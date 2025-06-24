@@ -11,7 +11,7 @@ export const loginUser = async (data) => {
     const errorObj = errorMsg ? new Error(errorMsg) : error;
     handleError(errorObj);
   }
-};
+}; //
 
 // Kiểm tra token
 export const introspectToken = async (data) => {
