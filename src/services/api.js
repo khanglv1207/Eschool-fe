@@ -2,7 +2,7 @@
 import axios from "axios";
 
 // Cấu hình của Axios
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = "";
 export const ACCESS_TOKEN = "access_token";
 
 const isClient = typeof window !== "undefined";

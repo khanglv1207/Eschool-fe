@@ -22,16 +22,23 @@ function Login() {
       });
       const userObj = res.result;
       const token = userObj.token;
+  
       localStorage.setItem("access_token", token);
       localStorage.setItem("loggedInUser", JSON.stringify(userObj));
-
-      alert("Đăng nhập thành công!");
-      window.location.href = "/";
+  
+      if (userObj.firstLogin) {
+        alert("Đây là lần đăng nhập đầu tiên. Vui lòng đổi mật khẩu.");
+        window.location.href = "/change-password";
+      } else {
+        alert("Đăng nhập thành công!");
+        window.location.href = "/";
+      }
     } catch (err) {
       const msg = err.message || "Đăng nhập thất bại!";
       alert(msg);
     }
   };
+  
 
   return (
     <div className="login-page enhanced-login-bg">
