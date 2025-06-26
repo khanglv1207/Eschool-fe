@@ -2,13 +2,13 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const sidebarItems = [
-    { icon: "fa-home", label: "Main Page", link: "/dashboard" },
-    { icon: "fa-users", label: "Users", link: "/usermanage" },
-    { icon: "fa-child", label: "Children", link: "/manageChildren" },
-    { icon: "fa-blog", label: "Blogs", link: "/manageBlogs" },
-    { icon: "fa-comments", label: "Consultations", link: "/manageConsultationsAdmin" },
-    { icon: "fa-comment-dots", label: "Feedbacks", link: "/manageFeedbacks" },
-    { icon: "fa-money-check-alt", label: "Transactions", link: "/manageTransactions" },
+    { icon: "fa-home", label: "Main Page", link: "/admin/dashboard" },
+    { icon: "fa-users", label: "Users", link: "/admin/usermanage" },
+    { icon: "fa-child", label: "Children", link: "/admin/manageChildren" },
+    { icon: "fa-blog", label: "Blogs", link: "/admin/manageBlogs" },
+    { icon: "fa-comments", label: "Consultations", link: "/admin/manageConsultationsAdmin" },
+    { icon: "fa-comment-dots", label: "Feedbacks", link: "/admin/manageFeedbacks" },
+    { icon: "fa-money-check-alt", label: "Transactions", link: "/admin/manageTransactions" },
 ];
 
 function AdminLayout({ children }) {
@@ -30,7 +30,7 @@ function AdminLayout({ children }) {
                             <ul className="nav flex-column">
                                 <li className="nav-item mb-2 text-uppercase text-secondary small" style={{ letterSpacing: 1 }}>Interface</li>
                                 <li className="nav-item mb-2">
-                                    <a className="nav-link text-white" href="/dashboard">
+                                    <a className="nav-link text-white" href="/admin/dashboard">
                                         <i className="fas fa-home me-2"></i> Main Page
                                     </a>
                                 </li>

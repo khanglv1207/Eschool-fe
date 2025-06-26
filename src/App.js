@@ -25,13 +25,13 @@ import AdminLayout from "./pages/admin/AdminLayout";
 
 
 function App() {
-  const hideNavbar = ["/dashboard", "/usermanage", "/adminlayout"].includes(window.location.pathname);
+  // Kiểm tra nếu đường dẫn nằm trong folder admin
+  const isAdminRoute = window.location.pathname.startsWith("/admin");
 
   return (
-    
     <Router>
-      {/* Navbar luôn luôn hiển thị */}
-      <Navbar />
+      {/* Chỉ hiển thị Navbar nếu không phải trang admin */}
+      {!isAdminRoute && <Navbar />}
 
       {/* Phần nội dung sẽ thay đổi theo Route */}
       <Routes>
@@ -51,8 +51,8 @@ function App() {
         <Route path="/medicine-report" element={<MedicineReport />} />
         <Route path="/incident-form" element={<HealthIncidentForm />} />
         <Route path="/change-password" element={<ChangePassword />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/usermanage" element={<UserManagement />} />
+        <Route path="/admin/dashboard" element={<Dashboard />} />
+        <Route path="/admin/usermanage" element={<UserManagement />} />
         <Route path="/admin" element={<AdminLayout />} />
       </Routes>
     </Router>
