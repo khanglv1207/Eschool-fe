@@ -18,6 +18,7 @@ import SendMedicine from "./pages/SendMedicine";
 import Inventory from "./pages/Inventory";
 import InventoryCheck from "./pages/InventoryCheck";
 import MedicineReport from "./pages/MedicineReport";
+import ChangePassword from "./pages/ChangePassword";
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
         <Route path="/medicine-registration" element={<DangKyThuocForm />} />
         <Route path="/medicine-report" element={<MedicineReport />} />
         <Route path="/incident-form" element={<HealthIncidentForm />} />
+        <Route path="/change-password" element={<ChangePassword />} />
       </Routes>
     </Router>
   );
