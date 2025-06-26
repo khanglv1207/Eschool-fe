@@ -19,6 +19,7 @@ import Inventory from "./pages/Inventory";
 import InventoryCheck from "./pages/InventoryCheck";
 import MedicineReport from "./pages/MedicineReport";
 import ChangePassword from "./pages/ChangePassword";
+import NurseHealthDeclaration from "./pages/NurseHealthDeclaration";
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
         <Route path="/medicine-report" element={<MedicineReport />} />
         <Route path="/incident-form" element={<HealthIncidentForm />} />
         <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/nurse/health-declaration" element={<NurseHealthDeclaration />} />
       </Routes>
     </Router>
   );
