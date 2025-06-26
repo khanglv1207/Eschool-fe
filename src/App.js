@@ -19,9 +19,16 @@ import Inventory from "./pages/Inventory";
 import InventoryCheck from "./pages/InventoryCheck";
 import MedicineReport from "./pages/MedicineReport";
 import ChangePassword from "./pages/ChangePassword";
+import Dashboard from "./pages/admin/AdminDashboard";
+import UserManagement from "./pages/admin/UserManagement";
+import AdminLayout from "./pages/admin/AdminLayout";
+
 
 function App() {
+  const hideNavbar = ["/dashboard", "/usermanage", "/adminlayout"].includes(window.location.pathname);
+
   return (
+    
     <Router>
       {/* Navbar luôn luôn hiển thị */}
       <Navbar />
@@ -44,6 +51,9 @@ function App() {
         <Route path="/medicine-report" element={<MedicineReport />} />
         <Route path="/incident-form" element={<HealthIncidentForm />} />
         <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/usermanage" element={<UserManagement />} />
+        <Route path="/admin" element={<AdminLayout />} />
       </Routes>
     </Router>
   );
