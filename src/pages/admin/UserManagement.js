@@ -2,38 +2,7 @@ import React, { useState } from "react";
 import AdminLayout from "./AdminLayout";
 
 const sampleUsers = [
-    {
-        username: "admin",
-        role: "ADMIN",
-        fullName: "Admin",
-        email: "admin@example.com",
-        phone: "0909090909",
-        paymentStatus: "Paid",
-    },
-    {
-        username: "ntan0409",
-        role: "DOCTOR",
-        fullName: "Pham Nhat Tan",
-        email: "ntan0409@gmail.com",
-        phone: "0918306884",
-        paymentStatus: "Unpaid",
-    },
-    {
-        username: "thienngan",
-        role: "MEMBER",
-        fullName: "Nguyen Kim Thien Ngan",
-        email: "nganntksa180013@fpt.edu.vn",
-        phone: "0123456789",
-        paymentStatus: "Paid",
-    },
-    {
-        username: "tienhung",
-        role: "MEMBER",
-        fullName: "Pham Tien Hung",
-        email: "tienhung@gmail.com",
-        phone: "0123454415",
-        paymentStatus: "Unpaid",
-    },
+    // Đã xóa dữ liệu mẫu, mảng này hiện rỗng
 ];
 
 const roleBadge = (role) => {
@@ -126,10 +95,10 @@ function UserManagement() {
                                                 )}
                                             </td>
                                             <td>
-                                                <button className="btn btn-sm btn-outline-primary me-2">
+                                                <button className="btn btn-sm btn-outline-primary me-2" title="Chỉnh sửa">
                                                     <i className="fas fa-edit"></i>
                                                 </button>
-                                                <button className="btn btn-sm btn-outline-danger">
+                                                <button className="btn btn-sm btn-outline-danger" title="Xóa">
                                                     <i className="fas fa-trash"></i>
                                                 </button>
                                             </td>
