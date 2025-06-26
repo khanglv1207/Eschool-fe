@@ -47,7 +47,7 @@ function AdminDashboard() {
                             </div>
                         </div>
                     </div>
-                    <div className="col-6 col-lg-3">
+                    {/* <div className="col-6 col-lg-3">
                         <div className="card stat-card border-0 shadow rounded-4 h-100">
                             <div className="card-body d-flex align-items-center">
                                 <i className="fas fa-money-check-alt fa-2x text-danger me-3"></i>
@@ -57,7 +57,7 @@ function AdminDashboard() {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Khu vực biểu đồ hoặc bảng dữ liệu */}

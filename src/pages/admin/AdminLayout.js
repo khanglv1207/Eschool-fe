@@ -4,11 +4,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const sidebarItems = [
     { icon: "fa-home", label: "Main Page", link: "/admin/dashboard" },
     { icon: "fa-users", label: "Users", link: "/admin/usermanage" },
-    { icon: "fa-child", label: "Children", link: "/admin/manageChildren" },
+    { icon: "fa-child", label: "Student", link: "/admin/manageChildren" },
+    { icon: "fa-user-nurse", label: "School Nurse", link: "/admin/manageSchoolNurse" },
     { icon: "fa-blog", label: "Blogs", link: "/admin/manageBlogs" },
     { icon: "fa-comments", label: "Consultations", link: "/admin/manageConsultationsAdmin" },
     { icon: "fa-comment-dots", label: "Feedbacks", link: "/admin/manageFeedbacks" },
-    { icon: "fa-money-check-alt", label: "Transactions", link: "/admin/manageTransactions" },
+    // { icon: "fa-money-check-alt", label: "Transactions", link: "/admin/manageTransactions" },
 ];
 
 function AdminLayout({ children }) {
@@ -16,7 +17,7 @@ function AdminLayout({ children }) {
         <div style={{ minHeight: "100vh", background: "#f5f6fa" }}>
             {/* Header */}
             <nav className="navbar navbar-dark bg-dark px-4" style={{ height: 56 }}>
-                <span className="navbar-brand fw-bold">MANAGE ADMIN</span>
+                <span className="navbar-brand fw-bold">ADMIN</span>
                 <div className="ms-auto text-white">
                     <span className="me-3">admin</span>
                     <i className="fas fa-user-circle"></i>
