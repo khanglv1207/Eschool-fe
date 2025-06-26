@@ -28,6 +28,7 @@ import StudentManagement from "./pages/admin/StudentManagement";
 import SchoolNurseManagement from "./pages/admin/SchoolNurseManagement";
 
 
+
 function App() {
   // Kiểm tra nếu đường dẫn nằm trong folder admin
   const isAdminRoute = window.location.pathname.startsWith("/admin");
