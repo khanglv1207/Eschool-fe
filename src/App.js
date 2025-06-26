@@ -19,13 +19,16 @@ import Inventory from "./pages/Inventory";
 import InventoryCheck from "./pages/InventoryCheck";
 import MedicineReport from "./pages/MedicineReport";
 import ChangePassword from "./pages/ChangePassword";
-import NurseHealthDeclaration from "./pages/NurseHealthDeclaration";
+
 
 function App() {
+  // Kiểm tra nếu đường dẫn nằm trong folder admin
+  const isAdminRoute = window.location.pathname.startsWith("/admin");
+
   return (
     <Router>
-      {/* Navbar luôn luôn hiển thị */}
-      <Navbar />
+      {/* Chỉ hiển thị Navbar nếu không phải trang admin */}
+      {!isAdminRoute && <Navbar />}
 
       {/* Phần nội dung sẽ thay đổi theo Route */}
       <Routes>
@@ -45,7 +48,7 @@ function App() {
         <Route path="/medicine-report" element={<MedicineReport />} />
         <Route path="/incident-form" element={<HealthIncidentForm />} />
         <Route path="/change-password" element={<ChangePassword />} />
-        <Route path="/nurse/health-declaration" element={<NurseHealthDeclaration />} />
+
       </Routes>
     </Router>
   );
