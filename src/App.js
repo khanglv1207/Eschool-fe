@@ -27,6 +27,7 @@ import FeedBackManagement from "./pages/admin/FeedBackManagement";
 import StudentManagement from "./pages/admin/StudentManagement";
 import SchoolNurseManagement from "./pages/admin/SchoolNurseManagement";
 
+
 function App() {
   // Kiểm tra nếu đường dẫn nằm trong folder admin
   const isAdminRoute = window.location.pathname.startsWith("/admin");
@@ -61,7 +62,6 @@ function App() {
         <Route path="/admin/manageFeedbacks" element={<FeedBackManagement />} />
         <Route path="/admin/manageChildren" element={<StudentManagement />} />
         <Route path="/admin/manageSchoolNurse" element={<SchoolNurseManagement />} />
-
       </Routes>
     </Router>
   );
