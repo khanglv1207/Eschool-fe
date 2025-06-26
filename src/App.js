@@ -19,7 +19,13 @@ import Inventory from "./pages/Inventory";
 import InventoryCheck from "./pages/InventoryCheck";
 import MedicineReport from "./pages/MedicineReport";
 import ChangePassword from "./pages/ChangePassword";
-
+import Dashboard from "./pages/admin/AdminDashboard";
+import UserManagement from "./pages/admin/UserManagement";
+import AdminLayout from "./pages/admin/AdminLayout";
+import BlogManagement from "./pages/admin/BlogManagement";
+import FeedBackManagement from "./pages/admin/FeedBackManagement";
+import StudentManagement from "./pages/admin/StudentManagement";
+import SchoolNurseManagement from "./pages/admin/SchoolNurseManagement";
 
 function App() {
   // Kiểm tra nếu đường dẫn nằm trong folder admin
@@ -48,6 +54,13 @@ function App() {
         <Route path="/medicine-report" element={<MedicineReport />} />
         <Route path="/incident-form" element={<HealthIncidentForm />} />
         <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/admin/dashboard" element={<Dashboard />} />
+        <Route path="/admin/usermanage" element={<UserManagement />} />
+        <Route path="/admin" element={<AdminLayout />} />
+        <Route path="/admin/manageBlogs" element={<BlogManagement />} />
+        <Route path="/admin/manageFeedbacks" element={<FeedBackManagement />} />
+        <Route path="/admin/manageChildren" element={<StudentManagement />} />
+        <Route path="/admin/manageSchoolNurse" element={<SchoolNurseManagement />} />
 
       </Routes>
     </Router>
