@@ -28,3 +28,14 @@ export const introspectToken = async (data) => {
     handleError(errorObj);
   }
 };
+
+// Đổi mật khẩu lần đầu
+export const firstChangePassword = async (newPassword) => {
+  try {
+    const response = await api.post("/api/users/change-password", { newPassword });
+    return response.data;
+  } catch (error) {
+    const errorMsg = error.response?.data?.message;
+    throw new Error(errorMsg || "Đổi mật khẩu thất bại");
+  }
+};
