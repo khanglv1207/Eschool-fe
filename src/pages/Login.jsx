@@ -21,14 +21,21 @@ function Login() {
         password: formData.password,
       });
       const userObj = res.result;
+      console.log("userObj:", userObj); // DEBUG: kiểm tra giá trị role và firstLogin
       const token = userObj.token;
-  
+
       localStorage.setItem("access_token", token);
       localStorage.setItem("loggedInUser", JSON.stringify(userObj));
-  
-      if (userObj.firstLogin) {
+
+      if (userObj.role === "nurse") {
+        alert("Đăng nhập thành công!");
+        window.location.href = "/nurse/health-declaration";
+      } else if (userObj.firstLogin) {
         alert("Đây là lần đăng nhập đầu tiên. Vui lòng đổi mật khẩu.");
         window.location.href = "/change-password";
+      } else if (userObj.role === "admin") {
+        alert("Đăng nhập thành công!");
+        window.location.href = "/admin";
       } else {
         alert("Đăng nhập thành công!");
         window.location.href = "/";
@@ -38,7 +45,7 @@ function Login() {
       alert(msg);
     }
   };
-  
+
 
   return (
     <div className="login-page enhanced-login-bg">
