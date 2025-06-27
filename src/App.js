@@ -26,6 +26,7 @@ import BlogManagement from "./pages/admin/BlogManagement";
 import FeedBackManagement from "./pages/admin/FeedBackManagement";
 import StudentManagement from "./pages/admin/StudentManagement";
 import SchoolNurseManagement from "./pages/admin/SchoolNurseManagement";
+import NurseHealthDeclaration from "./pages/NurseHealthDeclaration";
 
 
 function App() {
@@ -62,6 +63,7 @@ function App() {
         <Route path="/admin/manageFeedbacks" element={<FeedBackManagement />} />
         <Route path="/admin/manageChildren" element={<StudentManagement />} />
         <Route path="/admin/manageSchoolNurse" element={<SchoolNurseManagement />} />
+        <Route path="/nurse/health-declaration" element={<NurseHealthDeclaration />} />
       </Routes>
     </Router>
   );

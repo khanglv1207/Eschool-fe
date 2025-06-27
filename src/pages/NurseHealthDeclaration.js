@@ -10,11 +10,7 @@ function NurseHealthDeclaration() {
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    // Kiểm tra phân quyền
-    const user = JSON.parse(localStorage.getItem("loggedInUser"));
-    if (!user || !user.role || user.role.toLowerCase() !== "nurse") {
-      window.location.href = "/";
-    }
+    // Bỏ kiểm tra phân quyền, ai cũng có thể khai báo
   }, []);
 
   const handleChange = (e) => {
@@ -30,11 +26,14 @@ function NurseHealthDeclaration() {
     e.preventDefault();
     // Lưu vào localStorage
     const prev = JSON.parse(localStorage.getItem("nurseHealthDeclarations")) || [];
+    // Lấy userId hoặc email từ localStorage
+    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+    const userId = loggedInUser && (loggedInUser.id || loggedInUser.userId || loggedInUser.user_id || loggedInUser.email);
     localStorage.setItem(
       "nurseHealthDeclarations",
       JSON.stringify([
         ...prev,
-        { ...form, createdAt: new Date().toISOString() },
+        { ...form, createdAt: new Date().toISOString(), userId },
       ])
     );
     setSuccess("Khai báo thành công!");

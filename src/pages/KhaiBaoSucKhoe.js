@@ -3,16 +3,37 @@ import { useNavigate } from "react-router-dom";
 
 function KhaiBaoSucKhoe() {
   const [declarations, setDeclarations] = useState([]);
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Nếu chưa đăng nhập thì chuyển về trang chủ
+    const loggedInUser = localStorage.getItem("loggedInUser");
+    if (!loggedInUser) {
+      window.location.href = "/";
+      return;
+    }
     const data = JSON.parse(localStorage.getItem("nurseHealthDeclarations")) || [];
-    setDeclarations(data);
+    // Lấy userId hoặc email hiện tại
+    const userObj = JSON.parse(loggedInUser);
+    const userId = userObj && (userObj.id || userObj.userId || userObj.user_id || userObj.email);
+    // Lọc chỉ lấy khai báo của user này
+    setDeclarations(data.filter(item => item.userId === userId));
   }, []);
 
   const handleKhaiBao = () => {
     navigate("/nurse/health-declaration");
   };
+
+  // Lọc danh sách theo từ khóa
+  const filteredDeclarations = declarations.filter(item => {
+    const keyword = search.toLowerCase();
+    return (
+      item.name?.toLowerCase().includes(keyword) ||
+      item.symptoms?.toLowerCase().includes(keyword) ||
+      String(item.age).includes(keyword)
+    );
+  });
 
   return (
     <div style={styles.background}>
@@ -20,10 +41,27 @@ function KhaiBaoSucKhoe() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h2 style={styles.title}>🩺 Danh Sách Khai Báo Sức Khỏe (Y tá)</h2>
           <button onClick={handleKhaiBao} style={{padding: '10px 24px', background: '#1677ff', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, fontSize: 16, cursor: 'pointer'}}>
-            Khai báo sức khỏe
+            Gửi khai báo sức khỏe
           </button>
         </div>
-        {declarations.length === 0 ? (
+        {/* Ô tìm kiếm từ khóa */}
+        <input
+          type="text"
+          placeholder="Tìm kiếm theo tên, triệu chứng hoặc tuổi..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '10px 14px',
+            border: '1.5px solid #d1d5db',
+            borderRadius: 8,
+            fontSize: 16,
+            marginBottom: 18,
+            outline: 'none',
+            background: '#f9fafb',
+          }}
+        />
+        {filteredDeclarations.length === 0 ? (
           <div style={{ color: "#888", textAlign: "center" }}>Chưa có khai báo nào.</div>
         ) : (
           <table style={styles.table}>
@@ -37,7 +75,7 @@ function KhaiBaoSucKhoe() {
               </tr>
             </thead>
             <tbody>
-              {declarations.map((item, idx) => (
+              {filteredDeclarations.map((item, idx) => (
                 <tr key={idx}>
                   <td>{item.name}</td>
                   <td>{item.age}</td>

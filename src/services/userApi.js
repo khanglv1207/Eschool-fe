@@ -30,9 +30,39 @@ export const introspectToken = async (data) => {
 };
 
 // Đổi mật khẩu lần đầu
-export const firstChangePassword = async (newPassword) => {
+export const firstChangePassword = async (userId, newPassword) => {
   try {
-    const response = await api.post("/api/users/change-password", { newPassword });
+    const response = await api.post("/api/mail/change-password-first-time", { userId, newPassword });
+    return response.data;
+  } catch (error) {
+    const errorMsg = error.response?.data?.message;
+    throw new Error(errorMsg || "Đổi mật khẩu thất bại");
+  }
+};
+
+export const requestPasswordReset = async (email) => {
+  try {
+    const response = await api.post("/api/users/request-password-reset", { email });
+    return response.data;
+  } catch (error) {
+    const errorMsg = error.response?.data?.message;
+    throw new Error(errorMsg || "Không gửi được OTP");
+  }
+};
+
+export const verifyOtp = async (email, otpCode) => {
+  try {
+    const response = await api.post("/api/users/verify-otp", { email, otpCode });
+    return response.data;
+  } catch (error) {
+    const errorMsg = error.response?.data?.message;
+    throw new Error(errorMsg || "OTP không hợp lệ");
+  }
+};
+
+export const resetPassword = async (email, newPassword) => {
+  try {
+    const response = await api.post("/api/users/reset-password", { email, newPassword });
     return response.data;
   } catch (error) {
     const errorMsg = error.response?.data?.message;
