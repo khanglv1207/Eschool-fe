@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Banner from "./components/Banner";
 
-// Các trang
+
 import KhaiBaoSucKhoe from "./pages/KhaiBaoSucKhoe";
 import DangKyThuocForm from "./pages/DangKyThuocForm";
 import HealthIncidentForm from "./pages/HealthIncidentForm";
