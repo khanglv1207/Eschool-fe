@@ -1,16 +1,28 @@
 import React, { useState, useEffect } from "react";
+import { FaUserCircle, FaMoon, FaSun, FaHeartbeat } from "react-icons/fa";
 
 function NurseHealthDeclaration() {
   const [form, setForm] = useState({
     name: "",
     age: "",
+    gender: "",
     symptoms: "",
     hasFever: false,
   });
   const [success, setSuccess] = useState("");
+  const [dark, setDark] = useState(false);
 
   useEffect(() => {
-    // Bỏ kiểm tra phân quyền, ai cũng có thể khai báo
+    // Lấy thông tin hồ sơ từ localStorage
+    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (loggedInUser) {
+      setForm((prev) => ({
+        ...prev,
+        name: loggedInUser.name || loggedInUser.fullName || "",
+        age: loggedInUser.age || loggedInUser.tuoi || "",
+        gender: loggedInUser.gender || loggedInUser.gioiTinh || "",
+      }));
+    }
   }, []);
 
   const handleChange = (e) => {
@@ -37,25 +49,35 @@ function NurseHealthDeclaration() {
       ])
     );
     setSuccess("Khai báo thành công!");
-    setForm({ name: "", age: "", symptoms: "", hasFever: false });
+    setForm({ name: "", age: "", gender: "", symptoms: "", hasFever: false });
   };
 
   return (
-    <div style={styles.background}>
-      <div style={styles.container}>
-        <h2 style={styles.title}>🩺 Y Tá Khai Báo Sức Khỏe</h2>
+    <div style={{...styles.background, ...(dark ? styles.backgroundDark : {})}}>
+      <div style={{...styles.container, ...(dark ? styles.containerDark : {})}}>
+        <div style={styles.headerRow}>
+          <h2 style={styles.title}><FaHeartbeat style={{color:'#5b86e5',marginRight:8}}/>Y Tá Khai Báo Sức Khỏe</h2>
+          <button
+            onClick={() => setDark(d => !d)}
+            style={{...styles.iconButton, ...(dark ? styles.iconButtonDark : {})}}
+            title={dark ? 'Chuyển sáng' : 'Chuyển tối'}
+          >
+            {dark ? <FaSun /> : <FaMoon />}
+          </button>
+        </div>
         <form onSubmit={handleSubmit}>
           <div style={styles.formGroup}>
             <label style={styles.label}>Họ tên:</label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              required
-              placeholder="Nhập họ tên"
-              style={styles.input}
-            />
+            <div style={styles.inputIconBox}>
+              <FaUserCircle style={styles.inputIcon}/>
+              <input
+                type="text"
+                name="name"
+                value={form.name}
+                readOnly
+                style={{...styles.input, background:'#f4fafd', color:'#90a4ae', cursor:'not-allowed'}}
+              />
+            </div>
           </div>
           <div style={styles.formGroup}>
             <label style={styles.label}>Tuổi:</label>
@@ -63,11 +85,18 @@ function NurseHealthDeclaration() {
               type="number"
               name="age"
               value={form.age}
-              min="1"
-              onChange={handleChange}
-              required
-              placeholder="Nhập tuổi"
-              style={styles.input}
+              readOnly
+              style={{...styles.input, background:'#f4fafd', color:'#90a4ae', cursor:'not-allowed'}}
+            />
+          </div>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Giới tính:</label>
+            <input
+              type="text"
+              name="gender"
+              value={form.gender}
+              readOnly
+              style={{...styles.input, background:'#f4fafd', color:'#90a4ae', cursor:'not-allowed'}}
             />
           </div>
           <div style={styles.formGroup}>
@@ -81,23 +110,55 @@ function NurseHealthDeclaration() {
               style={styles.textarea}
             />
           </div>
-          <div style={{ ...styles.formGroup, flexDirection: "row", alignItems: "center" }}>
+          <div style={{ ...styles.formGroup, flexDirection: "row", alignItems: "center", gap: 8 }}>
             <input
               type="checkbox"
               name="hasFever"
               checked={form.hasFever}
               onChange={handleChange}
-              style={{ marginRight: "8px" }}
+              style={styles.checkbox}
             />
-            <label style={{ fontSize: "15px" }}>Có sốt hay không?</label>
+            <label style={{ fontSize: "15px", color: dark ? '#e3f2fd' : '#263238' }}>Có sốt hay không?</label>
           </div>
-          {success && <div style={{ color: "#27ae60", marginBottom: 10 }}>{success}</div>}
+          {success && <div style={styles.successMsg}>{success}</div>}
           <div style={styles.buttonGroup}>
-            <button type="submit" style={styles.button}>
+            <button type="submit" style={styles.button} className="ripple">
               Gửi khai báo
             </button>
           </div>
         </form>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+          body { font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+          @keyframes gradientMove {
+            0% { background-position: 0% 50% }
+            50% { background-position: 100% 50% }
+            100% { background-position: 0% 50% }
+          }
+          .ripple { position: relative; overflow: hidden; }
+          .ripple:after {
+            content: "";
+            display: block;
+            position: absolute;
+            border-radius: 50%;
+            width: 100px; height: 100px;
+            top: 50%; left: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(91,134,229,0.18);
+            opacity: 0.5;
+            transition: transform 0.4s, opacity 0.6s;
+          }
+          .ripple:active:after {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 0;
+            transition: 0s;
+          }
+          @media (max-width: 700px) {
+            input, textarea { font-size: 14px !important; }
+            .ripple { font-size: 15px !important; }
+          }
+        `}</style>
       </div>
     </div>
   );
@@ -109,28 +170,65 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: "linear-gradient(270deg, #89f7fe, #66a6ff, #fbc2eb, #a6c1ee)",
-    backgroundSize: "800% 800%",
+    background: "linear-gradient(120deg, #e0f7fa 0%, #f8fdff 100%)",
+    backgroundSize: "200% 200%",
     animation: "gradientMove 15s ease infinite",
     overflow: "hidden",
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    fontFamily: "'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    transition: 'background 0.4s',
+  },
+  backgroundDark: {
+    background: "linear-gradient(120deg, #232526 0%, #414345 100%)",
   },
   container: {
     width: "100%",
-    maxWidth: "550px",
-    padding: "30px",
-    borderRadius: "16px",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-    background: "white",
-    color: "#333",
+    maxWidth: "480px",
+    padding: "32px 18px 32px 18px",
+    borderRadius: "28px",
+    boxShadow: "0 8px 32px 0 rgba(91,134,229,0.10)",
+    background: "rgba(255,255,255,0.95)",
+    color: "#263238",
     position: "relative",
     zIndex: 2,
+    margin: "32px 0",
+    border: '1.5px solid #e3f2fd',
+    backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)',
+    transition: 'background 0.4s, color 0.4s',
+  },
+  containerDark: {
+    background: "rgba(40,40,60,0.7)",
+    color: "#f3f3f3",
+    border: '1.5px solid #232526',
+  },
+  headerRow: {
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24,
+    flexWrap: 'wrap', gap: 12,
   },
   title: {
-    textAlign: "center",
-    marginBottom: "30px",
-    fontSize: "26px",
-    color: "#007BFF",
+    textAlign: "left",
+    marginBottom: 0,
+    fontSize: "25px",
+    color: "#3a7bd5",
+    fontWeight: 700,
+    letterSpacing: 0.5,
+    fontFamily: "'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    display: 'flex', alignItems: 'center',
+  },
+  iconButton: {
+    background: 'rgba(255,255,255,0.7)',
+    border: 'none',
+    borderRadius: 8,
+    padding: 8,
+    cursor: 'pointer',
+    fontSize: 20,
+    boxShadow: '0 1px 4px rgba(91,134,229,0.06)',
+    transition: 'background 0.2s',
+    color: '#5b86e5',
+  },
+  iconButtonDark: {
+    background: 'rgba(40,40,60,0.7)',
+    color: '#5b86e5',
   },
   formGroup: {
     display: "flex",
@@ -141,21 +239,40 @@ const styles = {
     fontWeight: "600",
     marginBottom: "6px",
     fontSize: "15px",
+    color: '#1565c0',
+  },
+  inputIconBox: {
+    display: 'flex', alignItems: 'center', background: '#f4fafd', borderRadius: 10, boxShadow: '0 1px 4px #e3f2fd', border: '1.5px solid #e3f2fd', padding: '0 10px',
+  },
+  inputIcon: {
+    color: '#5b86e5', fontSize: 18, marginRight: 8,
   },
   input: {
-    padding: "10px 14px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
+    padding: "10px 0",
+    border: "none",
+    background: "transparent",
     fontSize: "15px",
-    outlineColor: "#007BFF",
+    outline: 'none',
+    width: '100%',
+    color: '#263238',
+    fontFamily: "'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
   },
   textarea: {
     padding: "10px 14px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
+    borderRadius: "10px",
+    border: "1.5px solid #e3f2fd",
     fontSize: "15px",
     resize: "vertical",
-    outlineColor: "#007BFF",
+    outline: 'none',
+    background: '#f4fafd',
+    color: '#263238',
+    fontFamily: "'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    boxShadow: '0 1px 4px #e3f2fd',
+  },
+  checkbox: {
+    accentColor: '#5b86e5',
+    width: 18, height: 18,
+    marginRight: 8,
   },
   buttonGroup: {
     display: "flex",
@@ -164,14 +281,24 @@ const styles = {
   },
   button: {
     padding: "12px 32px",
-    borderRadius: "8px",
+    borderRadius: "12px",
     color: "#fff",
     fontWeight: "600",
     fontSize: "16px",
     border: "none",
     cursor: "pointer",
-    backgroundColor: "#007BFF",
+    background: 'linear-gradient(90deg, #a8edea 0%, #5b86e5 100%)',
+    boxShadow: '0 2px 12px rgba(91,134,229,0.10)',
     transition: "background-color 0.3s ease",
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  successMsg: {
+    color: "#27ae60",
+    marginBottom: 10,
+    textAlign: 'center',
+    fontWeight: 600,
+    fontSize: 15,
   },
 };
 
