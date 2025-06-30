@@ -1,8 +1,13 @@
 import api from "./api";
 
-export const updateParentProfile = async (profileData) => {
+export const updateParentProfile = async (profileData, token) => {
   try {
-    const response = await api.post("/api/parents/update-profile", profileData);
+    const response = await api.post("/api/parents/update-profile-parent", profileData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
     return response.data;
   } catch (error) {
     const errorMsg = error.response?.data?.message;

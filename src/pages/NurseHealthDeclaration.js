@@ -56,7 +56,7 @@ function NurseHealthDeclaration() {
     <div style={{...styles.background, ...(dark ? styles.backgroundDark : {})}}>
       <div style={{...styles.container, ...(dark ? styles.containerDark : {})}}>
         <div style={styles.headerRow}>
-          <h2 style={styles.title}><FaHeartbeat style={{color:'#5b86e5',marginRight:8}}/>Y Tá Khai Báo Sức Khỏe</h2>
+          <h2 style={styles.title}><FaHeartbeat style={{color:'#5b86e5',marginRight:8}}/>Khai Báo Sức Khỏe</h2>
           <button
             onClick={() => setDark(d => !d)}
             style={{...styles.iconButton, ...(dark ? styles.iconButtonDark : {})}}
@@ -74,8 +74,10 @@ function NurseHealthDeclaration() {
                 type="text"
                 name="name"
                 value={form.name}
-                readOnly
-                style={{...styles.input, background:'#f4fafd', color:'#90a4ae', cursor:'not-allowed'}}
+                onChange={handleChange}
+                placeholder="Nhập họ tên..."
+                style={styles.input}
+                required
               />
             </div>
           </div>
@@ -85,19 +87,30 @@ function NurseHealthDeclaration() {
               type="number"
               name="age"
               value={form.age}
-              readOnly
-              style={{...styles.input, background:'#f4fafd', color:'#90a4ae', cursor:'not-allowed'}}
+              onChange={handleChange}
+              placeholder="Nhập tuổi..."
+              style={styles.input}
+              required
             />
           </div>
           <div style={styles.formGroup}>
             <label style={styles.label}>Giới tính:</label>
-            <input
-              type="text"
-              name="gender"
-              value={form.gender}
-              readOnly
-              style={{...styles.input, background:'#f4fafd', color:'#90a4ae', cursor:'not-allowed'}}
-            />
+            <div className="custom-select-wrapper">
+              <select
+                name="gender"
+                value={form.gender}
+                onChange={handleChange}
+                style={styles.select}
+                className="custom-select"
+                required
+              >
+                <option value="">Chọn giới tính</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+                <option value="Khác">Khác</option>
+              </select>
+              <span className="custom-arrow" />
+            </div>
           </div>
           <div style={styles.formGroup}>
             <label style={styles.label}>Triệu chứng:</label>
@@ -108,6 +121,7 @@ function NurseHealthDeclaration() {
               placeholder="Mô tả triệu chứng..."
               rows="4"
               style={styles.textarea}
+              required
             />
           </div>
           <div style={{ ...styles.formGroup, flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -154,8 +168,54 @@ function NurseHealthDeclaration() {
             opacity: 0;
             transition: 0s;
           }
+          .custom-select-wrapper {
+            position: relative;
+            width: 100%;
+          }
+          .custom-select {
+            width: 100%;
+            padding: 10px 40px 10px 14px;
+            border-radius: 10px;
+            border: 1.5px solid #e3f2fd;
+            background: #f4fafd;
+            color: #263238;
+            font-size: 15px;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-shadow: 0 1px 4px #e3f2fd;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            cursor: pointer;
+            transition: border 0.2s, box-shadow 0.2s;
+          }
+          .custom-select:focus {
+            border: 1.5px solid #5b86e5;
+            box-shadow: 0 2px 8px #a8edea55;
+            outline: none;
+            background: #e3f2fd;
+          }
+          .custom-arrow {
+            position: absolute;
+            top: 50%;
+            right: 16px;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+            border-top: 8px solid #5b86e5;
+            transform: translateY(-50%);
+          }
+          .custom-select option {
+            background: #f4fafd;
+            color: #263238;
+          }
+          .custom-select option:checked, .custom-select option:hover {
+            background: #e3f2fd;
+            color: #1565c0;
+          }
           @media (max-width: 700px) {
-            input, textarea { font-size: 14px !important; }
+            input, textarea, select { font-size: 14px !important; }
             .ripple { font-size: 15px !important; }
           }
         `}</style>
@@ -256,6 +316,18 @@ const styles = {
     width: '100%',
     color: '#263238',
     fontFamily: "'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+  },
+  select: {
+    padding: "10px 14px",
+    borderRadius: "10px",
+    border: "1.5px solid #e3f2fd",
+    fontSize: "15px",
+    outline: 'none',
+    background: '#f4fafd',
+    color: '#263238',
+    fontFamily: "'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    boxShadow: '0 1px 4px #e3f2fd',
+    cursor: 'pointer',
   },
   textarea: {
     padding: "10px 14px",

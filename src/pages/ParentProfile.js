@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { updateParentProfile } from "../services/parentApi";
+import { updateStudentProfile, linkParentStudent } from "../services/userApi";
 
 function ParentProfile() {
   // Lấy parentId từ localStorage nếu có (nếu cập nhật)
@@ -13,7 +14,7 @@ function ParentProfile() {
     address: "",
     dateOfBirth: "",
     students: [
-      { studentId: "", fullName: "", className: "", dateOfBirth: "" }
+      { studentId: "", fullName: "", className: "", dateOfBirth: "", relationship: "" }
     ]
   });
   const [message, setMessage] = useState("");
@@ -29,7 +30,7 @@ function ParentProfile() {
   };
 
   const addStudent = () => {
-    setForm({ ...form, students: [...form.students, { studentId: "", fullName: "", className: "", dateOfBirth: "" }] });
+    setForm({ ...form, students: [...form.students, { studentId: "", fullName: "", className: "", dateOfBirth: "", relationship: "" }] });
   };
 
   const removeStudent = (idx) => {
@@ -41,16 +42,22 @@ function ParentProfile() {
     e.preventDefault();
     setMessage("");
     try {
+      const token = localStorage.getItem("token");
+      // Gửi đúng body chuẩn tài liệu API
       await updateParentProfile({
-        parentId: parentId || undefined,
-        ...form,
-        students: form.students.map(s => ({
-          studentId: s.studentId || undefined,
-          fullName: s.fullName,
-          className: s.className,
-          dateOfBirth: s.dateOfBirth
-        }))
-      });
+        userid: parentId,
+        fullName: form.fullName,
+        email: form.email,
+        phoneNumber: form.phoneNumber,
+        address: form.address,
+        dateOfBirth: form.dateOfBirth
+      }, token);
+      // Gọi API liên kết phụ huynh-học sinh cho từng học sinh
+      for (const s of form.students) {
+        if (parentId && s.studentId && s.relationship) {
+          await linkParentStudent(parentId, s.studentId, s.relationship);
+        }
+      }
       setMessage("Cập nhật thông tin thành công!");
       setTimeout(() => {
         window.location.href = "/profile";
@@ -75,6 +82,7 @@ function ParentProfile() {
             <input name="fullName" value={student.fullName} onChange={e => handleStudentChange(idx, e)} placeholder="Họ tên học sinh" className="enhanced-input" style={{ marginBottom: 8 }} />
             <input name="className" value={student.className} onChange={e => handleStudentChange(idx, e)} placeholder="Lớp" className="enhanced-input" style={{ marginBottom: 8 }} />
             <input name="dateOfBirth" type="date" value={student.dateOfBirth} onChange={e => handleStudentChange(idx, e)} placeholder="Ngày sinh" className="enhanced-input" style={{ marginBottom: 8 }} />
+            <input name="relationship" value={student.relationship} onChange={e => handleStudentChange(idx, e)} placeholder="Mối quan hệ (Bố/Mẹ/...)" className="enhanced-input" style={{ marginBottom: 8 }} />
             <button type="button" onClick={() => removeStudent(idx)} style={{ color: "#e74c3c", border: "none", background: "none", cursor: "pointer" }}>Xóa</button>
           </div>
         ))}

@@ -69,3 +69,47 @@ export const resetPassword = async (email, newPassword) => {
     throw new Error(errorMsg || "Đổi mật khẩu thất bại");
   }
 };
+
+export const linkParentStudent = async (parentId, studentId, relationship) => {
+  try {
+    const response = await api.post("/api/parents-students", {
+      parent_id: parentId,
+      student_id: studentId,
+      relationship: relationship
+    });
+    return response.data;
+  } catch (error) {
+    const errorMsg = error.response?.data?.message;
+    throw new Error(errorMsg || "Liên kết phụ huynh-học sinh thất bại");
+  }
+};
+
+export const updateParentProfile = async (profileData, token) => {
+  try {
+    const response = await api.post("/api/parents/update-profile-parent", profileData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+    return response.data;
+  } catch (error) {
+    const errorMsg = error.response?.data?.message;
+    throw new Error(errorMsg || "Cập nhật thông tin phụ huynh thất bại");
+  }
+};
+
+export const updateStudentProfile = async (studentId, studentData, token) => {
+  try {
+    const response = await api.post(`/api/students/update-profile-student/${String(studentId)}`, studentData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+    return response.data;
+  } catch (error) {
+    const errorMsg = error.response?.data?.message;
+    throw new Error(errorMsg || "Cập nhật thông tin học sinh thất bại");
+  }
+};
