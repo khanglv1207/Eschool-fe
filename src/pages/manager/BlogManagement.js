@@ -1,36 +1,36 @@
 import React, { useState } from "react";
-import AdminLayout from "./AdminLayout";
+import ManagerLayout from "./ManagerLayout";
 
-// Dữ liệu mẫu (có thể để rỗng hoặc thêm vài feedback mẫu)
-const sampleFeedbacks = [
+// Dữ liệu mẫu (có thể để rỗng hoặc thêm vài blog mẫu)
+const sampleBlogs = [
     // {
     //     id: 1,
-    //     sender: "Nguyễn Văn A",
-    //     content: "Dịch vụ rất tốt!",
+    //     title: "Blog đầu tiên",
+    //     author: "Admin",
     //     date: "2024-06-01",
-    //     status: "Chờ xử lý",
+    //     status: "Đã đăng",
     // },
 ];
 
-function FeedBackManagement() {
+function BlogManagement() {
     const [search, setSearch] = useState("");
-    const [feedbacks] = useState(sampleFeedbacks);
+    const [blogs] = useState(sampleBlogs);
 
-    const filteredFeedbacks = feedbacks.filter(
-        (f) =>
-            f.sender?.toLowerCase().includes(search.toLowerCase()) ||
-            f.content?.toLowerCase().includes(search.toLowerCase())
+    const filteredBlogs = blogs.filter(
+        (b) =>
+            b.title?.toLowerCase().includes(search.toLowerCase()) ||
+            b.author?.toLowerCase().includes(search.toLowerCase())
     );
 
     return (
-        <AdminLayout>
+        <ManagerLayout>
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h2 className="fw-bold mb-0">
-                    <i className="fas fa-comment-dots me-2"></i> Feedback Management
+                    <i className="fas fa-blog me-2"></i> Blog Management
                 </h2>
-                {/* <button className="btn btn-primary">
-                    <i className="fas fa-plus me-2"></i> Tạo Feedback mới
-                </button> */}
+                <button className="btn btn-primary">
+                    <i className="fas fa-plus me-2"></i> Tạo Blog mới
+                </button>
             </div>
             <div className="card shadow border-0 mb-4">
                 <div className="card-body">
@@ -46,7 +46,7 @@ function FeedBackManagement() {
                         <input
                             type="text"
                             className="form-control w-auto"
-                            placeholder="Tìm kiếm feedback..."
+                            placeholder="Tìm kiếm blog..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             style={{ minWidth: 200 }}
@@ -56,36 +56,36 @@ function FeedBackManagement() {
                         <table className="table table-striped align-middle">
                             <thead>
                                 <tr>
-                                    <th>Người gửi</th>
-                                    <th>Nội dung</th>
-                                    <th>Ngày gửi</th>
+                                    <th>Tiêu đề</th>
+                                    <th>Tác giả</th>
+                                    <th>Ngày đăng</th>
                                     <th>Trạng thái</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredFeedbacks.length === 0 ? (
+                                {filteredBlogs.length === 0 ? (
                                     <tr>
                                         <td colSpan="5" className="text-center text-muted">
-                                            Không có feedback nào.
+                                            Không có blog nào.
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredFeedbacks.map((fb) => (
-                                        <tr key={fb.id}>
-                                            <td className="fw-bold">{fb.sender}</td>
-                                            <td>{fb.content}</td>
-                                            <td>{fb.date}</td>
+                                    filteredBlogs.map((blog) => (
+                                        <tr key={blog.id}>
+                                            <td className="fw-bold">{blog.title}</td>
+                                            <td>{blog.author}</td>
+                                            <td>{blog.date}</td>
                                             <td>
-                                                {fb.status === "Đã xử lý" ? (
-                                                    <span className="badge bg-success">Đã xử lý</span>
+                                                {blog.status === "Đã đăng" ? (
+                                                    <span className="badge bg-success">Đã đăng</span>
                                                 ) : (
-                                                    <span className="badge bg-warning text-dark">Chờ xử lý</span>
+                                                    <span className="badge bg-secondary">Nháp</span>
                                                 )}
                                             </td>
                                             <td>
-                                                <button className="btn btn-sm btn-outline-info me-2" title="Xem chi tiết">
-                                                    <i className="fas fa-eye"></i>
+                                                <button className="btn btn-sm btn-outline-primary me-2" title="Chỉnh sửa">
+                                                    <i className="fas fa-edit"></i>
                                                 </button>
                                                 <button className="btn btn-sm btn-outline-danger" title="Xóa">
                                                     <i className="fas fa-trash"></i>
@@ -99,7 +99,7 @@ function FeedBackManagement() {
                     </div>
                     <div className="d-flex justify-content-between align-items-center mt-3">
                         <div>
-                            Showing 1 to {filteredFeedbacks.length} of {feedbacks.length} entries
+                            Showing 1 to {filteredBlogs.length} of {blogs.length} entries
                         </div>
                         {/* Phân trang demo */}
                         <nav>
@@ -118,8 +118,8 @@ function FeedBackManagement() {
                     </div>
                 </div>
             </div>
-        </AdminLayout>
+        </ManagerLayout>
     );
 }
 
-export default FeedBackManagement;
+export default BlogManagement;
