@@ -27,16 +27,24 @@ import FeedBackManagement from "./pages/admin/FeedBackManagement";
 import StudentManagement from "./pages/admin/StudentManagement";
 import SchoolNurseManagement from "./pages/admin/SchoolNurseManagement";
 import NurseHealthDeclaration from "./pages/NurseHealthDeclaration";
+import ManagerLayout from "./pages/manager/ManagerLayout";
+import ManagerDashboard from "./pages/manager/ManagerDashboard";
+// import BlogManagement from "./pages/manager/BlogManagement";
+// import FeedBackManagement from "./pages/manager/FeedBackManagement";
+// import StudentManagement from "./pages/manager/StudentManagement";
+// import SchoolNurseManagement from "./pages/manager/SchoolNurseManagement";
+// import UserManagement from "./pages/manager/UserManagement";
 
 
 function App() {
-  // Kiểm tra nếu đường dẫn nằm trong folder admin
+
   const isAdminRoute = window.location.pathname.startsWith("/admin");
+  const isManagerRoute = window.location.pathname.startsWith("/manager");
 
   return (
     <Router>
-      {/* Chỉ hiển thị Navbar nếu không phải trang admin */}
-      {!isAdminRoute && <Navbar />}
+      {/* Chỉ hiển thị Navbar nếu không phải trang admin & manager  */}
+      {!isAdminRoute && !isManagerRoute && <Navbar />}
 
       {/* Phần nội dung sẽ thay đổi theo Route */}
       <Routes>
@@ -64,6 +72,13 @@ function App() {
         <Route path="/admin/manageChildren" element={<StudentManagement />} />
         <Route path="/admin/manageSchoolNurse" element={<SchoolNurseManagement />} />
         <Route path="/nurse/health-declaration" element={<NurseHealthDeclaration />} />
+        <Route path="/manager" element={<ManagerLayout />} />
+        <Route path="/manager/dashboard" element={<ManagerDashboard />} />
+        <Route path="/manager/manageBlogs" element={<BlogManagement />} />
+        <Route path="/manager/manageFeedbacks" element={<FeedBackManagement />} />
+        <Route path="/manager/manageChildren" element={<StudentManagement />} />
+        <Route path="/manager/manageSchoolNurse" element={<SchoolNurseManagement />} />
+        <Route path="/manager/manageUsers" element={<UserManagement />} />
       </Routes>
     </Router>
   );

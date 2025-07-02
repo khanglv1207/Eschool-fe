@@ -1,36 +1,43 @@
 import React, { useState } from "react";
-import AdminLayout from "./AdminLayout";
+import ManagerLayout from "./ManagerLayout";
 
-// Dữ liệu mẫu (có thể để rỗng hoặc thêm vài feedback mẫu)
-const sampleFeedbacks = [
-    // {
-    //     id: 1,
-    //     sender: "Nguyễn Văn A",
-    //     content: "Dịch vụ rất tốt!",
-    //     date: "2024-06-01",
-    //     status: "Chờ xử lý",
-    // },
+const sampleUsers = [
+    // Đã xóa dữ liệu mẫu, mảng này hiện rỗng
 ];
 
-function FeedBackManagement() {
-    const [search, setSearch] = useState("");
-    const [feedbacks] = useState(sampleFeedbacks);
+const roleBadge = (role) => {
+    switch (role) {
+        case "ADMIN":
+            return <span className="badge bg-danger">ADMIN</span>;
+        case "DOCTOR":
+            return <span className="badge bg-warning text-dark">DOCTOR</span>;
+        case "MEMBER":
+            return <span className="badge bg-success">MEMBER</span>;
+        default:
+            return <span className="badge bg-secondary">UNKNOWN</span>;
+    }
+};
 
-    const filteredFeedbacks = feedbacks.filter(
-        (f) =>
-            f.sender?.toLowerCase().includes(search.toLowerCase()) ||
-            f.content?.toLowerCase().includes(search.toLowerCase())
+function UserManagement() {
+    const [search, setSearch] = useState("");
+    const [users] = useState(sampleUsers);
+
+    const filteredUsers = users.filter(
+        (u) =>
+            u.username.toLowerCase().includes(search.toLowerCase()) ||
+            u.fullName.toLowerCase().includes(search.toLowerCase()) ||
+            u.email.toLowerCase().includes(search.toLowerCase())
     );
 
     return (
-        <AdminLayout>
+        <ManagerLayout>
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h2 className="fw-bold mb-0">
-                    <i className="fas fa-comment-dots me-2"></i> Feedback Management
+                    <i className="fas fa-users me-2"></i> User Management
                 </h2>
-                {/* <button className="btn btn-primary">
-                    <i className="fas fa-plus me-2"></i> Tạo Feedback mới
-                </button> */}
+                <button className="btn btn-primary">
+                    <i className="fas fa-plus me-2"></i> Create New User
+                </button>
             </div>
             <div className="card shadow border-0 mb-4">
                 <div className="card-body">
@@ -46,7 +53,7 @@ function FeedBackManagement() {
                         <input
                             type="text"
                             className="form-control w-auto"
-                            placeholder="Tìm kiếm feedback..."
+                            placeholder="Search users..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             style={{ minWidth: 200 }}
@@ -56,36 +63,40 @@ function FeedBackManagement() {
                         <table className="table table-striped align-middle">
                             <thead>
                                 <tr>
-                                    <th>Người gửi</th>
-                                    <th>Nội dung</th>
-                                    <th>Ngày gửi</th>
-                                    <th>Trạng thái</th>
+                                    <th>Username</th>
+                                    <th>Role</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Phone Number</th>
+                                    <th>Payment Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredFeedbacks.length === 0 ? (
+                                {filteredUsers.length === 0 ? (
                                     <tr>
-                                        <td colSpan="5" className="text-center text-muted">
-                                            Không có feedback nào.
+                                        <td colSpan="7" className="text-center text-muted">
+                                            No users found.
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredFeedbacks.map((fb) => (
-                                        <tr key={fb.id}>
-                                            <td className="fw-bold">{fb.sender}</td>
-                                            <td>{fb.content}</td>
-                                            <td>{fb.date}</td>
+                                    filteredUsers.map((user) => (
+                                        <tr key={user.username}>
+                                            <td className="fw-bold">{user.username}</td>
+                                            <td>{roleBadge(user.role)}</td>
+                                            <td>{user.fullName}</td>
+                                            <td>{user.email}</td>
+                                            <td>{user.phone}</td>
                                             <td>
-                                                {fb.status === "Đã xử lý" ? (
-                                                    <span className="badge bg-success">Đã xử lý</span>
+                                                {user.paymentStatus === "Paid" ? (
+                                                    <span className="badge bg-success">Paid</span>
                                                 ) : (
-                                                    <span className="badge bg-warning text-dark">Chờ xử lý</span>
+                                                    <span className="badge bg-secondary">Unpaid</span>
                                                 )}
                                             </td>
                                             <td>
-                                                <button className="btn btn-sm btn-outline-info me-2" title="Xem chi tiết">
-                                                    <i className="fas fa-eye"></i>
+                                                <button className="btn btn-sm btn-outline-primary me-2" title="Chỉnh sửa">
+                                                    <i className="fas fa-edit"></i>
                                                 </button>
                                                 <button className="btn btn-sm btn-outline-danger" title="Xóa">
                                                     <i className="fas fa-trash"></i>
@@ -99,7 +110,7 @@ function FeedBackManagement() {
                     </div>
                     <div className="d-flex justify-content-between align-items-center mt-3">
                         <div>
-                            Showing 1 to {filteredFeedbacks.length} of {feedbacks.length} entries
+                            Showing 1 to {filteredUsers.length} of {users.length} entries
                         </div>
                         {/* Phân trang demo */}
                         <nav>
@@ -118,8 +129,8 @@ function FeedBackManagement() {
                     </div>
                 </div>
             </div>
-        </AdminLayout>
+        </ManagerLayout>
     );
 }
 
-export default FeedBackManagement;
+export default UserManagement;
