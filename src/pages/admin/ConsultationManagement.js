@@ -26,7 +26,7 @@ const sampleConversations = [
     }
 ];
 
-function ConsultaionManagement() {
+function ConsultationManagement() {
     const [selectedId, setSelectedId] = useState(sampleConversations[0]?.id || null);
     const selectedConversation = sampleConversations.find(c => c.id === selectedId);
 
@@ -81,4 +81,4 @@ function ConsultaionManagement() {
     );
 }
 
-export default ConsultaionManagement;
+export default ConsultationManagement;

@@ -34,7 +34,7 @@ import ManagerDashboard from "./pages/manager/ManagerDashboard";
 // import StudentManagement from "./pages/manager/StudentManagement";
 // import SchoolNurseManagement from "./pages/manager/SchoolNurseManagement";
 // import UserManagement from "./pages/manager/UserManagement";
-
+import ConsultationManagement from "./pages/admin/ConsultationManagement";
 
 function App() {
 
@@ -71,6 +71,7 @@ function App() {
         <Route path="/admin/manageFeedbacks" element={<FeedBackManagement />} />
         <Route path="/admin/manageChildren" element={<StudentManagement />} />
         <Route path="/admin/manageSchoolNurse" element={<SchoolNurseManagement />} />
+        <Route path="/admin/ConsultationManagement" element={<ConsultationManagement />} />
         <Route path="/nurse/health-declaration" element={<NurseHealthDeclaration />} />
         <Route path="/manager" element={<ManagerLayout />} />
         <Route path="/manager/dashboard" element={<ManagerDashboard />} />
