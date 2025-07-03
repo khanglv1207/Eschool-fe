@@ -213,10 +213,10 @@ function UserManagement() {
                                     <button type="button" className="btn-close" onClick={handleCloseCreateModal}></button>
                                 </div>
                                 <div className="modal-body">
-                                    <div className="mb-3">
+                                    {/* <div className="mb-3">
                                         <label className="form-label">Username</label>
                                         <input type="text" className="form-control" name="username" value={newUser.username} onChange={handleChange} required />
-                                    </div>
+                                    </div> */}
                                     <div className="mb-3">
                                         <label className="form-label">Full Name</label>
                                         <input type="text" className="form-control" name="fullName" value={newUser.fullName} onChange={handleChange} required />
@@ -225,22 +225,22 @@ function UserManagement() {
                                         <label className="form-label">Email</label>
                                         <input type="email" className="form-control" name="email" value={newUser.email} onChange={handleChange} required />
                                     </div>
-                                    <div className="mb-3">
+                                    {/* <div className="mb-3">
                                         <label className="form-label">Phone</label>
                                         <input type="text" className="form-control" name="phone" value={newUser.phone} onChange={handleChange} required />
-                                    </div>
-                                    <div className="mb-3">
+                                    </div> */}
+                                    {/* <div className="mb-3">
                                         <label className="form-label">Role</label>
                                         <select className="form-select" name="role" value={newUser.role} onChange={handleChange} required>
                                             <option value="ADMIN">ADMIN</option>
                                             <option value="DOCTOR">SCHOOLNURSE</option>
                                             <option value="MEMBER">MEMBER</option>
                                         </select>
-                                    </div>
-                                    <div className="mb-3">
+                                    </div> */}
+                                    {/* <div className="mb-3">
                                         <label className="form-label">Password</label>
                                         <input type="password" className="form-control" name="password" value={newUser.password} onChange={handleChange} required />
-                                    </div>
+                                    </div> */}
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" onClick={handleCloseCreateModal}>Hủy</button>
