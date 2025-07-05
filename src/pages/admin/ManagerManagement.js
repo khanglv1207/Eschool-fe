@@ -1,36 +1,39 @@
 import React, { useState } from "react";
 import AdminLayout from "./AdminLayout";
 
-// Dữ liệu mẫu (có thể để rỗng hoặc thêm vài feedback mẫu)
-const sampleFeedbacks = [
+// Dữ liệu mẫu (có thể để rỗng hoặc thêm vài y tá mẫu)
+const sampleManager = [
     // {
     //     id: 1,
-    //     sender: "Nguyễn Văn A",
-    //     content: "Dịch vụ rất tốt!",
-    //     date: "2024-06-01",
-    //     status: "Chờ xử lý",
+    //     name: "Trần Thị B",
+    //     managerCode: "YT001",
+    //     phone: "0912345678",
+    //     email: "yt1@school.edu.vn",
+    //     status: "Đang làm việc",
     // },
 ];
 
-function FeedBackManagement() {
+function ManagerManagement() {
     const [search, setSearch] = useState("");
-    const [feedbacks] = useState(sampleFeedbacks);
+    const [manager] = useState(sampleManager);
 
-    const filteredFeedbacks = feedbacks.filter(
-        (f) =>
-            f.sender?.toLowerCase().includes(search.toLowerCase()) ||
-            f.content?.toLowerCase().includes(search.toLowerCase())
+    const filteredManager = manager.filter(
+        (manager) =>
+            manager.name?.toLowerCase().includes(search.toLowerCase()) ||
+            manager.managerCode?.toLowerCase().includes(search.toLowerCase()) ||
+            manager.phone?.toLowerCase().includes(search.toLowerCase()) ||
+            manager.email?.toLowerCase().includes(search.toLowerCase())
     );
 
     return (
         <AdminLayout>
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h2 className="fw-bold mb-0">
-                    <i className="fas fa-comment-dots me-2"></i> Feedback Management
+                    <i className="fas fa-user-nurse me-2"></i> Manager Management
                 </h2>
-                {/* <button className="btn btn-primary">
-                    <i className="fas fa-plus me-2"></i> Tạo Feedback mới
-                </button> */}
+                <button className="btn btn-primary">
+                    <i className="fas fa-plus me-2"></i> Thêm người quản lí mới
+                </button>
             </div>
             <div className="card shadow border-0 mb-4">
                 <div className="card-body">
@@ -46,7 +49,7 @@ function FeedBackManagement() {
                         <input
                             type="text"
                             className="form-control w-auto"
-                            placeholder="Tìm kiếm feedback..."
+                            placeholder="Tìm kiếm người quản lí..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             style={{ minWidth: 200 }}
@@ -56,36 +59,38 @@ function FeedBackManagement() {
                         <table className="table table-striped align-middle">
                             <thead>
                                 <tr>
-                                    <th>Người gửi</th>
-                                    <th>Nội dung</th>
-                                    <th>Ngày gửi</th>
+                                    <th>Tên manager</th>
+                                    <th>Mã manager</th>
+                                    <th>Số điện thoại</th>
+                                    <th>Email</th>
                                     <th>Trạng thái</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredFeedbacks.length === 0 ? (
+                                {filteredManager.length === 0 ? (
                                     <tr>
-                                        <td colSpan="5" className="text-center text-muted">
-                                            Không có feedback nào.
+                                        <td colSpan="6" className="text-center text-muted">
+                                            Không có manager nào.
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredFeedbacks.map((fb) => (
-                                        <tr key={fb.id}>
-                                            <td className="fw-bold">{fb.sender}</td>
-                                            <td>{fb.content}</td>
-                                            <td>{fb.date}</td>
+                                    filteredManager.map((manager) => (
+                                        <tr key={manager.id}>
+                                            <td className="fw-bold">{manager.name}</td>
+                                            <td>{manager.managerCode}</td>
+                                            <td>{manager.phone}</td>
+                                            <td>{manager.email}</td>
                                             <td>
-                                                {fb.status === "Đã xử lý" ? (
-                                                    <span className="badge bg-success">Đã xử lý</span>
+                                                {manager.status === "Đang làm việc" ? (
+                                                    <span className="badge bg-success">Đang làm việc</span>
                                                 ) : (
-                                                    <span className="badge bg-warning text-dark">Chờ xử lý</span>
+                                                    <span className="badge bg-secondary">Nghỉ việc</span>
                                                 )}
                                             </td>
                                             <td>
-                                                <button className="btn btn-sm btn-outline-info me-2" title="Xem chi tiết">
-                                                    <i className="fas fa-eye"></i>
+                                                <button className="btn btn-sm btn-outline-primary me-2" title="Chỉnh sửa">
+                                                    <i className="fas fa-edit"></i>
                                                 </button>
                                                 <button className="btn btn-sm btn-outline-danger" title="Xóa">
                                                     <i className="fas fa-trash"></i>
@@ -99,7 +104,7 @@ function FeedBackManagement() {
                     </div>
                     <div className="d-flex justify-content-between align-items-center mt-3">
                         <div>
-                            Showing 1 to {filteredFeedbacks.length} of {feedbacks.length} entries
+                            Showing 1 to {filteredManager.length} of {manager.length} entries
                         </div>
                         {/* Phân trang demo */}
                         <nav>
@@ -122,4 +127,4 @@ function FeedBackManagement() {
     );
 }
 
-export default FeedBackManagement;
+export default ManagerManagement; 

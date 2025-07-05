@@ -1,36 +1,38 @@
 import React, { useState } from "react";
-import AdminLayout from "./AdminLayout";
+import ManagerLayout from "./ManagerLayout";
 
-// Dữ liệu mẫu (có thể để rỗng hoặc thêm vài feedback mẫu)
-const sampleFeedbacks = [
+// Dữ liệu mẫu (có thể để rỗng hoặc thêm vài học sinh mẫu)
+const sampleStudents = [
     // {
     //     id: 1,
-    //     sender: "Nguyễn Văn A",
-    //     content: "Dịch vụ rất tốt!",
-    //     date: "2024-06-01",
-    //     status: "Chờ xử lý",
+    //     name: "Nguyễn Văn A",
+    //     studentCode: "HS001",
+    //     class: "1A",
+    //     dob: "2015-09-01",
+    //     status: "Đang học",
     // },
 ];
 
-function FeedBackManagement() {
+function StudentManagement() {
     const [search, setSearch] = useState("");
-    const [feedbacks] = useState(sampleFeedbacks);
+    const [students] = useState(sampleStudents);
 
-    const filteredFeedbacks = feedbacks.filter(
-        (f) =>
-            f.sender?.toLowerCase().includes(search.toLowerCase()) ||
-            f.content?.toLowerCase().includes(search.toLowerCase())
+    const filteredStudents = students.filter(
+        (s) =>
+            s.name?.toLowerCase().includes(search.toLowerCase()) ||
+            s.studentCode?.toLowerCase().includes(search.toLowerCase()) ||
+            s.class?.toLowerCase().includes(search.toLowerCase())
     );
 
     return (
-        <AdminLayout>
+        <ManagerLayout>
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h2 className="fw-bold mb-0">
-                    <i className="fas fa-comment-dots me-2"></i> Feedback Management
+                    <i className="fas fa-child me-2"></i> Student Management
                 </h2>
-                {/* <button className="btn btn-primary">
-                    <i className="fas fa-plus me-2"></i> Tạo Feedback mới
-                </button> */}
+                <button className="btn btn-primary">
+                    <i className="fas fa-plus me-2"></i> Thêm học sinh mới
+                </button>
             </div>
             <div className="card shadow border-0 mb-4">
                 <div className="card-body">
@@ -46,7 +48,7 @@ function FeedBackManagement() {
                         <input
                             type="text"
                             className="form-control w-auto"
-                            placeholder="Tìm kiếm feedback..."
+                            placeholder="Tìm kiếm học sinh..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             style={{ minWidth: 200 }}
@@ -56,36 +58,38 @@ function FeedBackManagement() {
                         <table className="table table-striped align-middle">
                             <thead>
                                 <tr>
-                                    <th>Người gửi</th>
-                                    <th>Nội dung</th>
-                                    <th>Ngày gửi</th>
+                                    <th>Tên học sinh</th>
+                                    <th>Mã học sinh</th>
+                                    <th>Lớp</th>
+                                    <th>Ngày sinh</th>
                                     <th>Trạng thái</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredFeedbacks.length === 0 ? (
+                                {filteredStudents.length === 0 ? (
                                     <tr>
-                                        <td colSpan="5" className="text-center text-muted">
-                                            Không có feedback nào.
+                                        <td colSpan="6" className="text-center text-muted">
+                                            Không có học sinh nào.
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredFeedbacks.map((fb) => (
-                                        <tr key={fb.id}>
-                                            <td className="fw-bold">{fb.sender}</td>
-                                            <td>{fb.content}</td>
-                                            <td>{fb.date}</td>
+                                    filteredStudents.map((student) => (
+                                        <tr key={student.id}>
+                                            <td className="fw-bold">{student.name}</td>
+                                            <td>{student.studentCode}</td>
+                                            <td>{student.class}</td>
+                                            <td>{student.dob}</td>
                                             <td>
-                                                {fb.status === "Đã xử lý" ? (
-                                                    <span className="badge bg-success">Đã xử lý</span>
+                                                {student.status === "Đang học" ? (
+                                                    <span className="badge bg-success">Đang học</span>
                                                 ) : (
-                                                    <span className="badge bg-warning text-dark">Chờ xử lý</span>
+                                                    <span className="badge bg-secondary">Nghỉ học</span>
                                                 )}
                                             </td>
                                             <td>
-                                                <button className="btn btn-sm btn-outline-info me-2" title="Xem chi tiết">
-                                                    <i className="fas fa-eye"></i>
+                                                <button className="btn btn-sm btn-outline-primary me-2" title="Chỉnh sửa">
+                                                    <i className="fas fa-edit"></i>
                                                 </button>
                                                 <button className="btn btn-sm btn-outline-danger" title="Xóa">
                                                     <i className="fas fa-trash"></i>
@@ -99,7 +103,7 @@ function FeedBackManagement() {
                     </div>
                     <div className="d-flex justify-content-between align-items-center mt-3">
                         <div>
-                            Showing 1 to {filteredFeedbacks.length} of {feedbacks.length} entries
+                            Showing 1 to {filteredStudents.length} of {students.length} entries
                         </div>
                         {/* Phân trang demo */}
                         <nav>
@@ -118,8 +122,8 @@ function FeedBackManagement() {
                     </div>
                 </div>
             </div>
-        </AdminLayout>
+        </ManagerLayout>
     );
 }
 
-export default FeedBackManagement;
+export default StudentManagement;

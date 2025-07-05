@@ -34,14 +34,21 @@ function ChangePassword() {
     }
     setLoading(true);
     try {
-      await firstChangePassword(form.newPassword);
+      // Lấy userId từ localStorage
+      const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+      const userId = loggedInUser && (loggedInUser.id || loggedInUser.userId || loggedInUser.user_id);
+      if (!userId) {
+        setError("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
+        setLoading(false);
+        return;
+      }
+      await firstChangePassword(userId, form.newPassword);
       setSuccess("Đổi mật khẩu thành công! Hãy đăng nhập lại với mật khẩu mới.");
       setForm({ newPassword: "", confirmPassword: "" });
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("loggedInUser");
+      localStorage.setItem("justChangedPassword", "1");
       setTimeout(() => {
         window.location.href = "/login";
-      }, 2000);
+      }, 1500);
     } catch (err) {
       setError(err.message || "Đổi mật khẩu thất bại.");
     } finally {

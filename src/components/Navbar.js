@@ -139,15 +139,12 @@ function Navbar() {
               </span>
             )}
             <div className="login-submenu">
-              <a href="/profile" className="submenu-link" style={submenuStyle}>
-                Thông tin hồ sơ
-              </a>
               <a
                 href="/update-profile"
                 className="submenu-link"
                 style={submenuStyle}
               >
-                Cập nhật hồ sơ
+                Thông tin hồ sơ
               </a>
               <span
                 onClick={handleLogout}

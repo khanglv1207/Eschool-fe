@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import AdminLayout from "./AdminLayout";
+import ManagerLayout from "./ManagerLayout";
 
 // Dữ liệu mẫu (có thể để rỗng hoặc thêm vài feedback mẫu)
 const sampleFeedbacks = [
@@ -23,14 +23,14 @@ function FeedBackManagement() {
     );
 
     return (
-        <AdminLayout>
+        <ManagerLayout>
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h2 className="fw-bold mb-0">
                     <i className="fas fa-comment-dots me-2"></i> Feedback Management
                 </h2>
-                {/* <button className="btn btn-primary">
+                <button className="btn btn-primary">
                     <i className="fas fa-plus me-2"></i> Tạo Feedback mới
-                </button> */}
+                </button>
             </div>
             <div className="card shadow border-0 mb-4">
                 <div className="card-body">
@@ -118,7 +118,7 @@ function FeedBackManagement() {
                     </div>
                 </div>
             </div>
-        </AdminLayout>
+        </ManagerLayout>
     );
 }
 
