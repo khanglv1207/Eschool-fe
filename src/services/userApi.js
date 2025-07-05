@@ -113,3 +113,38 @@ export const updateStudentProfile = async (studentId, studentData, token) => {
     throw new Error(errorMsg || "Cập nhật thông tin học sinh thất bại");
   }
 };
+
+// Xác nhận phụ huynh chuẩn bị khám sức khỏe
+export const confirmParentCheckup = async (notificationId) => {
+  try {
+    const response = await api.get(`/api/students/parent-checkup-confirm`, {
+      params: { notificationId }
+    });
+    return response.data;
+  } catch (error) {
+    const errorMsg = error.response?.data?.message;
+    throw new Error(errorMsg || "Xác nhận khám sức khỏe thất bại");
+  }
+};
+
+// Lấy danh sách học sinh đã xác nhận khám sức khỏe
+export const getConfirmedStudents = async (checkupId) => {
+  try {
+    const response = await api.get('/api/nurses/check-confirmStudent', {
+      params: { checkupId }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Không lấy được danh sách học sinh đã xác nhận');
+  }
+};
+
+// Lưu kết quả khám sức khỏe
+export const updateCheckupResult = async (notificationId, resultData) => {
+  try {
+    const response = await api.put(`/api/nurses/checkup-result/${notificationId}`, resultData);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Lưu kết quả khám thất bại');
+  }
+};

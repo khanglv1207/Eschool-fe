@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaCheckCircle, FaListAlt, FaStethoscope, FaEnvelopeOpenText, FaCalendarAlt } from "react-icons/fa";
+import { confirmParentCheckup, getConfirmedStudents, updateCheckupResult } from "../services/userApi";
+import { useNavigate } from "react-router-dom";
 
 const steps = [
   {
@@ -32,23 +34,37 @@ function MedicalCheckup() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showConsult, setShowConsult] = useState(false);
   const [consultInfo, setConsultInfo] = useState({ date: '', time: '' });
+  const navigate = useNavigate();
 
-  // Fetch danh sách học sinh từ API khi vào trang
+  useEffect(() => {
+    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (!loggedInUser || loggedInUser.role !== "nurse") {
+      alert("Bạn không có quyền truy cập trang này!");
+      navigate("/");
+    }
+  }, [navigate]);
+
+  // Fetch danh sách học sinh đã xác nhận từ API khi vào trang
   useEffect(() => {
     const fetchStudents = async () => {
       setLoading(true);
-      // TODO: Thay thế bằng API thực tế
-      // const res = await fetch('/api/students/medical-checkup-list');
-      // const data = await res.json();
-      // setStudents(data);
-      setTimeout(() => {
-        setStudents([
-          { id: 1, name: "Nguyễn Văn A", class: "1A", confirmed: true, checked: false, abnormal: false },
-          { id: 2, name: "Trần Thị B", class: "1B", confirmed: false, checked: false, abnormal: false },
-          { id: 3, name: "Lê Văn C", class: "2A", confirmed: true, checked: true, abnormal: true },
-        ]);
-        setLoading(false);
-      }, 600);
+      try {
+        // TODO: Thay checkupId bằng id thực tế khi có
+        const checkupId = "00000000-0000-0000-0000-000000000000"; // demo UUID, thay bằng id thực tế
+        const data = await getConfirmedStudents(checkupId);
+        setStudents(data.map(s => ({
+          ...s,
+          id: s.notificationId || s.id, // Đảm bảo có id để thao tác
+          name: s.fullName || s.name,
+          class: s.className || s.class,
+          confirmed: true, // Đã xác nhận
+          checked: s.checked || false, // Có thể sửa lại nếu BE trả về
+          abnormal: s.abnormal || false // Có thể sửa lại nếu BE trả về
+        })));
+      } catch (err) {
+        alert(err.message);
+      }
+      setLoading(false);
     };
     fetchStudents();
   }, []);
@@ -73,16 +89,24 @@ function MedicalCheckup() {
   const handleResultChange = (e) => setResult(r => ({ ...r, [e.target.name]: e.target.value }));
   const handleSaveResult = async () => {
     setLoading(true);
-    // TODO: Gọi API lưu kết quả khám cho học sinh
-    // await fetch(`/api/medical-checkup/result/${selectedStudent.id}`, { method: 'POST', body: JSON.stringify(result) });
-    setTimeout(() => {
+    try {
+      // Gọi API lưu kết quả khám cho học sinh
+      const resultData = {
+        resultSummary: `Chiều cao: ${result.height}cm, Cân nặng: ${result.weight}kg, Ghi chú: ${result.note}`,
+        isAbnormal: result.note.toLowerCase().includes('bất thường'),
+        suggestion: result.note
+      };
+      await updateCheckupResult(selectedStudent.id, resultData); // id là notificationId
       setStudents(students.map(s =>
-        s.id === selectedStudent.id ? { ...s, checked: true, abnormal: result.note.toLowerCase().includes('bất thường') } : s
+        s.id === selectedStudent.id ? { ...s, checked: true, abnormal: resultData.isAbnormal } : s
       ));
       setSelectedStudent(null);
       setResult({ height: '', weight: '', note: '' });
-      setLoading(false);
-    }, 600);
+      alert('Đã lưu kết quả khám thành công.');
+    } catch (err) {
+      alert(err.message || 'Lưu kết quả khám thất bại');
+    }
+    setLoading(false);
   };
 
   // Step 4: Trả kết quả & tư vấn
@@ -143,6 +167,7 @@ function MedicalCheckup() {
                     <th>Họ tên</th>
                     <th>Lớp</th>
                     <th>Phụ huynh xác nhận</th>
+                    <th>Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -151,6 +176,21 @@ function MedicalCheckup() {
                       <td>{s.name}</td>
                       <td>{s.class}</td>
                       <td>{s.confirmed ? <span style={styles.confirmed}>Đã xác nhận</span> : <span style={styles.notConfirmed}>Chưa xác nhận</span>}</td>
+                      <td>
+                        {!s.confirmed && (
+                          <button style={styles.smallBtn} onClick={async () => {
+                            setLoading(true);
+                            try {
+                              await confirmParentCheckup(s.id); // s.id as mock notificationId
+                              setStudents(students.map(stu => stu.id === s.id ? { ...stu, confirmed: true } : stu));
+                              alert("Xác nhận thành công! Học sinh sẽ được đưa vào danh sách kiểm tra.");
+                            } catch (err) {
+                              alert(err.message || "Xác nhận thất bại. Vui lòng thử lại hoặc liên hệ nhà trường.");
+                            }
+                            setLoading(false);
+                          }}>Phụ huynh xác nhận</button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
