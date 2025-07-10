@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import AdminLayout from "./AdminLayout";
 import * as XLSX from "xlsx";
+import { importStudent, importParentStudentExcel } from "../../services/adminApi";
 
 // Dữ liệu mẫu (có thể để rỗng hoặc thêm vài học sinh mẫu)
 const sampleStudents = [
@@ -24,6 +25,7 @@ const sampleStudents = [
 function StudentManagement() {
     const [search, setSearch] = useState("");
     const [students, setStudents] = useState(sampleStudents);
+    const [isImporting, setIsImporting] = useState(false);
     // Thêm state cho modal tạo học sinh
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newStudent, setNewStudent] = useState({
@@ -45,43 +47,85 @@ function StudentManagement() {
     const fileInputRef = React.useRef();
 
     // Hàm xử lý import Excel
-    const handleImportExcel = (e) => {
+    const handleImportExcel = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-            const bstr = evt.target.result;
-            const wb = XLSX.read(bstr, { type: "binary" });
-            const wsname = wb.SheetNames[0];
-            const ws = wb.Sheets[wsname];
-            const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-            // data[0] là header, data.slice(1) là dữ liệu
-            const header = data[0];
-            const studentsFromExcel = data.slice(1).map((row) => {
-                const student = {};
-                header.forEach((key, idx) => {
-                    student[key] = row[idx] || "";
-                });
-                // Đảm bảo các trường cần thiết
-                return {
-                    studentCode: student.studentCode || student["Mã học sinh"] || student.Code || "",
-                    studentName: student.studentName || student["Tên học sinh"] || student.Name || "",
-                    classNmae: student.classNmae || student["Lớp"] || student.Class || "",
-                    studentDob: student.studentDob || student["Ngày sinh"] || student.DOB || "",
-                    gender: student.gender || student["Giới tính"] || student.Gender || "Nam",
-                    parentCode: student.parentCode || student["Mã phụ huynh"] || student.ParentCode || "",
-                    parentName: student.parentName || student["Tên phụ huynh"] || student.ParentName || "",
-                    parentEmail: student.parentEmail || student["Email phụ huynh"] || student.ParentEmail || "",
-                    parentPhone: student.parentPhone || student["SĐT phụ huynh"] || student.ParentPhone || "",
-                    parentDob: student.parentDob || student["Ngày sinh phụ huynh"] || student.ParentDOB || "",
-                    parentAddress: student.parentAddress || student["Địa chỉ phụ huynh"] || student.ParentAddress || "",
-                    relationship: student.relationship || student["Quan hệ"] || student.ParentRelationship || "Bố",
-                    status: student.status || student["Trạng thái"] || student.Status || "Đang học"
+
+        setIsImporting(true);
+        try {
+            // Gọi API theo Swagger documentation
+            const response = await importParentStudentExcel(file);
+
+            // Xử lý response theo format Swagger API
+            if (response.success && response.data) {
+                const importedStudents = response.data.students || [];
+                setStudents(prev => [...prev, ...importedStudents]);
+
+                // Hiển thị thông báo chi tiết
+                let message = `Import thành công ${response.data.totalImported} học sinh!`;
+
+                if (response.data.errors && response.data.errors.length > 0) {
+                    message += `\nCó ${response.data.errors.length} lỗi xảy ra.`;
+                }
+
+                if (response.data.warnings && response.data.warnings.length > 0) {
+                    message += `\nCó ${response.data.warnings.length} cảnh báo.`;
+                }
+
+                alert(message);
+
+                // Log chi tiết nếu có lỗi hoặc cảnh báo
+                if (response.data.errors && response.data.errors.length > 0) {
+                    console.warn('Import errors:', response.data.errors);
+                }
+
+                if (response.data.warnings && response.data.warnings.length > 0) {
+                    console.warn('Import warnings:', response.data.warnings);
+                }
+            } else {
+                // Fallback: xử lý local nếu API chưa sẵn sàng
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    const bstr = evt.target.result;
+                    const wb = XLSX.read(bstr, { type: "binary" });
+                    const wsname = wb.SheetNames[0];
+                    const ws = wb.Sheets[wsname];
+                    const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+                    // data[0] là header, data.slice(1) là dữ liệu
+                    const header = data[0];
+                    const studentsFromExcel = data.slice(1).map((row) => {
+                        const student = {};
+                        header.forEach((key, idx) => {
+                            student[key] = row[idx] || "";
+                        });
+                        // Đảm bảo các trường cần thiết
+                        return {
+                            studentCode: student.studentCode || student["Mã học sinh"] || student.Code || "",
+                            studentName: student.studentName || student["Tên học sinh"] || student.Name || "",
+                            classNmae: student.classNmae || student["Lớp"] || student.Class || "",
+                            studentDob: student.studentDob || student["Ngày sinh"] || student.DOB || "",
+                            gender: student.gender || student["Giới tính"] || student.Gender || "Nam",
+                            parentCode: student.parentCode || student["Mã phụ huynh"] || student.ParentCode || "",
+                            parentName: student.parentName || student["Tên phụ huynh"] || student.ParentName || "",
+                            parentEmail: student.parentEmail || student["Email phụ huynh"] || student.ParentEmail || "",
+                            parentPhone: student.parentPhone || student["SĐT phụ huynh"] || student.ParentPhone || "",
+                            parentDob: student.parentDob || student["Ngày sinh phụ huynh"] || student.ParentDOB || "",
+                            parentAddress: student.parentAddress || student["Địa chỉ phụ huynh"] || student.ParentAddress || "",
+                            relationship: student.relationship || student["Quan hệ"] || student.ParentRelationship || "Bố",
+                            status: student.status || student["Trạng thái"] || student.Status || "Đang học"
+                        };
+                    });
+                    setStudents((prev) => [...prev, ...studentsFromExcel]);
+                    alert(`Import thành công ${studentsFromExcel.length} học sinh!`);
                 };
-            });
-            setStudents((prev) => [...prev, ...studentsFromExcel]);
-        };
-        reader.readAsBinaryString(file);
+                reader.readAsBinaryString(file);
+            }
+        } catch (error) {
+            console.error("Lỗi import:", error);
+            alert(`Lỗi import: ${error.message}`);
+        } finally {
+            setIsImporting(false);
+        }
     };
     const handleClickImport = () => {
         if (fileInputRef.current) fileInputRef.current.value = null;
@@ -130,8 +174,20 @@ function StudentManagement() {
                     <i className="fas fa-child me-2"></i> Student Management
                 </h2>
                 <div>
-                    <button className="btn btn-success me-2" onClick={handleClickImport}>
-                        <i className="fas fa-file-import me-2"></i> Import từ Excel
+                    <button
+                        className="btn btn-success me-2"
+                        onClick={handleClickImport}
+                        disabled={isImporting}
+                    >
+                        {isImporting ? (
+                            <>
+                                <i className="fas fa-spinner fa-spin me-2"></i> Đang import...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fas fa-file-import me-2"></i> Import từ Excel
+                            </>
+                        )}
                     </button>
                     <input
                         type="file"

@@ -118,6 +118,38 @@ export const changeStudentStatus = async (studentId, status) => {
     }
 };
 
+// Import học sinh từ Excel
+export const importStudent = async (file) => {
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await api.post("/api/students/import-student", formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể import học sinh từ Excel");
+    }
+};
+
+// Import parent student từ Excel (theo Swagger API)
+export const importParentStudentExcel = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // Sửa endpoint cho đúng với BE
+    const response = await api.post("/api/students/import-parent-students", formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+    return response.data;
+};
+
 // ==================== MANAGER MANAGEMENT ====================
 // Lấy danh sách managers
 export const getAllManagers = async (page = 1, size = 10, search = "") => {

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import AdminLayout from "./AdminLayout";
 
 // Dữ liệu mẫu danh sách cuộc trò chuyện
-const sampleConversations = [
+const initialConversations = [
     {
         id: 1,
         parentName: "Nguyễn Văn A",
@@ -27,8 +27,31 @@ const sampleConversations = [
 ];
 
 function ConsultationManagement() {
-    const [selectedId, setSelectedId] = useState(sampleConversations[0]?.id || null);
-    const selectedConversation = sampleConversations.find(c => c.id === selectedId);
+    const [conversations, setConversations] = useState(initialConversations);
+    const [selectedId, setSelectedId] = useState(conversations[0]?.id || null);
+    const [newMessage, setNewMessage] = useState("");
+    const selectedConversation = conversations.find(c => c.id === selectedId);
+
+    const handleSendMessage = () => {
+        if (!newMessage.trim()) return;
+        setConversations(prev => prev.map(conv => {
+            if (conv.id === selectedId) {
+                return {
+                    ...conv,
+                    messages: [
+                        ...conv.messages,
+                        {
+                            sender: "consultant",
+                            content: newMessage,
+                            time: new Date().toLocaleString("vi-VN", { hour12: false })
+                        }
+                    ]
+                };
+            }
+            return conv;
+        }));
+        setNewMessage("");
+    };
 
     return (
         <AdminLayout>
@@ -37,7 +60,7 @@ function ConsultationManagement() {
                 <div className="col-md-4 border-end">
                     <h5 className="fw-bold mb-3 mt-2">Danh sách phụ huynh</h5>
                     <ul className="list-group">
-                        {sampleConversations.map((conv) => (
+                        {conversations.map((conv) => (
                             <li
                                 key={conv.id}
                                 className={`list-group-item list-group-item-action ${selectedId === conv.id ? "active" : ""}`}
@@ -70,6 +93,19 @@ function ConsultationManagement() {
                                         </div>
                                     </div>
                                 ))}
+                            </div>
+                            <div className="card-footer bg-white border-0">
+                                <div className="d-flex">
+                                    <input
+                                        type="text"
+                                        className="form-control me-2"
+                                        placeholder="Nhập tin nhắn..."
+                                        value={newMessage}
+                                        onChange={e => setNewMessage(e.target.value)}
+                                        onKeyDown={e => { if (e.key === "Enter") handleSendMessage(); }}
+                                    />
+                                    <button className="btn btn-primary" onClick={handleSendMessage}>Gửi</button>
+                                </div>
                             </div>
                         </div>
                     ) : (
