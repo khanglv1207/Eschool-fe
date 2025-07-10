@@ -25,7 +25,7 @@ function DangKyThuocForm({ onBack }) {
     setBuoiUong((prev) => checked ? [...prev, value] : prev.filter((b) => b !== value));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (medicines.some(m => !m.tenThuoc || !m.lieuLuong)) {
       alert("Vui lòng nhập đầy đủ tên thuốc và liều lượng cho từng dòng!");
@@ -39,13 +39,31 @@ function DangKyThuocForm({ onBack }) {
       alert("Vui lòng nhập giờ uống sau khi ăn!");
       return;
     }
-    alert(
-      "Đã gửi đơn thuốc thành công!\n" +
-      medicines.map((m, i) => `Thuốc ${i + 1}: ${m.tenThuoc} - Liều lượng: ${m.lieuLuong}`).join("\n") +
-      `\nBuổi uống: ${buoiUong.map(b => b === "sang" ? "Sáng" : "Chiều").join(", ")}` +
-      `\nGiờ uống: ${gioUong}`
-    );
-    onBack();
+    // Gửi dữ liệu lên API
+    try {
+      const token = localStorage.getItem('accessToken'); // Nếu có dùng JWT
+      const response = await fetch('/medical-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          medicationList: medicines.map(m => ({ name: m.tenThuoc, dosage: m.lieuLuong })),
+          timesOfDay: buoiUong, // hoặc map lại nếu backend yêu cầu
+          timeAfterMeal: gioUong
+        })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert(data.message || 'Gửi thuốc thành công!');
+        onBack();
+      } else {
+        alert(data.message || 'Gửi thuốc thất bại!');
+      }
+    } catch (error) {
+      alert('Lỗi kết nối API!');
+    }
   };
 
   return (

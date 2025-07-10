@@ -21,16 +21,6 @@ const MENU_ITEMS = [
     title: "Sự kiện y tế",
     submenu: [
       { title: "Ghi nhận sự kiện", link: "/medical-events" },
-      { title: "Gửi thuốc cho trường", link: "/send-medicine" },
-    ],
-  },
-  {
-    title: "Quản lí thuốc",
-    submenu: [
-      { title: "Danh sách thuốc", link: "/inventory" },
-      { title: "Kiểm kê thuốc", link: "/inventory-check" },
-      { title: "Gửi thuốc cho con", link: "/medicine-registration" },
-      { title: "Báo cáo thuốc", link: "/medicine-report" },
     ],
   },
   {
