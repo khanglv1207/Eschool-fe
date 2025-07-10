@@ -187,6 +187,11 @@ function Navbar() {
         .menu-item:hover > .submenu {
           display: block !important;
         }
+        .menu-item > a:hover, .menu-item > span:hover {
+          background: #e3f2fd;
+          color: #1E90FF;
+          transition: background 0.2s, color 0.2s;
+        }
         .submenu {
           display: none;
           position: absolute;
@@ -199,16 +204,23 @@ function Navbar() {
           z-index: 1000;
           padding: 8px 0;
         }
+        .submenu-link:hover {
+          background: #1E90FF;
+          color: #fff;
+          transition: background 0.2s, color 0.2s;
+        }
         .login-container {
+          position: relative;
           z-index: 2000;
         }
-        .login-container:hover > .login-submenu {
+        .login-container:hover > .login-submenu,
+        .login-submenu:hover {
           display: block !important;
         }
         .login-submenu {
           display: none;
           position: absolute;
-          top: 120%;
+          top: 100%;
           right: 0;
           background: #fff;
           box-shadow: 0 6px 16px rgba(0,0,0,0.08);
@@ -216,6 +228,12 @@ function Navbar() {
           border-radius: 10px;
           z-index: 2001;
           padding: 8px 0;
+          pointer-events: auto;
+        }
+        .login-submenu .submenu-link:hover {
+          background: #1E90FF;
+          color: #fff;
+          transition: background 0.2s, color 0.2s;
         }
       `}</style>
     </nav>
