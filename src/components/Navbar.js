@@ -199,9 +199,8 @@ function Navbar() {
           z-index: 1000;
           padding: 8px 0;
         }
-        .submenu-link:hover {
-          background: #1E90FF;
-          color: #fff;
+        .login-container {
+          z-index: 2000;
         }
         .login-container:hover > .login-submenu {
           display: block !important;
@@ -215,7 +214,7 @@ function Navbar() {
           box-shadow: 0 6px 16px rgba(0,0,0,0.08);
           min-width: 180px;
           border-radius: 10px;
-          z-index: 1000;
+          z-index: 2001;
           padding: 8px 0;
         }
       `}</style>
