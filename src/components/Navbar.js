@@ -17,20 +17,42 @@ const MENU_ITEMS = [
     title: "Sự kiện y tế",
     submenu: [
       { title: "Ghi nhận sự kiện", link: "/medical-events" },
-      { title: "Gửi thuốc cho trường", link: "/send-medicine" },
     ],
   },
   {
     title: "Quản lí thuốc",
     submenu: [
-      { title: "Danh sách thuốc", link: "/inventory" },
-      { title: "Kiểm kê thuốc", link: "/inventory-check" },
       { title: "Gửi thuốc cho con", link: "/medicine-registration" },
-      { title: "Báo cáo thuốc", link: "/medicine-report" },
     ],
   },
   { title: "Liên hệ & Hỗ trợ", link: "/contact" },
 ];
+
+// Style cho menu chính
+const menuStyle = {
+  textDecoration: "none",
+  color: "#222",
+  padding: "18px 24px",
+  fontWeight: 700,
+  fontSize: "20px",
+  borderRadius: "8px",
+  cursor: "pointer",
+  fontFamily: "Segoe UI, sans-serif",
+};
+
+// Style cho submenu
+const submenuStyle = {
+  display: "block",
+  padding: "12px 24px",
+  color: "#333",
+  textDecoration: "none",
+  whiteSpace: "nowrap",
+  borderRadius: "8px",
+  fontWeight: 500,
+  fontSize: "16px",
+  transition: "all 0.2s ease",
+  fontFamily: "Segoe UI, sans-serif",
+};
 
 function Navbar() {
   let fullName = null;
@@ -162,59 +184,43 @@ function Navbar() {
 
       {/* CSS nội tuyến */}
       <style>{`
-        .submenu, .login-submenu {
+        .menu-item:hover > .submenu {
+          display: block !important;
+        }
+        .submenu {
+          display: none;
           position: absolute;
           top: 100%;
-          background-color: #fff;
-          box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-          min-width: 240px;
-          display: none;
-          z-index: 1000;
+          left: 0;
+          background: #fff;
+          box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+          min-width: 220px;
           border-radius: 10px;
-          padding: 12px 0;
-          transition: all 0.2s ease;
+          z-index: 1000;
+          padding: 8px 0;
         }
-        .submenu { left: 0; }
-        .login-submenu { right: 0; }
-
-        .menu-item:hover > .submenu,
-        .login-container:hover > .login-submenu {
-          display: block;
-        }
-
         .submenu-link:hover {
-          background-color: #1E90FF;
-          color: white;
-          padding-left: 26px;
-          transition: all 0.2s ease;
+          background: #1E90FF;
+          color: #fff;
+        }
+        .login-container:hover > .login-submenu {
+          display: block !important;
+        }
+        .login-submenu {
+          display: none;
+          position: absolute;
+          top: 120%;
+          right: 0;
+          background: #fff;
+          box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+          min-width: 180px;
+          border-radius: 10px;
+          z-index: 1000;
+          padding: 8px 0;
         }
       `}</style>
     </nav>
   );
 }
-
-// ✅ Style cho menu chính (hiện con trỏ bàn tay khi hover)
-const menuStyle = {
-  textDecoration: "none",
-  color: "#222",
-  padding: "18px 24px",
-  fontWeight: 700,
-  fontSize: "20px",
-  borderRadius: "8px",
-  cursor: "pointer",
-};
-
-// Style cho submenu
-const submenuStyle = {
-  display: "block",
-  padding: "12px 24px",
-  color: "#333",
-  textDecoration: "none",
-  whiteSpace: "nowrap",
-  borderRadius: "8px",
-  fontWeight: 500,
-  fontSize: "16px",
-  transition: "all 0.2s ease",
-};
 
 export default Navbar;

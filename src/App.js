@@ -5,7 +5,6 @@ import Banner from "./components/Banner";
 
 
 import KhaiBaoSucKhoe from "./pages/KhaiBaoSucKhoe";
-import DangKyThuocForm from "./pages/DangKyThuocForm";
 import HealthIncidentForm from "./pages/HealthIncidentForm";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
@@ -14,10 +13,6 @@ import ContactSupport from "./pages/ContactSupport";
 import Vaccination from "./pages/Vaccination";
 import MedicalCheckup from "./pages/MedicalCheckup";
 import MedicalEvents from "./pages/MedicalEvents";
-import SendMedicine from "./pages/SendMedicine";
-import Inventory from "./pages/Inventory";
-import InventoryCheck from "./pages/InventoryCheck";
-import MedicineReport from "./pages/MedicineReport";
 import ChangePassword from "./pages/ChangePassword";
 import Dashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
@@ -35,6 +30,7 @@ import ManagerDashboard from "./pages/manager/ManagerDashboard";
 // import SchoolNurseManagement from "./pages/manager/SchoolNurseManagement";
 // import UserManagement from "./pages/manager/UserManagement";
 import ConsultationManagement from "./pages/admin/ConsultationManagement";
+import DangKyThuocForm from "./pages/DangKyThuocForm";
 
 function App() {
 
@@ -57,11 +53,6 @@ function App() {
         <Route path="/vaccination" element={<Vaccination />} />
         <Route path="/medical-checkup" element={<MedicalCheckup />} />
         <Route path="/medical-events" element={<MedicalEvents />} />
-        <Route path="/send-medicine" element={<SendMedicine />} />
-        <Route path="/inventory" element={<Inventory />} />
-        <Route path="/inventory-check" element={<InventoryCheck />} />
-        <Route path="/medicine-registration" element={<DangKyThuocForm />} />
-        <Route path="/medicine-report" element={<MedicineReport />} />
         <Route path="/incident-form" element={<HealthIncidentForm />} />
         <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/admin/dashboard" element={<Dashboard />} />
@@ -80,6 +71,7 @@ function App() {
         <Route path="/manager/manageChildren" element={<StudentManagement />} />
         <Route path="/manager/manageSchoolNurse" element={<SchoolNurseManagement />} />
         <Route path="/manager/manageUsers" element={<UserManagement />} />
+        <Route path="/medicine-registration" element={<DangKyThuocForm onBack={() => window.history.back()} />} />
       </Routes>
     </Router>
   );
