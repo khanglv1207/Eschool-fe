@@ -7,7 +7,7 @@ const sidebarItems = [
     { icon: "fa-child", label: "Student", link: "/admin/manageChildren" },
     { icon: "fa-user-nurse", label: "School Nurse", link: "/admin/manageSchoolNurse" },
     { icon: "fa-blog", label: "Blogs", link: "/admin/manageBlogs" },
-    { icon: "fa-comments", label: "Consultations", link: "/admin/manageConsultationsAdmin" },
+    { icon: "fa-comments", label: "Consultations", link: "/admin/ConsultationManagement" },
     { icon: "fa-comment-dots", label: "Feedbacks", link: "/admin/manageFeedbacks" },
     // { icon: "fa-money-check-alt", label: "Transactions", link: "/admin/manageTransactions" },
 ];
