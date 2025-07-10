@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import bannerImage from "../assets/banner.jpg";
 import "./Banner.css"; // Thêm hiệu ứng vào đây
 
@@ -47,19 +48,23 @@ function Banner() {
           padding: "40px",
         }}
       >
-        <FeatureCard
+        <FeatureCardLink
+          to="/health-declaration"
           title="Khai báo sức khỏe"
           description="Phụ huynh dễ dàng khai báo tình trạng sức khỏe hàng ngày của học sinh."
         />
-        <FeatureCard
+        <FeatureCardLink
+          to="/vaccination"
           title="Tiêm chủng"
           description="Theo dõi lịch sử tiêm và thông báo các mũi tiêm sắp tới."
         />
-        <FeatureCard
+        <FeatureCardLink
+          to="/medical-events"
           title="Sự kiện y tế"
           description="Ghi nhận và xử lý các sự cố y tế tại trường học một cách nhanh chóng."
         />
-        <FeatureCard
+        <FeatureCardLink
+          to="/medicine-registration"
           title="Gửi thuốc & Quản lý thuốc"
           description="Phụ huynh gửi thuốc cho con, nhà trường theo dõi và quản lý tồn kho thuốc dễ dàng."
         />
@@ -116,15 +121,17 @@ function Banner() {
   );
 }
 
-// FeatureCard có hiệu ứng hover nổi lên
-function FeatureCard({ title, description }) {
+// Card có link điều hướng
+function FeatureCardLink({ to, title, description }) {
   return (
-    <div className="feature-card">
-      <h3 style={{ fontSize: "20px", color: "#1E90FF", marginBottom: "12px" }}>
-        {title}
-      </h3>
-      <p style={{ fontSize: "16px", color: "#333" }}>{description}</p>
-    </div>
+    <Link to={to} style={{ textDecoration: "none" }}>
+      <div className="feature-card" style={{ cursor: "pointer" }}>
+        <h3 style={{ fontSize: "20px", color: "#1E90FF", marginBottom: "12px" }}>
+          {title}
+        </h3>
+        <p style={{ fontSize: "16px", color: "#333" }}>{description}</p>
+      </div>
+    </Link>
   );
 }
 
