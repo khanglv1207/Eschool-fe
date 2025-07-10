@@ -41,18 +41,37 @@ function DangKyThuocForm({ onBack }) {
     }
     // Gửi dữ liệu lên API
     try {
-      const token = localStorage.getItem('accessToken'); // Nếu có dùng JWT
-      const response = await fetch('/medical-request', {
+      // Lấy token từ localStorage với nhiều key khác nhau
+      let token = localStorage.getItem('access_token')
+        || localStorage.getItem('accessToken')
+        || localStorage.getItem('token');
+      if (!token) {
+        try {
+          const user = JSON.parse(localStorage.getItem('loggedInUser'));
+          token = user?.token;
+        } catch {}
+      }
+      // Lấy studentId từ loggedInUser
+      const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+      const studentId = loggedInUser?.id;
+      const medications = medicines.map(m => ({
+        medicationName: m.tenThuoc,
+        dosage: m.lieuLuong,
+        note: "",
+        schedule: buoiUong
+      }));
+      const body = {
+        studentId,
+        note: "",
+        medications
+      };
+      const response = await fetch('/api/parents/medical-request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
-        body: JSON.stringify({
-          medicationList: medicines.map(m => ({ name: m.tenThuoc, dosage: m.lieuLuong })),
-          timesOfDay: buoiUong, // hoặc map lại nếu backend yêu cầu
-          timeAfterMeal: gioUong
-        })
+        body: JSON.stringify(body)
       });
       const data = await response.json();
       if (response.ok) {
