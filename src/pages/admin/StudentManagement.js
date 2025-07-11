@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminLayout from "./AdminLayout";
 import * as XLSX from "xlsx";
-import { importStudent, importParentStudentExcel } from "../../services/adminApi";
+import { importStudent, importParentStudentExcel, getAllParentStudent, createStudentParent, deleteStudentParent, updateStudentParent } from "../../services/adminApi";
 
 // Dữ liệu mẫu (có thể để rỗng hoặc thêm vài học sinh mẫu)
 const sampleStudents = [
@@ -45,6 +45,25 @@ function StudentManagement() {
 
     });
     const fileInputRef = React.useRef();
+
+    // State cho modal sửa
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editStudent, setEditStudent] = useState(null);
+
+    // Thêm useEffect để lấy danh sách học sinh/phụ huynh từ API khi load trang
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getAllParentStudent();
+                // data là mảng các học sinh/phụ huynh từ BE
+                // Nếu muốn giữ lại các chức năng import/thêm mới, có thể nối thêm vào students sau này
+                setStudents(data);
+            } catch (error) {
+                alert(error.message);
+            }
+        };
+        fetchData();
+    }, []);
 
     // Hàm xử lý import Excel
     const handleImportExcel = async (e) => {
@@ -111,8 +130,8 @@ function StudentManagement() {
                             parentPhone: student.parentPhone || student["SĐT phụ huynh"] || student.ParentPhone || "",
                             parentDob: student.parentDob || student["Ngày sinh phụ huynh"] || student.ParentDOB || "",
                             parentAddress: student.parentAddress || student["Địa chỉ phụ huynh"] || student.ParentAddress || "",
-                            relationship: student.relationship || student["Quan hệ"] || student.ParentRelationship || "Bố",
-                            status: student.status || student["Trạng thái"] || student.Status || "Đang học"
+                            relationship: student.relationship || student["Quan hệ"] || student.ParentRelationship || "Bố"
+
                         };
                     });
                     setStudents((prev) => [...prev, ...studentsFromExcel]);
@@ -154,10 +173,73 @@ function StudentManagement() {
     const handleChange = (e) => {
         setNewStudent({ ...newStudent, [e.target.name]: e.target.value });
     };
-    const handleCreateStudent = (e) => {
+    const handleCreateStudent = async (e) => {
         e.preventDefault();
-        // Chưa xử lý lưu, chỉ đóng modal
+        // Chuẩn bị dữ liệu đúng format cho API
+        const payload = {
+            studentName: newStudent.studentName,
+            studentDob: newStudent.studentDob,
+            gender: newStudent.gender,
+            className: newStudent.classNmae,
+            parentName: newStudent.parentName,
+            parentEmail: newStudent.parentEmail,
+            parentPhone: newStudent.parentPhone,
+            parentDob: newStudent.parentDob,
+            parentAddress: newStudent.parentAddress,
+            relationship: newStudent.relationship
+        };
+        try {
+            const created = await createStudentParent(payload);
+            // Thêm vào danh sách hiện tại (nếu muốn hiển thị ngay)
+            setStudents(prev => [...prev, { ...newStudent }]);
+            alert("Tạo học sinh/phụ huynh thành công!");
+        } catch (error) {
+            alert(error.message || "Lỗi khi tạo học sinh/phụ huynh");
+        }
         handleCloseCreateModal();
+    };
+
+    // Hàm xóa học sinh/phụ huynh
+    const handleDeleteStudent = async (student, idx) => {
+        if (!window.confirm(`Bạn có chắc chắn muốn xóa học sinh/phụ huynh này?`)) return;
+        // Ưu tiên lấy id từ student, nếu có
+        const id = student.id || student._id;
+        if (!id) {
+            alert("Không tìm thấy id để xóa!");
+            return;
+        }
+        try {
+            await deleteStudentParent(id);
+            setStudents(prev => prev.filter((_, i) => i !== idx));
+            alert("Xóa thành công!");
+        } catch (error) {
+            alert(error.message || "Lỗi khi xóa học sinh/phụ huynh");
+        }
+    };
+
+    // Mở modal sửa
+    const handleOpenEditModal = (student) => {
+        setEditStudent({ ...student });
+        setShowEditModal(true);
+    };
+    const handleCloseEditModal = () => {
+        setShowEditModal(false);
+        setEditStudent(null);
+    };
+    const handleEditChange = (e) => {
+        setEditStudent({ ...editStudent, [e.target.name]: e.target.value });
+    };
+    // Lưu cập nhật
+    const handleUpdateStudent = async (e) => {
+        e.preventDefault();
+        try {
+            await updateStudentParent(editStudent);
+            setStudents(prev => prev.map(s => (s.id === editStudent.id || s._id === editStudent._id) ? { ...editStudent } : s));
+            alert("Cập nhật thành công!");
+            handleCloseEditModal();
+        } catch (error) {
+            alert(error.message || "Lỗi khi cập nhật học sinh/phụ huynh");
+        }
     };
 
     const filteredStudents = students.filter(
@@ -265,10 +347,10 @@ function StudentManagement() {
                                             <td>{student.relationship}</td>
                                             <td>{student.status}</td>
                                             <td>
-                                                <button className="btn btn-sm btn-outline-primary me-2" title="Chỉnh sửa">
+                                                <button className="btn btn-sm btn-outline-primary me-2" title="Chỉnh sửa" onClick={() => handleOpenEditModal(student)}>
                                                     <i className="fas fa-edit"></i>
                                                 </button>
-                                                <button className="btn btn-sm btn-outline-danger" title="Xóa">
+                                                <button className="btn btn-sm btn-outline-danger" title="Xóa" onClick={() => handleDeleteStudent(student, idx)}>
                                                     <i className="fas fa-trash"></i>
                                                 </button>
                                             </td>
@@ -376,6 +458,90 @@ function StudentManagement() {
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" onClick={handleCloseCreateModal}>Hủy</button>
+                                    <button type="submit" className="btn btn-primary">Lưu</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Modal sửa học sinh */}
+            {showEditModal && editStudent && (
+                <div className="modal fade show" style={{ display: "block", background: "rgba(0,0,0,0.3)" }} tabIndex="-1">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <form onSubmit={handleUpdateStudent}>
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Chỉnh sửa học sinh/phụ huynh</h5>
+                                    <button type="button" className="btn-close" onClick={handleCloseEditModal}></button>
+                                </div>
+                                <div className="modal-body">
+                                    <div className="mb-3">
+                                        <label className="form-label">Mã học sinh</label>
+                                        <input type="text" className="form-control" name="studentCode" value={editStudent.studentCode || ""} onChange={handleEditChange} required />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Tên học sinh</label>
+                                        <input type="text" className="form-control" name="studentName" value={editStudent.studentName || ""} onChange={handleEditChange} required />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Lớp</label>
+                                        <input type="text" className="form-control" name="classNmae" value={editStudent.classNmae || ""} onChange={handleEditChange} required />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Ngày sinh học sinh</label>
+                                        <input type="date" className="form-control" name="studentDob" value={editStudent.studentDob || ""} onChange={handleEditChange} required />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Giới tính</label>
+                                        <select className="form-select" name="gender" value={editStudent.gender || "Nam"} onChange={handleEditChange} required>
+                                            <option value="Nam">Nam</option>
+                                            <option value="Nữ">Nữ</option>
+                                        </select>
+                                    </div>
+                                    <hr />
+                                    <div className="mb-3">
+                                        <label className="form-label">Mã phụ huynh</label>
+                                        <input type="text" className="form-control" name="parentCode" value={editStudent.parentCode || ""} onChange={handleEditChange} required />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Tên phụ huynh</label>
+                                        <input type="text" className="form-control" name="parentName" value={editStudent.parentName || ""} onChange={handleEditChange} required />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Email phụ huynh</label>
+                                        <input type="email" className="form-control" name="parentEmail" value={editStudent.parentEmail || ""} onChange={handleEditChange} required />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">SĐT phụ huynh</label>
+                                        <input type="text" className="form-control" name="parentPhone" value={editStudent.parentPhone || ""} onChange={handleEditChange} required />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Ngày sinh phụ huynh</label>
+                                        <input type="date" className="form-control" name="parentDob" value={editStudent.parentDob || ""} onChange={handleEditChange} required />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Địa chỉ phụ huynh</label>
+                                        <input type="text" className="form-control" name="parentAddress" value={editStudent.parentAddress || ""} onChange={handleEditChange} required />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Quan hệ</label>
+                                        <select className="form-select" name="relationship" value={editStudent.relationship || "Bố"} onChange={handleEditChange} required>
+                                            <option value="Bố">Bố</option>
+                                            <option value="Mẹ">Mẹ</option>
+                                            <option value="Khác">Khác</option>
+                                        </select>
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Trạng thái</label>
+                                        <select className="form-select" name="status" value={editStudent.status || "Đang học"} onChange={handleEditChange} required>
+                                            <option value="Đang học">Đang học</option>
+                                            <option value="Nghỉ học">Nghỉ học</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" onClick={handleCloseEditModal}>Hủy</button>
                                     <button type="submit" className="btn btn-primary">Lưu</button>
                                 </div>
                             </form>

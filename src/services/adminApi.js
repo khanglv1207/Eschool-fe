@@ -73,12 +73,23 @@ export const getAllStudents = async (page = 1, size = 10, search = "") => {
         throw new Error(errorMsg || "Không thể lấy danh sách học sinh");
     }
 };
-
-// Tạo học sinh mới
-export const createStudent = async (studentData) => {
+// Hiển thị danh sách học sinh 
+export const getAllParentStudent = async () => {
     try {
-        const response = await api.post("/api/admin/students", studentData);
-        return response.data;
+        const response = await api.get("/api/admin/get-all-student-parent");
+        return response.data.result;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể lấy danh sách học sinh/phụ huynh");
+    }
+};
+
+
+// Tạo học sinh mới (kết nối BE thật)
+export const createStudentParent = async (studentData) => {
+    try {
+        const response = await api.post("/api/admin/create-student-parent", studentData);
+        return response.data.result;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
         throw new Error(errorMsg || "Không thể tạo học sinh mới");
@@ -104,6 +115,17 @@ export const deleteStudent = async (studentId) => {
     } catch (error) {
         const errorMsg = error.response?.data?.message;
         throw new Error(errorMsg || "Không thể xóa học sinh");
+    }
+};
+
+// Xóa học sinh/phụ huynh
+export const deleteStudentParent = async (id) => {
+    try {
+        const response = await api.delete(`/api/admin/delete-student-parent/${id}`);
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể xóa học sinh/phụ huynh");
     }
 };
 
@@ -148,6 +170,17 @@ export const importParentStudentExcel = async (file) => {
         },
     });
     return response.data;
+};
+
+// Cập nhật học sinh/phụ huynh
+export const updateStudentParent = async (studentParentData) => {
+    try {
+        const response = await api.put("/api/admin/update-student-parent", studentParentData);
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể cập nhật học sinh/phụ huynh");
+    }
 };
 
 // ==================== MANAGER MANAGEMENT ====================
@@ -457,3 +490,4 @@ export const getBackupList = async () => {
         throw new Error(errorMsg || "Không thể lấy danh sách backup");
     }
 };
+
