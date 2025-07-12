@@ -17,9 +17,9 @@ function AdminLayout({ children }) {
         <div style={{ minHeight: "100vh", background: "#f5f6fa" }}>
             {/* Header */}
             <nav className="navbar navbar-dark bg-dark px-4" style={{ height: 56 }}>
-                <span className="navbar-brand fw-bold">ADMIN</span>
+                <span className="navbar-brand fw-bold">EschoolMED</span>
                 <div className="ms-auto text-white">
-                    <span className="me-3">admin</span>
+                    <span className="me-3">EschoolMED</span>
                     <i className="fas fa-user-circle"></i>
                 </div>
             </nav>
