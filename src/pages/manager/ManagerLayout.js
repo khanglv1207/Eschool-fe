@@ -2,12 +2,13 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const sidebarItems = [
-    { icon: "fa-home", label: "Main Page", link: "/manager/dashboard" },
-    { icon: "fa-users", label: "Users", link: "/manager/usermanage" },
-    { icon: "fa-child", label: "Student", link: "/manager/manageChildren" },
-    { icon: "fa-user-nurse", label: "School Nurse", link: "/manager/manageSchoolNurse" },
-    { icon: "fa-blog", label: "Blogs", link: "/manager/manageBlogs" },
-    { icon: "fa-comment-dots", label: "Feedbacks", link: "/manager/manageFeedbacks" },
+    { icon: "fa-home", label: "Main Page", link: "/admin/dashboard" },
+    { icon: "fa-users", label: "Users", link: "/admin/usermanage" },
+    { icon: "fa-child", label: "Student", link: "/admin/manageChildren" },
+    { icon: "fa-user-nurse", label: "School Nurse", link: "/admin/manageSchoolNurse" },
+    { icon: "fa-blog", label: "Blogs", link: "/admin/manageBlogs" },
+    { icon: "fa-comments", label: "Consultations", link: "/admin/ConsultationManagement" },
+    { icon: "fa-comment-dots", label: "Feedbacks", link: "/admin/manageFeedbacks" },
     // Các tính năng riêng cho manager sẽ bổ sung sau
 ];
 
@@ -16,9 +17,9 @@ function ManagerLayout({ children }) {
         <div style={{ minHeight: "100vh", background: "#f5f6fa" }}>
             {/* Header */}
             <nav className="navbar navbar-dark bg-dark px-4" style={{ height: 56 }}>
-                <span className="navbar-brand fw-bold">MANAGER</span>
+                <span className="navbar-brand fw-bold">EschoolMED</span>
                 <div className="ms-auto text-white">
-                    <span className="me-3">manager</span>
+                    <span className="me-3">EschoolMED</span>
                     <i className="fas fa-user-circle"></i>
                 </div>
             </nav>
