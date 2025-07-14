@@ -2,7 +2,7 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const sidebarItems = [
-    { icon: "fa-home", label: "Main Page", link: "/admin/dashboard" },
+    { icon: "fa-home", label: "Main Page", link: "/manager/dashboard" },
     { icon: "fa-users", label: "Users", link: "/admin/usermanage" },
     { icon: "fa-child", label: "Student", link: "/admin/manageChildren" },
     { icon: "fa-user-nurse", label: "School Nurse", link: "/admin/manageSchoolNurse" },

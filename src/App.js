@@ -66,11 +66,6 @@ function App() {
         <Route path="/nurse/health-declaration" element={<NurseHealthDeclaration />} />
         <Route path="/manager" element={<ManagerLayout />} />
         <Route path="/manager/dashboard" element={<ManagerDashboard />} />
-        <Route path="/manager/manageBlogs" element={<BlogManagement />} />
-        <Route path="/manager/manageFeedbacks" element={<FeedBackManagement />} />
-        <Route path="/manager/manageChildren" element={<StudentManagement />} />
-        <Route path="/manager/manageSchoolNurse" element={<SchoolNurseManagement />} />
-        <Route path="/manager/manageUsers" element={<UserManagement />} />
         <Route path="/medicine-registration" element={<DangKyThuocForm onBack={() => window.history.back()} />} />
       </Routes>
     </Router>
