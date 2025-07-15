@@ -42,14 +42,19 @@ function DangKyThuocForm({ onBack }) {
     // Gửi dữ liệu lên API
     try {
       // Lấy token từ localStorage với nhiều key khác nhau
-      let token = localStorage.getItem('access_token')
-        || localStorage.getItem('accessToken')
-        || localStorage.getItem('token');
+      let token =
+        localStorage.getItem('access_token') ||
+        localStorage.getItem('accessToken') ||
+        localStorage.getItem('token');
       if (!token) {
         try {
           const user = JSON.parse(localStorage.getItem('loggedInUser'));
           token = user?.token;
         } catch {}
+      }
+      if (!token) {
+        alert('Bạn chưa đăng nhập hoặc phiên đăng nhập đã hết hạn!');
+        return;
       }
       // Lấy studentId từ loggedInUser
       const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
@@ -69,7 +74,7 @@ function DangKyThuocForm({ onBack }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(body)
       });
