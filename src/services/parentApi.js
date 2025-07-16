@@ -17,7 +17,7 @@ export const updateParentProfile = async (profileData, token) => {
 
 export const getParentProfile = async () => {
   try {
-    const response = await api.get("/api/parents/profile");
+    const response = await api.get("/api/parents/parent-profile");
     return response.data;
   } catch (error) {
     const errorMsg = error.response?.data?.message;

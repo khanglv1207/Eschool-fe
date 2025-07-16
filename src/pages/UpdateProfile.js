@@ -105,7 +105,7 @@ function UpdateProfile() {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>Cập nhật hồ sơ</h2>
+      <h2 style={styles.title}>Thông tin hồ sơsơ</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
         {/* Thông tin phụ huynh */}
         {[{ label: "Họ và tên", name: "fullName" },
