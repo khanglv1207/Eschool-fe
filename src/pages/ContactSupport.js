@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import emailjs from "emailjs-com"; // Thêm dòng này
 
 function ContactSupport() {
   const [formData, setFormData] = useState({
@@ -15,9 +16,27 @@ function ContactSupport() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Yêu cầu hỗ trợ:", formData);
-    setSubmitted(true);
-    setFormData({ name: "", email: "", message: "" });
+    // Gửi email qua EmailJS
+    emailjs
+      .send(
+        "YOUR_SERVICE_ID", // Thay bằng Service ID của bạn
+        "YOUR_TEMPLATE_ID", // Thay bằng Template ID của bạn
+        {
+          from_name: formData.name,
+          from_email: formData.email,
+          message: formData.message,
+        },
+        "YOUR_USER_ID_OR_PUBLIC_KEY" // Thay bằng User ID/Public Key của bạn
+      )
+      .then(
+        (result) => {
+          setSubmitted(true);
+          setFormData({ name: "", email: "", message: "" });
+        },
+        (error) => {
+          alert("Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại!");
+        }
+      );
   };
 
   return (
@@ -29,15 +48,15 @@ function ContactSupport() {
         <p>
           <strong>Phòng y tế trường học:</strong>
         </p>
-        <p>📞 0123 456 789</p>
-        <p>✉️ ytetruong@eschoolmed.vn</p>
+        <p>📞 0816 386 382</p>
+        <p>✉️ eschoolmed391@gmail.com</p>
         <p>🏫 Trường THPT ABC, Quận XYZ, TP.HCM</p>
 
         <p style={{ marginTop: 20 }}>
           <strong>Bộ phận kỹ thuật eSchoolMed:</strong>
         </p>
-        <p>📞 1900 999 888</p>
-        <p>✉️ hotro@eschoolmed.vn</p>
+        <p>📞 0816 386 382</p>
+        <p>✉️ eschoolmed391@gmail.com</p>
       </div>
 
       <div style={styles.section}>
