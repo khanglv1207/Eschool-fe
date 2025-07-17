@@ -31,7 +31,7 @@ function StudentManagement() {
     const [newStudent, setNewStudent] = useState({
         studentCode: "",
         studentName: "",
-        classNmae: "",
+        classId: "",
         studentDob: "",
         gender: "",
         parentCode: "",
@@ -121,7 +121,7 @@ function StudentManagement() {
                         return {
                             studentCode: student.studentCode || student["Mã học sinh"] || student.Code || "",
                             studentName: student.studentName || student["Tên học sinh"] || student.Name || "",
-                            classNmae: student.classNmae || student["Lớp"] || student.Class || "",
+                            classId: student.classId || student["Lớp"] || student.Class || "",
                             studentDob: student.studentDob || student["Ngày sinh"] || student.DOB || "",
                             gender: student.gender || student["Giới tính"] || student.Gender || "Nam",
                             parentCode: student.parentCode || student["Mã phụ huynh"] || student.ParentCode || "",
@@ -157,7 +157,7 @@ function StudentManagement() {
         setNewStudent({
             studentCode: "",
             studentName: "",
-            classNmae: "",
+            classId: "",
             studentDob: "",
             gender: "Nam",
             parentCode: "",
@@ -180,7 +180,7 @@ function StudentManagement() {
             studentName: newStudent.studentName,
             studentDob: newStudent.studentDob,
             gender: newStudent.gender,
-            className: newStudent.classNmae,
+            className: newStudent.classId,
             parentName: newStudent.parentName,
             parentEmail: newStudent.parentEmail,
             parentPhone: newStudent.parentPhone,
@@ -246,7 +246,7 @@ function StudentManagement() {
         (s) =>
             s.studentName?.toLowerCase().includes(search.toLowerCase()) ||
             s.studentCode?.toLowerCase().includes(search.toLowerCase()) ||
-            s.classNmae?.toLowerCase().includes(search.toLowerCase())
+            s.classId?.toLowerCase().includes(search.toLowerCase())
     );
 
     return (
@@ -316,8 +316,6 @@ function StudentManagement() {
                                     <th>Tên phụ huynh</th>
                                     <th>Email phụ huynh</th>
                                     <th>SĐT phụ huynh</th>
-                                    <th>Ngày sinh phụ huynh</th>
-                                    <th>Địa chỉ phụ huynh</th>
                                     <th>Quan hệ</th>
                                     <th>Trạng thái</th>
                                     <th>Actions</th>
@@ -335,15 +333,13 @@ function StudentManagement() {
                                         <tr key={idx}>
                                             <td>{student.studentCode}</td>
                                             <td className="fw-bold">{student.studentName}</td>
-                                            <td>{student.classNmae}</td>
+                                            <td>{student.classId}</td>
                                             <td>{student.studentDob}</td>
                                             <td>{student.gender}</td>
                                             <td>{student.parentCode}</td>
                                             <td>{student.parentName}</td>
                                             <td>{student.parentEmail}</td>
                                             <td>{student.parentPhone}</td>
-                                            <td>{student.parentDob}</td>
-                                            <td>{student.parentAddress}</td>
                                             <td>{student.relationship}</td>
                                             <td>{student.status}</td>
                                             <td>
@@ -402,7 +398,7 @@ function StudentManagement() {
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Lớp</label>
-                                        <input type="text" className="form-control" name="classNmae" value={newStudent.classNmae} onChange={handleChange} required />
+                                        <input type="text" className="form-control" name="classId" value={newStudent.classId} onChange={handleChange} required />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Ngày sinh học sinh</label>
@@ -431,14 +427,6 @@ function StudentManagement() {
                                     <div className="mb-3">
                                         <label className="form-label">SĐT phụ huynh</label>
                                         <input type="text" className="form-control" name="parentPhone" value={newStudent.parentPhone} onChange={handleChange} required />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Ngày sinh phụ huynh</label>
-                                        <input type="date" className="form-control" name="parentDob" value={newStudent.parentDob} onChange={handleChange} required />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Địa chỉ phụ huynh</label>
-                                        <input type="text" className="form-control" name="parentAddress" value={newStudent.parentAddress} onChange={handleChange} required />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Quan hệ</label>
@@ -486,7 +474,7 @@ function StudentManagement() {
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Lớp</label>
-                                        <input type="text" className="form-control" name="classNmae" value={editStudent.classNmae || ""} onChange={handleEditChange} required />
+                                        <input type="text" className="form-control" name="classId" value={editStudent.classId || ""} onChange={handleEditChange} required />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Ngày sinh học sinh</label>
@@ -515,14 +503,6 @@ function StudentManagement() {
                                     <div className="mb-3">
                                         <label className="form-label">SĐT phụ huynh</label>
                                         <input type="text" className="form-control" name="parentPhone" value={editStudent.parentPhone || ""} onChange={handleEditChange} required />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Ngày sinh phụ huynh</label>
-                                        <input type="date" className="form-control" name="parentDob" value={editStudent.parentDob || ""} onChange={handleEditChange} required />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Địa chỉ phụ huynh</label>
-                                        <input type="text" className="form-control" name="parentAddress" value={editStudent.parentAddress || ""} onChange={handleEditChange} required />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Quan hệ</label>
