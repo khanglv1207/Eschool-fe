@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminLayout from "./AdminLayout";
 import * as XLSX from "xlsx";
+import { getAllUsers } from "../../services/adminApi";
 
 const sampleUsers = [
     // Đã xóa dữ liệu mẫu, mảng này hiện rỗng
@@ -32,6 +33,18 @@ function UserManagement() {
         password: ""
     });
     const fileInputRef = React.useRef();
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const data = await getAllUsers(); // data là mảng user
+                setUsers(Array.isArray(data) ? data : []);
+            } catch (error) {
+                alert(error.message || "Lỗi khi lấy danh sách user");
+            }
+        };
+        fetchUsers();
+    }, []);
 
     const handleOpenCreateModal = () => setShowCreateModal(true);
     const handleCloseCreateModal = () => {
@@ -85,9 +98,9 @@ function UserManagement() {
 
     const filteredUsers = users.filter(
         (u) =>
-            u.username.toLowerCase().includes(search.toLowerCase()) ||
-            u.fullName.toLowerCase().includes(search.toLowerCase()) ||
-            u.email.toLowerCase().includes(search.toLowerCase())
+            (u.fullName && u.fullName.toLowerCase().includes(search.toLowerCase())) ||
+            (u.email && u.email.toLowerCase().includes(search.toLowerCase())) ||
+            (u.role && u.role.toLowerCase().includes(search.toLowerCase()))
     );
 
     return (
