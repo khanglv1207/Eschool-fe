@@ -9,6 +9,7 @@ const sidebarItems = [
     { icon: "fa-blog", label: "Blogs", link: "/admin/manageBlogs" },
     { icon: "fa-comments", label: "Consultations", link: "/admin/ConsultationManagement" },
     { icon: "fa-comment-dots", label: "Feedbacks", link: "/admin/manageFeedbacks" },
+    { icon: "fa-medical", label: "Medicals", link: "/admin/MedicalManagement"},
     // { icon: "fa-money-check-alt", label: "Transactions", link: "/admin/manageTransactions" },
 ];
 

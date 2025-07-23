@@ -15,7 +15,7 @@ export const getAllUsers = async () => {
 };
 
 // Tạo user mới
-export const createUser = async (userData) => {
+export const createUser =  async (userData) => {
     try {
         const response = await api.post("/api/admin/users", userData);
         return response.data;
@@ -75,7 +75,7 @@ export const createParent = async ({ email, fullName }) => {
         return response.data.result;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
-        throw new Error(errorMsg || "Không thể tạo phụ huynh mới");
+        throw new Error(errorMsg || "Không thể tạo tài khoản");
     }
 }
 

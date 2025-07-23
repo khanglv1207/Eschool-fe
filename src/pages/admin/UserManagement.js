@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from "react";
 import AdminLayout from "./AdminLayout";
 import * as XLSX from "xlsx";
-import { getAllUsers } from "../../services/adminApi";
+import { getAllUsers, createParent } from "../../services/adminApi";
 
 const sampleUsers = [
     // Đã xóa dữ liệu mẫu, mảng này hiện rỗng
 ];
 
 const roleBadge = (role) => {
-    switch (role) {
-        case "ADMIN":
+    switch (role?.toLowerCase()) {
+        case "admin":
             return <span className="badge bg-danger">ADMIN</span>;
-        case "DOCTOR":
-            return <span className="badge bg-warning text-dark">DOCTOR</span>;
-        case "MEMBER":
-            return <span className="badge bg-success">MEMBER</span>;
+        case "parent":
+            return <span className="badge bg-success">PARENT</span>;
+        // case "doctor":
+        case "schoolnurse":
+            return <span className="badge bg-warning text-dark">SCHOOL NURSE</span>;
         default:
-            return <span className="badge bg-secondary">UNKNOWN</span>;
+            return <span className="badge bg-secondary">{role?.toUpperCase() || "UNKNOWN"}</span>;
     }
 };
 
@@ -25,12 +26,8 @@ function UserManagement() {
     const [users, setUsers] = useState(sampleUsers);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newUser, setNewUser] = useState({
-        username: "",
         fullName: "",
-        email: "",
-        phone: "",
-        role: "MEMBER",
-        password: ""
+        email: ""
     });
     const fileInputRef = React.useRef();
 
@@ -49,52 +46,27 @@ function UserManagement() {
     const handleOpenCreateModal = () => setShowCreateModal(true);
     const handleCloseCreateModal = () => {
         setShowCreateModal(false);
-        setNewUser({ username: "", fullName: "", email: "", phone: "", role: "MEMBER", password: "" });
+        setNewUser({ fullName: "", email: "" });
     };
     const handleChange = (e) => {
         setNewUser({ ...newUser, [e.target.name]: e.target.value });
     };
-    const handleCreateUser = (e) => {
+    const handleCreateUser = async (e) => {
         e.preventDefault();
-        handleCloseCreateModal();
+        try {
+            await createParent({ email: newUser.email, fullName: newUser.fullName });
+            // Refresh danh sách user sau khi tạo thành công
+            const data = await getAllUsers();
+            setUsers(Array.isArray(data) ? data : []);
+            alert("Tạo user thành công!");
+            handleCloseCreateModal();
+        } catch (error) {
+            alert(error.message || "Lỗi khi tạo user");
+        }
     };
 
     // Hàm xử lý import Excel
-    const handleImportExcel = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-            const bstr = evt.target.result;
-            const wb = XLSX.read(bstr, { type: "binary" });
-            const wsname = wb.SheetNames[0];
-            const ws = wb.Sheets[wsname];
-            const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-            // data[0] là header, data.slice(1) là dữ liệu
-            const header = data[0];
-            const usersFromExcel = data.slice(1).map((row) => {
-                const user = {};
-                header.forEach((key, idx) => {
-                    user[key] = row[idx] || "";
-                });
-                // Đảm bảo các trường cần thiết
-                return {
-                    username: user.username || user.Username || "",
-                    fullName: user.fullName || user["Full Name"] || "",
-                    email: user.email || user.Email || "",
-                    phone: user.phone || user.Phone || "",
-                    role: user.role || user.Role || "MEMBER",
-                    password: user.password || user.Password || ""
-                };
-            });
-            setUsers((prev) => [...prev, ...usersFromExcel]);
-        };
-        reader.readAsBinaryString(file);
-    };
-    const handleClickImport = () => {
-        if (fileInputRef.current) fileInputRef.current.value = null;
-        fileInputRef.current.click();
-    };
+    // Xóa hàm handleImportExcel và handleClickImport
 
     const filteredUsers = users.filter(
         (u) =>
@@ -110,16 +82,7 @@ function UserManagement() {
                     <i className="fas fa-users me-2"></i> User Management
                 </h2>
                 <div>
-                    <button className="btn btn-success me-2" onClick={handleClickImport}>
-                        <i className="fas fa-file-import me-2"></i> Import từ Excel
-                    </button>
-                    <input
-                        type="file"
-                        accept=".xlsx,.xls"
-                        style={{ display: "none" }}
-                        ref={fileInputRef}
-                        onChange={handleImportExcel}
-                    />
+                    {/* Đã xóa nút Import từ Excel */}
                     <button className="btn btn-primary" onClick={handleOpenCreateModal}>
                         <i className="fas fa-plus me-2"></i> Create New User
                     </button>
@@ -149,7 +112,7 @@ function UserManagement() {
                         <table className="table table-striped align-middle">
                             <thead>
                                 <tr>
-                                    <th>Username</th>
+                                    <th>id</th>
                                     <th>Role</th>
                                     <th>Full Name</th>
                                     <th>Email</th>
@@ -167,8 +130,8 @@ function UserManagement() {
                                     </tr>
                                 ) : (
                                     filteredUsers.map((user) => (
-                                        <tr key={user.username}>
-                                            <td className="fw-bold">{user.username}</td>
+                                        <tr key={user.id}>
+                                            <td className="fw-bold">{user.id}</td>
                                             <td>{roleBadge(user.role)}</td>
                                             <td>{user.fullName}</td>
                                             <td>{user.email}</td>
@@ -222,42 +185,36 @@ function UserManagement() {
                         <div className="modal-content">
                             <form onSubmit={handleCreateUser}>
                                 <div className="modal-header">
-                                    <h5 className="modal-title">Tạo người dùng mới</h5>
+                                    <h5 className="modal-title">Tạo user mới</h5>
                                     <button type="button" className="btn-close" onClick={handleCloseCreateModal}></button>
                                 </div>
                                 <div className="modal-body">
-                                    {/* <div className="mb-3">
-                                        <label className="form-label">Username</label>
-                                        <input type="text" className="form-control" name="username" value={newUser.username} onChange={handleChange} required />
-                                    </div> */}
                                     <div className="mb-3">
-                                        <label className="form-label">Full Name</label>
-                                        <input type="text" className="form-control" name="fullName" value={newUser.fullName} onChange={handleChange} required />
+                                        <label className="form-label">Họ tên</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="fullName"
+                                            value={newUser.fullName}
+                                            onChange={handleChange}
+                                            required
+                                        />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Email</label>
-                                        <input type="email" className="form-control" name="email" value={newUser.email} onChange={handleChange} required />
+                                        <input
+                                            type="email"
+                                            className="form-control"
+                                            name="email"
+                                            value={newUser.email}
+                                            onChange={handleChange}
+                                            required
+                                        />
                                     </div>
-                                    {/* <div className="mb-3">
-                                        <label className="form-label">Phone</label>
-                                        <input type="text" className="form-control" name="phone" value={newUser.phone} onChange={handleChange} required />
-                                    </div> */}
-                                    {/* <div className="mb-3">
-                                        <label className="form-label">Role</label>
-                                        <select className="form-select" name="role" value={newUser.role} onChange={handleChange} required>
-                                            <option value="ADMIN">ADMIN</option>
-                                            <option value="DOCTOR">SCHOOLNURSE</option>
-                                            <option value="MEMBER">MEMBER</option>
-                                        </select>
-                                    </div> */}
-                                    {/* <div className="mb-3">
-                                        <label className="form-label">Password</label>
-                                        <input type="password" className="form-control" name="password" value={newUser.password} onChange={handleChange} required />
-                                    </div> */}
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" onClick={handleCloseCreateModal}>Hủy</button>
-                                    <button type="submit" className="btn btn-primary">Lưu</button>
+                                    <button type="submit" className="btn btn-primary">Tạo user</button>
                                 </div>
                             </form>
                         </div>

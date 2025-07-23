@@ -67,7 +67,7 @@ function SchoolNurseManagement() {
     const handleOpenCreateModal = () => setShowCreateModal(true);
     const handleCloseCreateModal = () => {
         setShowCreateModal(false);
-        setNewNurse({ name: "", nurseCode: "", phone: "", email: "", status: "Đang làm việc" });
+        setNewNurse({ name: "", phone: "", email: ""});
     };
     const handleChange = (e) => {
         setNewNurse({ ...newNurse, [e.target.name]: e.target.value });

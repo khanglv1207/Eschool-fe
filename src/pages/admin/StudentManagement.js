@@ -287,14 +287,7 @@ function StudentManagement() {
             <div className="card shadow border-0 mb-4">
                 <div className="card-body">
                     <div className="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <select className="form-select d-inline-block w-auto me-2">
-                                <option>10</option>
-                                <option>25</option>
-                                <option>50</option>
-                            </select>
-                            entries per page
-                        </div>
+                        
                         <input
                             type="text"
                             className="form-control w-auto"
