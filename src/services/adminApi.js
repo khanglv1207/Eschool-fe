@@ -4,20 +4,18 @@ import axios from "axios";
 
 // ==================== USER MANAGEMENT ====================
 // Lấy danh sách tất cả users
-export const getAllUsers = async (page = 1, size = 10, search = "") => {
+export const getAllUsers = async () => {
     try {
-        const response = await api.get("/api/admin/users", {
-            params: { page, size, search }
-        });
-        return response.data;
+        const response = await api.get("/api/users/get-all-user");
+        return response.data.result;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
-        throw new Error(errorMsg || "Không thể lấy danh sách users");
+        throw new Error(errorMsg || "Không thể lấy danh sách người dùng");
     }
 };
 
 // Tạo user mới
-export const createUser = async (userData) => {
+export const createUser =  async (userData) => {
     try {
         const response = await api.post("/api/admin/users", userData);
         return response.data;
@@ -61,18 +59,6 @@ export const changeUserRole = async (userId, newRole) => {
 };
 
 // ==================== STUDENT MANAGEMENT ====================
-// Lấy danh sách học sinh
-export const getAllStudents = async (page = 1, size = 10, search = "") => {
-    try {
-        const response = await api.get("/api/admin/students", {
-            params: { page, size, search }
-        });
-        return response.data;
-    } catch (error) {
-        const errorMsg = error.response?.data?.message;
-        throw new Error(errorMsg || "Không thể lấy danh sách học sinh");
-    }
-};
 // Hiển thị danh sách học sinh 
 export const getAllParentStudent = async () => {
     try {
@@ -83,6 +69,15 @@ export const getAllParentStudent = async () => {
         throw new Error(errorMsg || "Không thể lấy danh sách học sinh/phụ huynh");
     }
 };
+export const createParent = async ({ email, fullName }) => {
+    try {
+        const response = await api.post("/api/mail/create-parent", { email, fullName });
+        return response.data.result;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể tạo tài khoản");
+    }
+}
 
 
 // Tạo học sinh mới (kết nối BE thật)

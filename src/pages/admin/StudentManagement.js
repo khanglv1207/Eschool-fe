@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import AdminLayout from "./AdminLayout";
 import * as XLSX from "xlsx";
 import { importStudent, importParentStudentExcel, getAllParentStudent, createStudentParent, deleteStudentParent, updateStudentParent } from "../../services/adminApi";
-
+import { createParent } from "../../services/adminApi";
 // Dữ liệu mẫu (có thể để rỗng hoặc thêm vài học sinh mẫu)
 const sampleStudents = [
     // {
@@ -18,7 +18,6 @@ const sampleStudents = [
     //     parentDob: "1980-01-01",
     //     parentAddress: "Hà Nội",
     //     relationship: "Bố",
-    //     status: "Đang học"
     // },
 ];
 
@@ -41,8 +40,6 @@ function StudentManagement() {
         parentDob: "",
         parentAddress: "",
         relationship: "",
-        status: "",
-
     });
     const fileInputRef = React.useRef();
 
@@ -167,7 +164,6 @@ function StudentManagement() {
             parentDob: "",
             parentAddress: "",
             relationship: "Bố",
-            status: "Đang học"
         });
     };
     const handleChange = (e) => {
@@ -190,7 +186,12 @@ function StudentManagement() {
         };
         try {
             const created = await createStudentParent(payload);
-            // Thêm vào danh sách hiện tại (nếu muốn hiển thị ngay)
+            // Gọi tiếp API tạo parent gửi mail
+            try {
+                await createParent({ email: newStudent.parentEmail, fullName: newStudent.parentName });
+            } catch (err) {
+                alert("Tạo học sinh thành công nhưng gửi mail phụ huynh thất bại: " + (err.message || ""));
+            }
             setStudents(prev => [...prev, { ...newStudent }]);
             alert("Tạo học sinh/phụ huynh thành công!");
         } catch (error) {
@@ -286,14 +287,7 @@ function StudentManagement() {
             <div className="card shadow border-0 mb-4">
                 <div className="card-body">
                     <div className="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <select className="form-select d-inline-block w-auto me-2">
-                                <option>10</option>
-                                <option>25</option>
-                                <option>50</option>
-                            </select>
-                            entries per page
-                        </div>
+                        
                         <input
                             type="text"
                             className="form-control w-auto"
@@ -317,7 +311,6 @@ function StudentManagement() {
                                     <th>Email phụ huynh</th>
                                     <th>SĐT phụ huynh</th>
                                     <th>Quan hệ</th>
-                                    <th>Trạng thái</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -341,7 +334,6 @@ function StudentManagement() {
                                             <td>{student.parentEmail}</td>
                                             <td>{student.parentPhone}</td>
                                             <td>{student.relationship}</td>
-                                            <td>{student.status}</td>
                                             <td>
                                                 <button className="btn btn-sm btn-outline-primary me-2" title="Chỉnh sửa" onClick={() => handleOpenEditModal(student)}>
                                                     <i className="fas fa-edit"></i>
@@ -436,13 +428,7 @@ function StudentManagement() {
                                             <option value="Khác">Khác</option>
                                         </select>
                                     </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Trạng thái</label>
-                                        <select className="form-select" name="status" value={newStudent.status} onChange={handleChange} required>
-                                            <option value="Đang học">Đang học</option>
-                                            <option value="Nghỉ học">Nghỉ học</option>
-                                        </select>
-                                    </div>
+
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" onClick={handleCloseCreateModal}>Hủy</button>
@@ -512,13 +498,7 @@ function StudentManagement() {
                                             <option value="Khác">Khác</option>
                                         </select>
                                     </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Trạng thái</label>
-                                        <select className="form-select" name="status" value={editStudent.status || "Đang học"} onChange={handleEditChange} required>
-                                            <option value="Đang học">Đang học</option>
-                                            <option value="Nghỉ học">Nghỉ học</option>
-                                        </select>
-                                    </div>
+
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" onClick={handleCloseEditModal}>Hủy</button>
