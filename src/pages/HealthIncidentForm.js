@@ -1,295 +1,218 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
-function HealthIncidentForm({ onBack }) {
-  const [studentName, setStudentName] = useState("");
-  const [className, setClassName] = useState("");
-  const [incidentDate, setIncidentDate] = useState("");
-  const [description, setDescription] = useState("");
-  const [reporter, setReporter] = useState("");
-  const [resolved, setResolved] = useState(false);
+// Thêm import Roboto font cho toàn trang nếu chưa có
+const robotoFont = document.getElementById('roboto-font');
+if (!robotoFont) {
+  const link = document.createElement('link');
+  link.id = 'roboto-font';
+  link.rel = 'stylesheet';
+  link.href = 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap';
+  document.head.appendChild(link);
+}
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert(
-      `Báo cáo sự cố thành công!\n` +
-        `Tên học sinh: ${studentName}\n` +
-        `Lớp: ${className}\n` +
-        `Ngày sự cố: ${incidentDate}\n` +
-        `Mô tả: ${description}\n` +
-        `Người báo cáo: ${reporter}\n` +
-        `Đã xử lý: ${resolved ? "Có" : "Chưa"}`
-    );
-    onBack();
-  };
+const INCIDENT_TYPES = [
+  "Tai nạn (té ngã, va chạm…)",
+  "Vấn đề sức khỏe (đau bụng, sốt, ngất…)",
+  "Dị ứng, phản ứng thuốc",
+  "Khác",
+];
+const STATUS_OPTIONS = [
+  "Ổn định",
+  "Đang theo dõi",
+  "Chuyển viện",
+  "Khác",
+];
 
-  useEffect(() => {
-    const styleTagId = "gradient-animation-keyframes";
-    if (!document.getElementById(styleTagId)) {
-      const styleTag = document.createElement("style");
-      styleTag.id = styleTagId;
-      styleTag.innerHTML = `
-      @keyframes gradientMove {
-        0% { background-position: 0% 50% }
-        50% { background-position: 100% 50% }
-        100% { background-position: 0% 50% }
-      }
-      @keyframes waveMove {
-        0% { transform: translateX(0) }
-        100% { transform: translateX(-50%) }
-      }
-      `;
-      document.head.appendChild(styleTag);
-    }
-  }, []);
+export default function HealthIncidentForm() {
+  const [incidentType, setIncidentType] = useState("");
+  const [otherIncident, setOtherIncident] = useState("");
+  const [status, setStatus] = useState("");
+  const [otherStatus, setOtherStatus] = useState("");
+  const [file, setFile] = useState(null);
 
   return (
-    <div style={styles.background}>
-      <div style={styles.container}>
-        <h2 style={styles.title}>🚑 Báo Cáo Sự Cố Y Tế</h2>
-        <form onSubmit={handleSubmit}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Tên học sinh:</label>
-            <input
-              type="text"
-              value={studentName}
-              onChange={(e) => setStudentName(e.target.value)}
-              required
-              placeholder="Nhập tên học sinh"
-              style={styles.input}
-            />
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(120deg, #eaf4ff 0%, #fafdff 60%, #d2e7fa 100%)',
+      padding: '48px 0',
+      fontFamily: 'Arial, Helvetica, sans-serif',
+    }}>
+      <div style={{
+        maxWidth: 720,
+        margin: "40px auto",
+        background: "rgba(255,255,255,0.98)",
+        borderRadius: 32,
+        boxShadow: "0 12px 48px 0 rgba(67,149,247,0.18)",
+        border: '1.5px solid #e3eefd',
+        padding: 48,
+        backdropFilter: 'blur(2px)',
+        position: 'relative',
+        fontFamily: 'Arial, Helvetica, sans-serif',
+      }}>
+        <h1 style={{ color: "#2979e8", fontWeight: 700, fontSize: 36, marginBottom: 10, fontFamily: 'Roboto, Segoe UI, Arial, sans-serif' }}>Ghi nhận sự cố y tế</h1>
+        <div style={{ color: "#444", fontSize: 18, marginBottom: 36, fontWeight: 500 }}>
+          Vui lòng điền đầy đủ thông tin về sự cố sức khỏe của học sinh để được xử lý và theo dõi.
+        </div>
+        <form style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
+          {/* 1. Thông tin học sinh */}
+          <SectionTitle>1. Thông tin học sinh</SectionTitle>
+          <div style={{ display: 'flex', gap: 24, marginBottom: 18, flexWrap: 'wrap' }}>
+            <InputGroup label="Họ và tên học sinh" required />
+            <InputGroup label="Mã học sinh" />
+          </div>
+          <div style={{ maxWidth: 320, marginBottom: 32 }}>
+            <InputGroup label="Lớp" />
           </div>
 
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Lớp:</label>
-            <input
-              type="text"
-              value={className}
-              onChange={(e) => setClassName(e.target.value)}
-              required
-              placeholder="Nhập lớp"
-              style={styles.input}
-            />
+          {/* 2. Thông tin sự cố */}
+          <SectionTitle>2. Thông tin sự cố</SectionTitle>
+          <div style={{ marginBottom: 18 }}>
+            <InputGroup label="Thời gian xảy ra sự cố" type="datetime-local" required />
+          </div>
+          <div style={{ marginBottom: 18 }}>
+            <label className="label-luxury">Loại sự cố</label>
+            <select className="input-luxury" style={{ ...inputStyle, marginTop: 6 }} value={incidentType} onChange={e => setIncidentType(e.target.value)} required>
+              <option value="">-- Chọn loại sự cố --</option>
+              {INCIDENT_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+            </select>
+            {incidentType === "Khác" && (
+              <input type="text" className="input-luxury" style={{ ...inputStyle, marginTop: 10 }} placeholder="Nhập loại sự cố khác" value={otherIncident} onChange={e => setOtherIncident(e.target.value)} />
+            )}
+          </div>
+          <div style={{ marginBottom: 32 }}>
+            <label className="label-luxury">Mô tả chi tiết sự cố</label>
+            <textarea className="input-luxury" style={{ ...inputStyle, minHeight: 80, marginTop: 6 }} placeholder="Ghi rõ hoàn cảnh, mức độ tổn thương…" />
           </div>
 
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Ngày xảy ra sự cố:</label>
-            <input
-              type="date"
-              value={incidentDate}
-              onChange={(e) => setIncidentDate(e.target.value)}
-              required
-              style={styles.input}
-            />
+          {/* 3. Xử lý ban đầu */}
+          <SectionTitle>3. Xử lý ban đầu</SectionTitle>
+          <div style={{ marginBottom: 18 }}>
+            <label className="label-luxury">Biện pháp xử lý</label>
+            <textarea className="input-luxury" style={{ ...inputStyle, minHeight: 60, marginTop: 6 }} placeholder="Ví dụ: rửa vết thương, đo nhiệt độ, sơ cứu…" />
+          </div>
+          <div style={{ marginBottom: 18 }}>
+            <InputGroup label="Người xử lý ban đầu" placeholder="Tên cán bộ y tế, giáo viên…" />
+          </div>
+          <div style={{ display: 'flex', gap: 32, marginBottom: 32, flexWrap: 'wrap' }}>
+            <label style={checkboxLabel}><input type="checkbox" style={checkboxStyle} />Có gọi phụ huynh</label>
+            <label style={checkboxLabel}><input type="checkbox" style={checkboxStyle} />Có chuyển viện</label>
+            <label style={checkboxLabel}><input type="checkbox" style={checkboxStyle} />Có theo dõi tại trường</label>
           </div>
 
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Mô tả sự cố:</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Mô tả chi tiết sự cố..."
-              rows="4"
-              style={styles.textarea}
-            />
+          {/* 4. Tình trạng hiện tại */}
+          <SectionTitle>4. Tình trạng hiện tại</SectionTitle>
+          <div style={{ marginBottom: 32 }}>
+            <label className="label-luxury">Tình trạng</label>
+            <select className="input-luxury" style={{ ...inputStyle, marginTop: 6 }} value={status} onChange={e => setStatus(e.target.value)} required>
+              <option value="">-- Chọn tình trạng --</option>
+              {STATUS_OPTIONS.map(type => <option key={type} value={type}>{type}</option>)}
+            </select>
+            {status === "Khác" && (
+              <input type="text" className="input-luxury" style={{ ...inputStyle, marginTop: 10 }} placeholder="Nhập tình trạng khác" value={otherStatus} onChange={e => setOtherStatus(e.target.value)} />
+            )}
           </div>
 
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Người báo cáo:</label>
-            <input
-              type="text"
-              value={reporter}
-              onChange={(e) => setReporter(e.target.value)}
-              required
-              placeholder="Nhập tên người báo cáo"
-              style={styles.input}
-            />
+          {/* 5. Đính kèm hình ảnh */}
+          <SectionTitle>5. Đính kèm hình ảnh (nếu có)</SectionTitle>
+          <div style={{ marginBottom: 36 }}>
+            <input type="file" accept="image/*" onChange={e => setFile(e.target.files[0])} style={{ marginTop: 8 }} />
+            {file && <div style={{ marginTop: 10, color: '#2979e8', fontWeight: 600 }}>Đã chọn: {file.name}</div>}
           </div>
 
-          <div
-            style={{
-              ...styles.formGroup,
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={resolved}
-              onChange={(e) => setResolved(e.target.checked)}
-              style={{ marginRight: "8px" }}
-            />
-            <label style={{ fontSize: "15px" }}>Đã xử lý?</label>
-          </div>
-
-          <div style={styles.buttonGroup}>
-            <button
-              type="submit"
-              style={styles.submitButton}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#2C6AD8")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "#4395F7")
-              }
-            >
-              Gửi báo cáo
-            </button>
-            <button
-              type="button"
-              onClick={onBack}
-              style={{ ...styles.button, backgroundColor: "#4395F7" }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#2C6AD8")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "#4395F7")
-              }
-            >
-              Quay lại
-            </button>
-          </div>
+          <button type="submit" style={luxuryButtonStyle}>Gửi ghi nhận</button>
         </form>
       </div>
-
-      <div style={styles.waveWrapper}>
-        <svg
-          style={styles.waveSvg}
-          viewBox="0 0 1200 200"
-          preserveAspectRatio="none"
-        >
-          <path
-            fill="url(#gradient)"
-            fillOpacity="0.6"
-            d="M0,100 C150,200 350,0 600,100 C850,200 1050,0 1200,100 L1200,200 L0,200 Z"
-          />
-          <defs>
-            <linearGradient id="gradient" gradientTransform="rotate(90)">
-              <stop offset="0%" stopColor="#89f7fe" />
-              <stop offset="100%" stopColor="#66a6ff" />
-            </linearGradient>
-          </defs>
-        </svg>
-
-        <svg
-          style={{ ...styles.waveSvg, ...styles.waveSvgDuplicate }}
-          viewBox="0 0 1200 200"
-          preserveAspectRatio="none"
-        >
-          <path
-            fill="url(#gradient)"
-            fillOpacity="0.6"
-            d="M0,100 C150,200 350,0 600,100 C850,200 1050,0 1200,100 L1200,200 L0,200 Z"
-          />
-        </svg>
-      </div>
+      <style>{luxuryFormStyle}</style>
     </div>
   );
 }
 
-const styles = {
-  background: {
-    minHeight: "100vh",
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "linear-gradient(270deg, #89f7fe, #66a6ff, #fbc2eb, #a6c1ee)",
-    backgroundSize: "800% 800%",
-    animation: "gradientMove 15s ease infinite",
-    overflow: "hidden",
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-  },
-  container: {
-    width: "100%",
-    maxWidth: "550px",
-    padding: "30px",
-    borderRadius: "16px",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-    background: "white",
-    color: "#333",
-    position: "relative",
-    zIndex: 2,
-  },
-  title: {
-    textAlign: "center",
-    marginBottom: "30px",
-    fontSize: "26px",
-    color: "#007BFF",
-  },
-  formGroup: {
-    display: "flex",
-    flexDirection: "column",
-    marginBottom: "18px",
-  },
-  label: {
-    fontWeight: "600",
-    marginBottom: "6px",
-    fontSize: "15px",
-  },
-  input: {
-    padding: "10px 14px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-    fontSize: "15px",
-    outlineColor: "#007BFF",
-  },
-  textarea: {
-    padding: "10px 14px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-    fontSize: "15px",
-    resize: "vertical",
-    outlineColor: "#007BFF",
-  },
-  buttonGroup: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: "12px",
-    marginTop: "20px",
-  },
-  button: {
-    flex: 1,
-    padding: "12px",
-    borderRadius: "8px",
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: "16px",
-    border: "none",
-    cursor: "pointer",
-    transition: "background-color 0.3s ease",
-  },
-  submitButton: {
-    flex: 1,
-    padding: "12px",
-    borderRadius: "8px",
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: "16px",
-    border: "none",
-    cursor: "pointer",
-    backgroundColor: "#4395F7",
-    boxShadow: "0 4px 8px rgba(67, 149, 247, 0.4)",
-    transition: "background-color 0.3s ease",
-  },
-  waveWrapper: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    width: "200%",
-    height: "200px",
-    overflow: "hidden",
-    display: "flex",
-    animation: "waveMove 10s linear infinite",
-    zIndex: 1,
-  },
-  waveSvg: {
-    width: "50%",
-    height: "100%",
-    flexShrink: 0,
-  },
-  waveSvgDuplicate: {
-    marginLeft: "-1px",
-  },
+function SectionTitle({ children }) {
+  return <h3 style={{ color: "#2979e8", fontWeight: 700, fontSize: 22, margin: '32px 0 18px 0', fontFamily: 'Roboto, Segoe UI, Arial, sans-serif' }}>{children}</h3>;
+}
+
+function InputGroup({ label, type = "text", required, placeholder }) {
+  return (
+    <div style={{ flex: 1, minWidth: 180 }}>
+      <label className="label-luxury">
+        {label} {required && <span style={{ color: '#e53935' }}>*</span>}
+      </label>
+      <input type={type} className="input-luxury" style={{ ...inputStyle, marginTop: 6 }} required={required} placeholder={placeholder} />
+    </div>
+  );
+}
+
+const inputStyle = {
+  width: '100%',
+  padding: '13px 18px',
+  borderRadius: 12,
+  border: '1.5px solid #c2d6f7',
+  fontSize: 17,
+  fontFamily: 'Arial, Helvetica, sans-serif',
+  background: '#f8fbff',
+  outline: 'none',
+  boxSizing: 'border-box',
+  boxShadow: '0 2px 8px rgba(67,149,247,0.04)',
+  transition: 'border-color 0.2s, box-shadow 0.2s',
+  fontWeight: 400,
 };
 
-export default HealthIncidentForm;
+const luxuryButtonStyle = {
+  background: 'linear-gradient(90deg, #4395F7 0%, #2979e8 100%)',
+  color: '#fff',
+  border: 0,
+  borderRadius: 16,
+  padding: '18px 54px',
+  fontSize: 20,
+  fontWeight: 700,
+  fontFamily: 'Arial, Helvetica, sans-serif',
+  cursor: 'pointer',
+  boxShadow: '0 8px 32px rgba(67,149,247,0.18)',
+  transition: 'background 0.2s, box-shadow 0.2s, color 0.2s',
+  outline: 'none',
+  margin: '0 auto',
+  display: 'block',
+};
+
+const luxuryFormStyle = `
+.input-luxury, .input-luxury:focus, .input-luxury:active {
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.label-luxury {
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-weight: 700;
+  color: #1a355b;
+  font-size: 16px;
+  margin-bottom: 2px;
+  letter-spacing: 0;
+}
+.input-luxury {
+  background: #f8fbff;
+  border-radius: 12px;
+  border: 1.5px solid #c2d6f7;
+  padding: 13px 18px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-luxury:disabled {
+  background: #f2f6fa;
+}
+`;
+
+const checkboxLabel = {
+  fontWeight: 600,
+  color: '#2979e8',
+  fontSize: 16,
+  display: 'flex',
+  alignItems: 'center',
+  gap: 6,
+  fontFamily: 'Arial, Helvetica, sans-serif',
+};
+const checkboxStyle = {
+  width: 18,
+  height: 18,
+  accentColor: '#4395F7',
+  marginRight: 6,
+};

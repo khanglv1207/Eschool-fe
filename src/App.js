@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Banner from "./components/Banner";
+import Home from "./components/Home";
 
 
 import KhaiBaoSucKhoe from "./pages/KhaiBaoSucKhoe";
@@ -44,7 +44,7 @@ function App() {
 
       {/* Phần nội dung sẽ thay đổi theo Route */}
       <Routes>
-        <Route path="/" element={<Banner />} />
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/update-profile" element={<UpdateProfile />} />
@@ -52,7 +52,7 @@ function App() {
         <Route path="/health-declaration" element={<KhaiBaoSucKhoe />} />
         <Route path="/vaccination" element={<Vaccination />} />
         <Route path="/medical-checkup" element={<MedicalCheckup />} />
-        <Route path="/medical-events" element={<MedicalEvents />} />
+        <Route path="/medical-events" element={<HealthIncidentForm />} />
         <Route path="/incident-form" element={<HealthIncidentForm />} />
         <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/admin/dashboard" element={<Dashboard />} />
