@@ -1,19 +1,31 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AdminLayout from "./AdminLayout";
-import { getAllMedicalRecords, createMedicalRecord, deleteMedicalRecord, updateMedicalRecord } from "../../services/adminApi";
+import * as XLSX from "xlsx";
+import {
+    importMedicalExcel,
+    getAllMedicalRecords,
+    createMedicalRecord,
+    deleteMedicalRecord,
+    updateMedicalRecord
+} from "../../services/adminApi";
+// import MedicalEvents from "../MedicalEvents";
 
-function MedicalManagement() {
+const sampleRecords = [];
+
+function MedicalEventRecording() {
     const [search, setSearch] = useState("");
-    const [records, setRecords] = useState([]);
-    // const [isImporting, setIsImporting] = useState(false);
+    const [records, setRecords] = useState(sampleRecords);
+    const [isImporting, setIsImporting] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newRecord, setNewRecord] = useState({
-        MedCode: "",
-        MedName: "",
-        MedIngredients: "",
-        content: "",
-        Packaging: "",
-        unit: ""
+        studentCode: "",
+        studentName: "",
+        classId: "",
+        date: "",
+        symptom: "",
+        diagnosis: "",
+        treatment: "",
+        note: "",
     });
     const fileInputRef = useRef();
 
@@ -26,35 +38,79 @@ function MedicalManagement() {
                 const data = await getAllMedicalRecords();
                 setRecords(data);
             } catch (error) {
-                console.error("Error fetching medical records:", error);
-                alert("Failed to fetch medical records. Please try again later.");
+                alert(error.message);
             }
         };
         fetchData();
     }, []);
+
+    const handleImportExcel = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setIsImporting(true);
+        try {
+            const response = await importMedicalExcel(file);
+
+            if (response.success && response.data) {
+                const importedRecords = response.data.records || [];
+                setRecords((prev) => [...prev, ...importedRecords]);
+                alert(`Import thành công ${response.data.totalImported} bản ghi y tế!`);
+            } else {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    const bstr = evt.target.result;
+                    const wb = XLSX.read(bstr, { type: "binary" });
+                    const wsname = wb.SheetNames[0];
+                    const ws = wb.Sheets[wsname];
+                    const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+                    const header = data[0];
+                    const recordsFromExcel = data.slice(1).map((row) => {
+                        const record = {};
+                        header.forEach((key, idx) => {
+                            record[key] = row[idx] || "";
+                        });
+                        return {
+                            studentCode: record.studentCode || record["Mã học sinh"] || "",
+                            studentName: record.studentName || record["Tên học sinh"] || "",
+                            classId: record.classId || record["Lớp"] || "",
+                            date: record.date || record["Ngày"] || "",
+                            symptom: record.symptom || record["Triệu chứng"] || "",
+                            diagnosis: record.diagnosis || record["Chẩn đoán"] || "",
+                            treatment: record.treatment || record["Điều trị"] || "",
+                            note: record.note || record["Ghi chú"] || "",
+                        };
+                    });
+                    setRecords((prev) => [...prev, ...recordsFromExcel]);
+                    alert(`Import thành công ${recordsFromExcel.length} bản ghi y tế!`);
+                };
+                reader.readAsBinaryString(file);
+            }
+        } catch (error) {
+            console.error("Lỗi import:", error);
+            alert(`Lỗi import: ${error.message}`);
+        } finally {
+            setIsImporting(false);
+        }
+    };
 
     const handleClickImport = () => {
         if (fileInputRef.current) fileInputRef.current.value = null;
         fileInputRef.current.click();
     };
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        // Logic to handle file import
-        console.log("File selected:", file);
-    };
-
     const handleOpenCreateModal = () => setShowCreateModal(true);
     const handleCloseCreateModal = () => {
         setShowCreateModal(false);
         setNewRecord({
-            MedCode: "",
-            MedName: "",
-            MedIngredients: "",
-            content: "",
-            Packaging: "",
-            unit: ""
+            studentCode: "",
+            studentName: "",
+            classId: "",
+            date: "",
+            symptom: "",
+            diagnosis: "",
+            treatment: "",
+            note: "",
         });
     };
 
@@ -64,32 +120,26 @@ function MedicalManagement() {
 
     const handleCreateRecord = async (e) => {
         e.preventDefault();
-        if (!newRecord.MedCode || !newRecord.MedName) {
-            alert("Please fill in all required fields.");
-            return;
-        }
         try {
-            const createdRecord = await createMedicalRecord(newRecord);
-            setRecords((prev) => [...prev, createdRecord]);
-            alert("Medical record created successfully!");
+            await createMedicalRecord(newRecord);
+            setRecords((prev) => [...prev, newRecord]);
+            alert("Tạo bản ghi y tế thành công!");
             handleCloseCreateModal();
         } catch (error) {
-            console.error("Error creating medical record:", error);
-            alert("Failed to create medical record. Please try again.");
+            alert(error.message || "Lỗi khi tạo bản ghi y tế");
         }
     };
 
     const handleDeleteRecord = async (record, idx) => {
-        if (!window.confirm("Are you sure you want to delete this record?")) return;
+        if (!window.confirm("Bạn có chắc chắn muốn xóa bản ghi này?")) return;
         const id = record.id || record._id;
-        if (!id) return alert("Record ID not found!");
+        if (!id) return alert("Không tìm thấy id để xóa!");
         try {
             await deleteMedicalRecord(id);
             setRecords((prev) => prev.filter((_, i) => i !== idx));
-            alert("Record deleted successfully!");
+            alert("Xóa thành công!");
         } catch (error) {
-            console.error("Error deleting medical record:", error);
-            alert("Failed to delete medical record. Please try again.");
+            alert(error.message || "Lỗi khi xóa bản ghi y tế");
         }
     };
 
@@ -97,48 +147,39 @@ function MedicalManagement() {
         setEditRecord({ ...record });
         setShowEditModal(true);
     };
-
     const handleCloseEditModal = () => {
         setShowEditModal(false);
         setEditRecord(null);
     };
-
     const handleEditChange = (e) => {
         setEditRecord({ ...editRecord, [e.target.name]: e.target.value });
     };
-
     const handleUpdateRecord = async (e) => {
         e.preventDefault();
-        if (!editRecord.MedCode || !editRecord.MedName) {
-            alert("Please fill in all required fields.");
-            return;
-        }
         try {
-            const updatedRecord = await updateMedicalRecord(editRecord);
+            await updateMedicalRecord(editRecord);
             setRecords((prev) =>
-                prev.map((r) => (r.id === updatedRecord.id || r._id === updatedRecord._id ? updatedRecord : r))
+                prev.map((r) => (r.id === editRecord.id || r._id === editRecord._id ? editRecord : r))
             );
-            alert("Medical record updated successfully!");
+            alert("Cập nhật thành công!");
             handleCloseEditModal();
         } catch (error) {
-            console.error("Error updating medical record:", error);
-            alert("Failed to update medical record. Please try again.");
+            alert(error.message || "Lỗi khi cập nhật bản ghi y tế");
         }
     };
 
-    const filteredRecords = useMemo(() => {
-        return records.filter(
-            (r) =>
-                r.MedName?.toLowerCase().includes(search.toLowerCase()) ||
-                r.MedCode?.toLowerCase().includes(search.toLowerCase())
-        );
-    }, [records, search]);
+    const filteredRecords = records.filter(
+        (r) =>
+            r.studentName?.toLowerCase().includes(search.toLowerCase()) ||
+            r.studentCode?.toLowerCase().includes(search.toLowerCase()) ||
+            r.classId?.toLowerCase().includes(search.toLowerCase())
+    );
 
     return (
         <AdminLayout>
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h2 className="fw-bold mb-0">
-                    <i className="fas fa-notes-medical me-2"></i> Medical Management
+                    <i className="fas fa-notes-medical me-2"></i> Medical Event Recording
                 </h2>
                 <div>
                     <button className="btn btn-primary me-2" onClick={handleOpenCreateModal}>
@@ -151,7 +192,7 @@ function MedicalManagement() {
                         type="file"
                         ref={fileInputRef}
                         style={{ display: "none" }}
-                        onChange={handleFileChange}
+                        onChange={handleImportExcel}
                     />
                 </div>
             </div>
@@ -170,31 +211,35 @@ function MedicalManagement() {
                     <table className="table table-striped align-middle">
                         <thead>
                             <tr>
-                                <th>Code</th>
-                                <th>Name</th>
-                                <th>Ingredients</th>
-                                <th>Content</th>
-                                <th>Packaging</th>
-                                <th>Unit</th>
+                                <th>Student Code</th>
+                                <th>Student Name</th>
+                                <th>Class</th>
+                                <th>Date</th>
+                                <th>Symptom</th>
+                                <th>Diagnosis</th>
+                                <th>Treatment</th>
+                                <th>Note</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filteredRecords.length === 0 ? (
                                 <tr>
-                                    <td colSpan="7" className="text-center text-muted">
+                                    <td colSpan="9" className="text-center text-muted">
                                         No records found.
                                     </td>
                                 </tr>
                             ) : (
                                 filteredRecords.map((record, idx) => (
                                     <tr key={record.id || idx}>
-                                        <td>{record.MedCode}</td>
-                                        <td>{record.MedName}</td>
-                                        <td>{record.MedIngredients}</td>
-                                        <td>{record.content}</td>
-                                        <td>{record.Packaging}</td>
-                                        <td>{record.unit}</td>
+                                        <td>{record.studentCode}</td>
+                                        <td>{record.studentName}</td>
+                                        <td>{record.classId}</td>
+                                        <td>{record.date}</td>
+                                        <td>{record.symptom}</td>
+                                        <td>{record.diagnosis}</td>
+                                        <td>{record.treatment}</td>
+                                        <td>{record.note}</td>
                                         <td>
                                             <button
                                                 className="btn btn-sm btn-outline-primary me-2"
@@ -228,66 +273,87 @@ function MedicalManagement() {
                                 </div>
                                 <div className="modal-body">
                                     <div className="mb-3">
-                                        <label className="form-label">Code</label>
+                                        <label className="form-label">Student Code</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="MedCode"
-                                            value={newRecord.MedCode}
+                                            name="studentCode"
+                                            value={newRecord.studentCode}
                                             onChange={handleChange}
                                             required
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <label className="form-label">Name</label>
+                                        <label className="form-label">Student Name</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="MedName"
-                                            value={newRecord.MedName}
+                                            name="studentName"
+                                            value={newRecord.studentName}
                                             onChange={handleChange}
                                             required
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <label className="form-label">Ingredients</label>
+                                        <label className="form-label">Class</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="MedIngredients"
-                                            value={newRecord.MedIngredients}
+                                            name="classId"
+                                            value={newRecord.classId}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Date</label>
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            name="date"
+                                            value={newRecord.date}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Symptom</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="symptom"
+                                            value={newRecord.symptom}
                                             onChange={handleChange}
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <label className="form-label">Content</label>
+                                        <label className="form-label">Diagnosis</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="content"
-                                            value={newRecord.content}
+                                            name="diagnosis"
+                                            value={newRecord.diagnosis}
                                             onChange={handleChange}
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <label className="form-label">Packaging</label>
+                                        <label className="form-label">Treatment</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="Packaging"
-                                            value={newRecord.Packaging}
+                                            name="treatment"
+                                            value={newRecord.treatment}
                                             onChange={handleChange}
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <label className="form-label">Unit</label>
-                                        <input
-                                            type="text"
+                                        <label className="form-label">Note</label>
+                                        <textarea
                                             className="form-control"
-                                            name="unit"
-                                            value={newRecord.unit}
+                                            name="note"
+                                            value={newRecord.note}
                                             onChange={handleChange}
-                                        />
+                                        ></textarea>
                                     </div>
                                 </div>
                                 <div className="modal-footer">
@@ -314,66 +380,87 @@ function MedicalManagement() {
                                 </div>
                                 <div className="modal-body">
                                     <div className="mb-3">
-                                        <label className="form-label">Code</label>
+                                        <label className="form-label">Student Code</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="MedCode"
-                                            value={editRecord.MedCode}
+                                            name="studentCode"
+                                            value={editRecord.studentCode}
                                             onChange={handleEditChange}
                                             required
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <label className="form-label">Name</label>
+                                        <label className="form-label">Student Name</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="MedName"
-                                            value={editRecord.MedName}
+                                            name="studentName"
+                                            value={editRecord.studentName}
                                             onChange={handleEditChange}
                                             required
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <label className="form-label">Ingredients</label>
+                                        <label className="form-label">Class</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="MedIngredients"
-                                            value={editRecord.MedIngredients}
+                                            name="classId"
+                                            value={editRecord.classId}
+                                            onChange={handleEditChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Date</label>
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            name="date"
+                                            value={editRecord.date}
+                                            onChange={handleEditChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Symptom</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="symptom"
+                                            value={editRecord.symptom}
                                             onChange={handleEditChange}
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <label className="form-label">Content</label>
+                                        <label className="form-label">Diagnosis</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="content"
-                                            value={editRecord.content}
+                                            name="diagnosis"
+                                            value={editRecord.diagnosis}
                                             onChange={handleEditChange}
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <label className="form-label">Packaging</label>
+                                        <label className="form-label">Treatment</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="Packaging"
-                                            value={editRecord.Packaging}
+                                            name="treatment"
+                                            value={editRecord.treatment}
                                             onChange={handleEditChange}
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <label className="form-label">Unit</label>
-                                        <input
-                                            type="text"
+                                        <label className="form-label">Note</label>
+                                        <textarea
                                             className="form-control"
-                                            name="unit"
-                                            value={editRecord.unit}
+                                            name="note"
+                                            value={editRecord.note}
                                             onChange={handleEditChange}
-                                        />
+                                        ></textarea>
                                     </div>
                                 </div>
                                 <div className="modal-footer">
@@ -393,4 +480,4 @@ function MedicalManagement() {
     );
 }
 
-export default MedicalManagement;
+export default MedicalEventRecording;

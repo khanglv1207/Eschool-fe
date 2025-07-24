@@ -486,3 +486,57 @@ export const getBackupList = async () => {
     }
 };
 
+// ==================== Medical Management =====================
+export const getAllMedicalRecords = async () => {
+    try {
+        const response = await api.get("/api/admin/get-all-medical-record");
+        return response.data.result;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể lấy danh sách hồ sơ y tế");
+    }
+};
+
+export const createMedicalRecord = async (medicalData) => {
+    try {
+        const response = await api.post("/api/admin/create-medical-record", medicalData);
+        return response.data.result;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể tạo hồ sơ y tế mới");
+    }
+}
+export const updateMedicalRecord = async (medicalId, medicalData) => {
+    try {
+        const response = await api.put(`/api/admin/medical-records/${medicalId}`, medicalData);
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể cập nhật hồ sơ y tế");
+    }
+};
+export const deleteMedicalRecord = async (medicalId) => {
+    try {
+        const response = await api.delete(`/api/admin/medical-records/${medicalId}`);
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể xóa hồ sơ y tế");
+    }
+};
+export const importMedicalExcel = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const response = await api.post("/api/admin/import-medical-records", formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể import hồ sơ y tế từ Excel");
+    }
+}
