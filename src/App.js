@@ -21,6 +21,8 @@ import BlogManagement from "./pages/admin/BlogManagement";
 import FeedBackManagement from "./pages/admin/FeedBackManagement";
 import StudentManagement from "./pages/admin/StudentManagement";
 import SchoolNurseManagement from "./pages/admin/SchoolNurseManagement";
+import MedicalManagement from "./pages/admin/MedicalManagement";
+import MedicalEventRecording from "./pages/admin/MedicalEventRecording";
 import NurseHealthDeclaration from "./pages/NurseHealthDeclaration";
 import ManagerLayout from "./pages/manager/ManagerLayout";
 import ManagerDashboard from "./pages/manager/ManagerDashboard";
@@ -63,6 +65,8 @@ function App() {
         <Route path="/admin/manageChildren" element={<StudentManagement />} />
         <Route path="/admin/manageSchoolNurse" element={<SchoolNurseManagement />} />
         <Route path="/admin/ConsultationManagement" element={<ConsultationManagement />} />
+        <Route path="/admin/MedicalManagement" element={<MedicalManagement />} />
+        <Route path="/admin/medicaleventrecording" element={<MedicalEventRecording />} />
         <Route path="/nurse/health-declaration" element={<NurseHealthDeclaration />} />
         <Route path="/manager" element={<ManagerLayout />} />
         <Route path="/manager/dashboard" element={<ManagerDashboard />} />
