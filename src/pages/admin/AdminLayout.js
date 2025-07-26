@@ -10,7 +10,7 @@ const sidebarItems = [
     { icon: "fa-comments", label: "Consultations", link: "/admin/ConsultationManagement" },
     { icon: "fa-comment-dots", label: "Feedbacks", link: "/admin/manageFeedbacks" },
     { icon: "fa-medical", label: "Medicals", link: "/admin/MedicalManagement" },
-    { icon: "fa-calendar-check", label: "Medical Events", link: "/admin/medicaleventrecording" },
+    { icon: "fa-calendar-check", label: "Medical Event Recording", link: "/admin/medicaleventrecording" },
     // { icon: "fa-money-check-alt", label: "Transactions", link: "/admin/manageTransactions" },
 ];
 
@@ -51,7 +51,6 @@ function AdminLayout({ children }) {
                             </div>
                         </div>
                     </nav>
-                    {/* Main content */}
                     <main className="col-md-10 ms-sm-auto px-md-4 py-4">
                         {children}
                     </main>
