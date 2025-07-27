@@ -14,10 +14,13 @@ import Vaccination from "./pages/Vaccination";
 import MedicalCheckup from "./pages/MedicalCheckup";
 import MedicalEvents from "./pages/MedicalEvents";
 import ChangePassword from "./pages/ChangePassword";
+import BlogList from "./pages/BlogList";
+import BlogDetail from "./pages/BlogDetail";
 import Dashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import AdminLayout from "./pages/admin/AdminLayout";
 import BlogManagement from "./pages/admin/BlogManagement";
+import UploadBlog from "./pages/admin/UploadBlog";
 import FeedBackManagement from "./pages/admin/FeedBackManagement";
 import StudentManagement from "./pages/admin/StudentManagement";
 import SchoolNurseManagement from "./pages/admin/SchoolNurseManagement";
@@ -57,10 +60,13 @@ function App() {
         <Route path="/medical-events" element={<HealthIncidentForm />} />
         <Route path="/incident-form" element={<HealthIncidentForm />} />
         <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/blogs" element={<BlogList />} />
+        <Route path="/blog/:id" element={<BlogDetail />} />
         <Route path="/admin/dashboard" element={<Dashboard />} />
         <Route path="/admin/usermanage" element={<UserManagement />} />
         <Route path="/admin" element={<AdminLayout />} />
         <Route path="/admin/manageBlogs" element={<BlogManagement />} />
+        <Route path="/admin/uploadBlog" element={<UploadBlog />} />
         <Route path="/admin/manageFeedbacks" element={<FeedBackManagement />} />
         <Route path="/admin/manageChildren" element={<StudentManagement />} />
         <Route path="/admin/manageSchoolNurse" element={<SchoolNurseManagement />} />

@@ -289,7 +289,14 @@ export const getAllBlogs = async (page = 1, size = 10, search = "") => {
 // Tạo blog mới
 export const createBlog = async (blogData) => {
     try {
-        const response = await api.post("/api/admin/blogs", blogData);
+        // Nếu blogData là FormData (có file upload), không cần set Content-Type
+        const config = blogData instanceof FormData ? {} : {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        };
+        
+        const response = await api.post("/api/admin/blogs", blogData, config);
         return response.data;
     } catch (error) {
         const errorMsg = error.response?.data?.message;

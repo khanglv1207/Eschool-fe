@@ -25,6 +25,7 @@ const MENU_ITEMS = [
       { title: "Gửi thuốc cho con", link: "/medicine-registration" },
     ],
   },
+  { title: "Blog", link: "/blogs" },
   { title: "Liên hệ & Hỗ trợ", link: "/contact" },
 ];
 
@@ -84,7 +85,8 @@ function Navbar() {
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <span style={{ cursor: "pointer" }}>🌐 Eng / Vie</span>
+            <span style={{ marginRight: 16 }}>Buổi sáng / Buổi chiều</span>
+            <span style={{ cursor: "pointer" }}>🌐 Chỉnh Anh Việt</span>
             <span style={{ fontSize: 18, marginLeft: 8, cursor: "pointer" }}>● ● ●</span>
           </div>
         </div>
@@ -146,6 +148,7 @@ function Navbar() {
               )}
             </div>
           ))}
+          <span style={{ marginLeft: 32, fontWeight: 600, fontSize: 18, color: '#4395F7' }}>Buổi sáng / Buổi chiều</span>
         </div>
 
         {/* Nút Book Appointment */}

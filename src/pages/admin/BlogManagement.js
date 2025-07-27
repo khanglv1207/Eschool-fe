@@ -63,9 +63,14 @@ function BlogManagement() {
                 <h2 className="fw-bold mb-0">
                     <i className="fas fa-blog me-2"></i> Blog Management
                 </h2>
-                <button className="btn btn-primary" onClick={handleOpenCreateModal}>
-                    <i className="fas fa-plus me-2"></i> Tạo Blog mới
-                </button>
+                <div className="d-flex gap-2">
+                    <a href="/admin/uploadBlog" className="btn btn-success">
+                        <i className="fas fa-upload me-2"></i> Upload Blog
+                    </a>
+                    <button className="btn btn-primary" onClick={handleOpenCreateModal}>
+                        <i className="fas fa-plus me-2"></i> Tạo Blog mới
+                    </button>
+                </div>
             </div>
             <div className="card shadow border-0 mb-4">
                 <div className="card-body">
