@@ -15,7 +15,7 @@ export const getAllUsers = async () => {
 };
 
 // Tạo user mới
-export const createUser =  async (userData) => {
+export const createUser = async (userData) => {
     try {
         const response = await api.post("/api/admin/users", userData);
         return response.data;
@@ -28,7 +28,7 @@ export const createUser =  async (userData) => {
 // Cập nhật thông tin user
 export const updateUser = async (userId, userData) => {
     try {
-        const response = await api.put(`/api/admin/users/${userId}`, userData);
+        const response = await api.put(`/api/users/update-user/${userId}`, userData);
         return response.data;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
@@ -179,12 +179,9 @@ export const updateStudentParent = async (studentParentData) => {
 };
 
 // ==================== MANAGER MANAGEMENT ====================
-// Lấy danh sách managers
 export const getAllManagers = async (page = 1, size = 10, search = "") => {
     try {
-        const response = await api.get("/api/admin/managers", {
-            params: { page, size, search }
-        });
+        const response = await api.get("/api/admin/managers", { params: { page, size, search } });
         return response.data;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
@@ -227,11 +224,9 @@ export const deleteManager = async (managerId) => {
 
 // ==================== SCHOOL NURSE MANAGEMENT ====================
 // Lấy danh sách y tá trường học
-export const getAllSchoolNurses = async (page = 1, size = 10, search = "") => {
+export const getAllSchoolNurses = async () => {
     try {
-        const response = await api.get("/api/admin/school-nurses", {
-            params: { page, size, search }
-        });
+        const response = await api.get("/api/admin/school-nurses");
         return response.data;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
@@ -271,14 +266,11 @@ export const deleteSchoolNurse = async (nurseId) => {
         throw new Error(errorMsg || "Không thể xóa y tá trường học");
     }
 };
-
 // ==================== BLOG MANAGEMENT ====================
 // Lấy danh sách blogs
 export const getAllBlogs = async (page = 1, size = 10, search = "") => {
     try {
-        const response = await api.get("/api/admin/blogs", {
-            params: { page, size, search }
-        });
+        const response = await api.get("/api/admin/blogs", { params: { page, size, search } });
         return response.data;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
@@ -289,13 +281,7 @@ export const getAllBlogs = async (page = 1, size = 10, search = "") => {
 // Tạo blog mới
 export const createBlog = async (blogData) => {
     try {
-        // Nếu blogData là FormData (có file upload), không cần set Content-Type
-        const config = blogData instanceof FormData ? {} : {
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        };
-        
+        const config = blogData instanceof FormData ? {} : { headers: { 'Content-Type': 'application/json' } };
         const response = await api.post("/api/admin/blogs", blogData, config);
         return response.data;
     } catch (error) {
@@ -326,7 +312,7 @@ export const deleteBlog = async (blogId) => {
     }
 };
 
-// Thay đổi trạng thái blog (publish/unpublish)
+// Thay đổi trạng thái blog
 export const changeBlogStatus = async (blogId, status) => {
     try {
         const response = await api.patch(`/api/admin/blogs/${blogId}/status`, { status });
@@ -336,7 +322,6 @@ export const changeBlogStatus = async (blogId, status) => {
         throw new Error(errorMsg || "Không thể thay đổi trạng thái blog");
     }
 };
-
 // ==================== FEEDBACK MANAGEMENT ====================
 // Lấy danh sách feedback
 export const getAllFeedbacks = async (page = 1, size = 10, search = "") => {
@@ -395,103 +380,9 @@ export const changeFeedbackStatus = async (feedbackId, status) => {
     }
 };
 
-// ==================== DASHBOARD STATISTICS ====================
-// Lấy thống kê tổng quan
-export const getDashboardStats = async () => {
-    try {
-        const response = await api.get("/api/admin/dashboard/stats");
-        return response.data;
-    } catch (error) {
-        const errorMsg = error.response?.data?.message;
-        throw new Error(errorMsg || "Không thể lấy thống kê dashboard");
-    }
-};
 
-// Lấy biểu đồ dữ liệu
-export const getDashboardCharts = async (period = "month") => {
-    try {
-        const response = await api.get("/api/admin/dashboard/charts", {
-            params: { period }
-        });
-        return response.data;
-    } catch (error) {
-        const errorMsg = error.response?.data?.message;
-        throw new Error(errorMsg || "Không thể lấy dữ liệu biểu đồ");
-    }
-};
 
-// Lấy hoạt động gần đây
-export const getRecentActivities = async (limit = 10) => {
-    try {
-        const response = await api.get("/api/admin/dashboard/recent-activities", {
-            params: { limit }
-        });
-        return response.data;
-    } catch (error) {
-        const errorMsg = error.response?.data?.message;
-        throw new Error(errorMsg || "Không thể lấy hoạt động gần đây");
-    }
-};
 
-// ==================== SYSTEM SETTINGS ====================
-// Lấy cài đặt hệ thống
-export const getSystemSettings = async () => {
-    try {
-        const response = await api.get("/api/admin/settings");
-        return response.data;
-    } catch (error) {
-        const errorMsg = error.response?.data?.message;
-        throw new Error(errorMsg || "Không thể lấy cài đặt hệ thống");
-    }
-};
-
-// Cập nhật cài đặt hệ thống
-export const updateSystemSettings = async (settingsData) => {
-    try {
-        const response = await api.put("/api/admin/settings", settingsData);
-        return response.data;
-    } catch (error) {
-        const errorMsg = error.response?.data?.message;
-        throw new Error(errorMsg || "Không thể cập nhật cài đặt hệ thống");
-    }
-};
-
-// ==================== BACKUP & EXPORT ====================
-// Xuất dữ liệu
-export const exportData = async (dataType, format = "excel") => {
-    try {
-        const response = await api.get("/api/admin/export", {
-            params: { type: dataType, format },
-            responseType: "blob"
-        });
-        return response.data;
-    } catch (error) {
-        const errorMsg = error.response?.data?.message;
-        throw new Error(errorMsg || "Không thể xuất dữ liệu");
-    }
-};
-
-// Tạo backup
-export const createBackup = async () => {
-    try {
-        const response = await api.post("/api/admin/backup");
-        return response.data;
-    } catch (error) {
-        const errorMsg = error.response?.data?.message;
-        throw new Error(errorMsg || "Không thể tạo backup");
-    }
-};
-
-// Lấy danh sách backup
-export const getBackupList = async () => {
-    try {
-        const response = await api.get("/api/admin/backup");
-        return response.data;
-    } catch (error) {
-        const errorMsg = error.response?.data?.message;
-        throw new Error(errorMsg || "Không thể lấy danh sách backup");
-    }
-};
 
 // ==================== Medical Management =====================
 export const getAllMedicalRecords = async () => {
@@ -547,3 +438,59 @@ export const importMedicalExcel = async (file) => {
         throw new Error(errorMsg || "Không thể import hồ sơ y tế từ Excel");
     }
 }
+// ==================== VACCINATION MANAGEMENT ====================
+
+// Lấy danh sách tiêm chủng đang chờ xử lý
+export const getPendingVaccinations = async () => {
+    try {
+        const response = await api.get("/api/admin/vaccinations/pending");
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể lấy danh sách tiêm chủng đang chờ xử lý");
+    }
+};
+
+// Lấy danh sách kết quả tiêm chủng
+export const getVaccinationResults = async () => {
+    try {
+        const response = await api.get("/api/admin/vaccinations/results");
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể lấy danh sách kết quả tiêm chủng");
+    }
+};
+
+// Gửi thông báo tiêm chủng
+export const sendVaccinationNotification = async (notificationData) => {
+    try {
+        const response = await api.post("/api/admin/vaccinations/notify", notificationData);
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể gửi thông báo tiêm chủng");
+    }
+};
+
+// Xác nhận tiêm chủng
+export const confirmVaccination = async (vaccinationId) => {
+    try {
+        const response = await api.patch(`/api/admin/vaccinations/${vaccinationId}/confirm`);
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể xác nhận tiêm chủng");
+    }
+};
+
+// Gửi kết quả tiêm chủng
+export const sendVaccinationResults = async (resultData) => {
+    try {
+        const response = await api.post("/api/admin/vaccinations/results", resultData);
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể gửi kết quả tiêm chủng");
+    }
+};
