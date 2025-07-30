@@ -451,6 +451,7 @@ export const getPendingVaccinations = async () => {
     }
 };
 
+
 // Lấy danh sách kết quả tiêm chủng
 export const getVaccinationResults = async () => {
     try {
@@ -494,3 +495,13 @@ export const sendVaccinationResults = async (resultData) => {
         throw new Error(errorMsg || "Không thể gửi kết quả tiêm chủng");
     }
 };
+
+export const sendNotification = async (accountId) => {
+    try {
+        const response = await api.post("/api/admin/notifications/send", { accountId });
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể gửi thông báo");
+    }
+}
