@@ -2,7 +2,7 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const sidebarItems = [
-    { icon: "fa-home", label: "Main Page", link: "/manager/dashboard" },
+    { icon: "fa-home", label: "Home Page", link: "/" },
     { icon: "fa-users", label: "Users", link: "/admin/usermanage" },
     { icon: "fa-child", label: "Student", link: "/admin/manageChildren" },
     { icon: "fa-user-nurse", label: "School Nurse", link: "/admin/manageSchoolNurse" },
@@ -31,8 +31,8 @@ function ManagerLayout({ children }) {
                             <ul className="nav flex-column">
                                 <li className="nav-item mb-2 text-uppercase text-secondary small" style={{ letterSpacing: 1 }}>Interface</li>
                                 <li className="nav-item mb-2">
-                                    <a className="nav-link text-white" href="/manager/dashboard">
-                                        <i className="fas fa-home me-2"></i> Main Page
+                                    <a className="nav-link text-white" href="/">
+                                        <i className="fas fa-home me-2"></i> Home Page
                                     </a>
                                 </li>
                                 <li className="nav-item mb-2 text-uppercase text-secondary small mt-3" style={{ letterSpacing: 1 }}>Manage</li>

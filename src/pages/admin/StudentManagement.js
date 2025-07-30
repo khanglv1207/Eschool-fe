@@ -30,7 +30,7 @@ function StudentManagement() {
     const [newStudent, setNewStudent] = useState({
         studentCode: "",
         studentName: "",
-        classId: "",
+        className: "",
         studentDob: "",
         gender: "",
         parentCode: "",
@@ -118,7 +118,7 @@ function StudentManagement() {
                         return {
                             studentCode: student.studentCode || student["Mã học sinh"] || student.Code || "",
                             studentName: student.studentName || student["Tên học sinh"] || student.Name || "",
-                            classId: student.classId || student["Lớp"] || student.Class || "",
+                            className: student.className || student["Lớp"] || student.Class || "",
                             studentDob: student.studentDob || student["Ngày sinh"] || student.DOB || "",
                             gender: student.gender || student["Giới tính"] || student.Gender || "Nam",
                             parentCode: student.parentCode || student["Mã phụ huynh"] || student.ParentCode || "",
@@ -154,7 +154,7 @@ function StudentManagement() {
         setNewStudent({
             studentCode: "",
             studentName: "",
-            classId: "",
+            className: "",
             studentDob: "",
             gender: "Nam",
             parentCode: "",
@@ -176,7 +176,7 @@ function StudentManagement() {
             studentName: newStudent.studentName,
             studentDob: newStudent.studentDob,
             gender: newStudent.gender,
-            className: newStudent.classId,
+            className: newStudent.className,
             parentName: newStudent.parentName,
             parentEmail: newStudent.parentEmail,
             parentPhone: newStudent.parentPhone,
@@ -247,7 +247,7 @@ function StudentManagement() {
         (s) =>
             s.studentName?.toLowerCase().includes(search.toLowerCase()) ||
             s.studentCode?.toLowerCase().includes(search.toLowerCase()) ||
-            s.classId?.toLowerCase().includes(search.toLowerCase())
+            s.className?.toLowerCase().includes(search.toLowerCase())
     );
 
     return (
@@ -326,7 +326,7 @@ function StudentManagement() {
                                         <tr key={idx}>
                                             <td>{student.studentCode}</td>
                                             <td className="fw-bold">{student.studentName}</td>
-                                            <td>{student.classId}</td>
+                                            <td>{student.className}</td>
                                             <td>{student.studentDob}</td>
                                             <td>{student.gender}</td>
                                             <td>{student.parentCode}</td>
@@ -390,7 +390,7 @@ function StudentManagement() {
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Lớp</label>
-                                        <input type="text" className="form-control" name="classId" value={newStudent.classId} onChange={handleChange} required />
+                                        <input type="text" className="form-control" name="className" value={newStudent.className} onChange={handleChange} required />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Ngày sinh học sinh</label>
@@ -460,7 +460,7 @@ function StudentManagement() {
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Lớp</label>
-                                        <input type="text" className="form-control" name="classId" value={editStudent.classId || ""} onChange={handleEditChange} required />
+                                        <input type="text" className="form-control" name="className" value={editStudent.className || ""} onChange={handleEditChange} required />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Ngày sinh học sinh</label>
