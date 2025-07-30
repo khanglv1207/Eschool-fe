@@ -287,7 +287,7 @@ function StudentManagement() {
             <div className="card shadow border-0 mb-4">
                 <div className="card-body">
                     <div className="d-flex justify-content-between align-items-center mb-3">
-                        
+
                         <input
                             type="text"
                             className="form-control w-auto"
