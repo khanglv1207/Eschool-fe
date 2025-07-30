@@ -226,7 +226,7 @@ export const deleteManager = async (managerId) => {
 // Lấy danh sách y tá trường học
 export const getAllSchoolNurses = async () => {
     try {
-        const response = await api.get("/api/admin/school-nurses");
+        const response = await api.get("/api/nurse/get-all-nurse");
         return response.data;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
@@ -237,7 +237,7 @@ export const getAllSchoolNurses = async () => {
 // Tạo y tá trường học mới
 export const createSchoolNurse = async (nurseData) => {
     try {
-        const response = await api.post("/api/admin/school-nurses", nurseData);
+        const response = await api.post("/api/nurse/create-nurse", nurseData);
         return response.data;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
@@ -246,9 +246,9 @@ export const createSchoolNurse = async (nurseData) => {
 };
 
 // Cập nhật thông tin y tá trường học
-export const updateSchoolNurse = async (nurseId, nurseData) => {
+export const updateSchoolNurse = async (nurseData) => {
     try {
-        const response = await api.put(`/api/admin/school-nurses/${nurseId}`, nurseData);
+        const response = await api.put("/api/nurse/update-nurse", nurseData);
         return response.data;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
@@ -259,7 +259,7 @@ export const updateSchoolNurse = async (nurseId, nurseData) => {
 // Xóa y tá trường học
 export const deleteSchoolNurse = async (nurseId) => {
     try {
-        const response = await api.delete(`/api/admin/school-nurses/${nurseId}`);
+        const response = await api.delete(`/api/nurse/delete-nurse/${nurseId}`);
         return response.data;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
@@ -440,22 +440,10 @@ export const importMedicalExcel = async (file) => {
 }
 // ==================== VACCINATION MANAGEMENT ====================
 
-// Lấy danh sách tiêm chủng đang chờ xử lý
-export const getPendingVaccinations = async () => {
-    try {
-        const response = await api.get("/api/admin/vaccinations/pending");
-        return response.data;
-    } catch (error) {
-        const errorMsg = error.response?.data?.message;
-        throw new Error(errorMsg || "Không thể lấy danh sách tiêm chủng đang chờ xử lý");
-    }
-};
-
-
 // Lấy danh sách kết quả tiêm chủng
 export const getVaccinationResults = async () => {
     try {
-        const response = await api.get("/api/admin/vaccinations/results");
+        const response = await api.get("/api/vaccinations/vaccination-result");
         return response.data;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
@@ -463,32 +451,34 @@ export const getVaccinationResults = async () => {
     }
 };
 
-// Gửi thông báo tiêm chủng
-export const sendVaccinationNotification = async (notificationData) => {
+// Lấy danh sách học sinh cần tiêm chủng
+export const getStudentsToVaccinate = async (vaccineName) => {
     try {
-        const response = await api.post("/api/admin/vaccinations/notify", notificationData);
+        const response = await api.get("/api/vaccinations/students-to-vaccinate", {
+            params: { vaccineName }
+        });
         return response.data;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
-        throw new Error(errorMsg || "Không thể gửi thông báo tiêm chủng");
+        throw new Error(errorMsg || "Không thể lấy danh sách học sinh cần tiêm chủng");
     }
 };
 
-// Xác nhận tiêm chủng
-export const confirmVaccination = async (vaccinationId) => {
+// Lấy danh sách học sinh cần tiêm chủng (không cần vaccineName)
+export const getStudentsNeedVaccination = async () => {
     try {
-        const response = await api.patch(`/api/admin/vaccinations/${vaccinationId}/confirm`);
+        const response = await api.get("/api/vaccinations/students-need-vaccination");
         return response.data;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
-        throw new Error(errorMsg || "Không thể xác nhận tiêm chủng");
+        throw new Error(errorMsg || "Không thể lấy danh sách học sinh cần tiêm chủng");
     }
 };
 
 // Gửi kết quả tiêm chủng
-export const sendVaccinationResults = async (resultData) => {
+export const sendVaccinationResult = async (resultData) => {
     try {
-        const response = await api.post("/api/admin/vaccinations/results", resultData);
+        const response = await api.post("/api/vaccinations/vaccination/result", resultData);
         return response.data;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
@@ -496,6 +486,62 @@ export const sendVaccinationResults = async (resultData) => {
     }
 };
 
+// Gửi kết quả tiêm chủng (endpoint khác)
+export const sendVaccinationResults = async () => {
+    try {
+        const response = await api.post("/api/vaccinations/send-vaccination-results");
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể gửi kết quả tiêm chủng");
+    }
+};
+
+// Gửi thông báo tiêm chủng
+export const sendVaccinationNotices = async (noticeData) => {
+    try {
+        const response = await api.post("/api/vaccinations/send-vaccination-notices", noticeData);
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể gửi thông báo tiêm chủng");
+    }
+};
+
+// Tạo loại vaccine mới
+export const createVaccineType = async (vaccineData) => {
+    try {
+        const response = await api.post("/api/vaccinations/create-vaccine-type", vaccineData);
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể tạo loại vaccine mới");
+    }
+};
+
+// Xác nhận tiêm chủng
+export const confirmVaccination = async (confirmationData) => {
+    try {
+        const response = await api.post("/api/vaccinations/confirm-vaccination", confirmationData);
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể xác nhận tiêm chủng");
+    }
+};
+
+// Lấy danh sách tiêm chủng đang chờ xử lý (giữ lại cho tương thích)
+export const getPendingVaccinations = async () => {
+    try {
+        const response = await api.get("/api/vaccinations/students-need-vaccination");
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể lấy danh sách tiêm chủng đang chờ xử lý");
+    }
+};
+
+// Gửi thông báo (giữ lại cho tương thích)
 export const sendNotification = async (accountId) => {
     try {
         const response = await api.post("/api/admin/notifications/send", { accountId });
@@ -504,4 +550,4 @@ export const sendNotification = async (accountId) => {
         const errorMsg = error.response?.data?.message;
         throw new Error(errorMsg || "Không thể gửi thông báo");
     }
-}
+};
