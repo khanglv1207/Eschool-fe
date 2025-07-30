@@ -68,12 +68,48 @@ export const getParentStudents = async () => {
   }
 };
 
-// Gửi yêu cầu thuốc
+// Tìm kiếm học sinh theo student code
+export const searchStudentByCode = async (studentCode) => {
+  try {
+    console.log('=== TÌM KIẾM HỌC SINH THEO CODE ===');
+    console.log('Student Code:', studentCode);
+    
+    // Thử các endpoint khác nhau để tìm kiếm học sinh
+    const endpoints = [
+      `/api/parents/students/search?studentCode=${encodeURIComponent(studentCode)}`,
+      `/api/parent/students/search?studentCode=${encodeURIComponent(studentCode)}`,
+      `/api/students/search?studentCode=${encodeURIComponent(studentCode)}`,
+      `/api/parents/students?studentCode=${encodeURIComponent(studentCode)}`,
+      `/api/parent/students?studentCode=${encodeURIComponent(studentCode)}`
+    ];
+    
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`Trying search endpoint: ${endpoint}`);
+        const response = await api.get(endpoint);
+        console.log(`✅ Success with search endpoint ${endpoint}:`, response);
+        return response.data;
+      } catch (err) {
+        console.log(`❌ Failed with search endpoint ${endpoint}:`, err.response?.status);
+        if (err.response?.status === 404) continue;
+        throw err;
+      }
+    }
+    
+    throw new Error('Không tìm thấy học sinh với mã số này');
+  } catch (error) {
+    console.error('❌ Error searching student by code:', error);
+    throw error;
+  }
+};
+
+// Gửi yêu cầu thuốc (cập nhật để hỗ trợ student code)
 export const sendMedicalRequest = async (medicalRequestData) => {
   try {
     console.log('=== GỬI YÊU CẦU THUỐC ===');
     console.log('Data being sent:', JSON.stringify(medicalRequestData, null, 2));
     console.log('Student ID:', medicalRequestData.studentId);
+    console.log('Student Code:', medicalRequestData.studentCode);
     
     // Thử các endpoint khác nhau
     const endpoints = [

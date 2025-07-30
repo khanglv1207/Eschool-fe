@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { sendMedicalRequest, getParentStudents, getParentStudentsFromDB } from "../services/parentApi";
+import { sendMedicalRequest, getParentStudents, getParentStudentsFromDB, searchStudentByCode } from "../services/parentApi";
 
 function DangKyThuocForm({ onBack }) {
   const [medicines, setMedicines] = useState([
@@ -10,6 +10,12 @@ function DangKyThuocForm({ onBack }) {
   const [students, setStudents] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [loadingStudents, setLoadingStudents] = useState(true);
+  
+  // Thêm state cho tìm kiếm theo student code
+  const [searchMode, setSearchMode] = useState(false);
+  const [studentCode, setStudentCode] = useState("");
+  const [searchingStudent, setSearchingStudent] = useState(false);
+  const [searchedStudent, setSearchedStudent] = useState(null);
 
   // Load danh sách học sinh của phụ huynh
   useEffect(() => {
@@ -216,8 +222,12 @@ function DangKyThuocForm({ onBack }) {
         schedule: medicine.schedule || []
       }));
       
+      // Lấy thông tin học sinh đã chọn
+      const selectedStudent = students.find(s => s.id === selectedStudentId);
+      
       const medicalRequest = {
         studentId: selectedStudentId,
+        studentCode: selectedStudent?.studentCode || studentCode, // Thêm student code
         note: note,
         medications: medications
       };
@@ -350,13 +360,13 @@ function DangKyThuocForm({ onBack }) {
                 onBlur={e => e.target.style.border = '1.5px solid #e3eafc'}
               >
                 <option value="">-- Chọn học sinh --</option>
-                              {students.map((student) => (
-                <option key={student.id} value={student.id}>
-                  {student.fullName} - {student.studentCode || 'Chưa có mã học sinh'} 
-                  {student.relationship ? ` (${student.relationship})` : ''}
-                  {student.className ? ` - ${student.className}` : ''}
-                </option>
-              ))}
+                {students.map((student) => (
+                  <option key={student.id} value={student.id}>
+                    {student.fullName} - {student.studentCode || 'Chưa có mã học sinh'} 
+                    {student.relationship ? ` (${student.relationship})` : ''}
+                    {student.className ? ` - ${student.className}` : ''}
+                  </option>
+                ))}
               </select>
               <small style={{ 
                 color: "#666", 
@@ -366,89 +376,100 @@ function DangKyThuocForm({ onBack }) {
               }}>
                 💡 Chọn học sinh mà bạn muốn gửi thuốc cho
               </small>
+              
+              {/* Tìm kiếm theo student code */}
+              <div style={{ marginTop: "12px", padding: "12px", background: "#f8f9fa", borderRadius: "8px", border: "1px solid #e3eafc" }}>
+                <label style={{ fontWeight: 600, fontSize: "13px", color: "#1E90FF", marginBottom: "8px", display: "block" }}>
+                  🔍 Tìm kiếm theo mã học sinh
+                </label>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                  <input
+                    type="text"
+                    placeholder="Nhập mã học sinh..."
+                    value={studentCode}
+                    onChange={(e) => setStudentCode(e.target.value)}
+                    style={{
+                      flex: 1,
+                      padding: "8px 12px",
+                      borderRadius: "6px",
+                      border: "1px solid #e3eafc",
+                      fontSize: "14px",
+                      background: "#fff"
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!studentCode.trim()) {
+                        alert('Vui lòng nhập mã học sinh!');
+                        return;
+                      }
+                      
+                      console.log('=== TÌM KIẾM HỌC SINH THEO MÃ ===');
+                      setSearchingStudent(true);
+                      setSearchedStudent(null);
+                      try {
+                        const response = await searchStudentByCode(studentCode.trim());
+                        console.log('API Response:', response);
+                        
+                        if (response.result && response.result.length > 0) {
+                          const student = response.result[0];
+                          console.log('Searched student data:', student);
+                          
+                          // Tìm student_id thực
+                          const studentId = student.id || student.student_id || student.studentId;
+                          console.log('Real student ID:', studentId);
+                          
+                          // Set dữ liệu thực
+                          setStudents([student]);
+                          setSelectedStudentId(studentId);
+                          setSearchedStudent(student);
+                          
+                          console.log('✅ Đã tìm thấy học sinh theo mã: ' + student.studentCode);
+                          alert('✅ Đã tìm thấy học sinh: ' + student.fullName);
+                        } else {
+                          console.log('❌ Không tìm thấy học sinh theo mã: ' + studentCode);
+                          alert('❌ Không tìm thấy học sinh với mã này.');
+                        }
+                      } catch (error) {
+                        console.error('❌ Lỗi API tìm kiếm học sinh:', error);
+                        alert('❌ Lỗi khi tìm kiếm học sinh: ' + error.message);
+                      } finally {
+                        setSearchingStudent(false);
+                      }
+                    }}
+                    disabled={searchingStudent}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: "6px",
+                      border: "none",
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      cursor: searchingStudent ? "not-allowed" : "pointer",
+                      background: searchingStudent ? "#ccc" : "#1E90FF",
+                      color: "white",
+                      minWidth: "120px"
+                    }}
+                  >
+                    {searchingStudent ? "🔍 Đang tìm..." : "🔍 Tìm kiếm"}
+                  </button>
+                </div>
+                {searchedStudent && (
+                  <div style={{ 
+                    marginTop: "8px", 
+                    padding: "8px", 
+                    background: "#e8f5e8", 
+                    borderRadius: "6px", 
+                    border: "1px solid #4caf50",
+                    fontSize: "13px"
+                  }}>
+                    ✅ <strong>{searchedStudent.fullName}</strong> - Mã: {searchedStudent.studentCode}
+                    {searchedStudent.className && ` - Lớp: ${searchedStudent.className}`}
+                  </div>
+                )}
+              </div>
+              
               <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
-                <button
-                    type="button"
-                    onClick={async () => {
-                        console.log('=== LẤY DỮ LIỆU THỰC TỪ API ===');
-                        try {
-                            const response = await getParentStudents();
-                            console.log('API Response:', response);
-                            console.log('Raw response:', JSON.stringify(response, null, 2));
-                            
-                            if (response.result && response.result.length > 0) {
-                                const student = response.result[0];
-                                console.log('Student data:', student);
-                                console.log('All student fields:', Object.keys(student));
-                                
-                                // Tìm student_id thực
-                                const studentId = student.id || student.student_id || student.studentId;
-                                console.log('Real student ID:', studentId);
-                                
-                                // Set dữ liệu thực
-                                setStudents(response.result);
-                                setSelectedStudentId(studentId);
-                                
-                                console.log('✅ Đã set dữ liệu thực từ API');
-                            } else {
-                                console.log('❌ Không có dữ liệu học sinh từ API');
-                                alert('Không tìm thấy học sinh liên kết với tài khoản này');
-                            }
-                        } catch (error) {
-                            console.error('❌ Lỗi API:', error);
-                            alert('Lỗi khi lấy dữ liệu học sinh: ' + error.message);
-                        }
-                    }}
-                    style={{
-                        background: "#007bff",
-                        border: "none",
-                        borderRadius: "4px",
-                        padding: "8px 12px",
-                        fontSize: "12px",
-                        color: "white",
-                        cursor: "pointer"
-                    }}
-                >
-                    Lấy Dữ Liệu Thực
-                </button>
-                <button
-                    type="button"
-                    onClick={async () => {
-                        console.log('=== TEST GỬI THUỐC ===');
-                        
-                        if (!selectedStudentId) {
-                            console.log('❌ Chưa chọn học sinh');
-                            return;
-                        }
-                        
-                        console.log('Student ID sẽ gửi:', selectedStudentId);
-                        
-                        // Set dữ liệu thuốc test
-                        setMedicines([
-                            {
-                                medicationName: 'Paracetamol',
-                                dosage: '1 viên',
-                                note: 'Uống sau ăn',
-                                schedule: ['sáng', 'chiều']
-                            }
-                        ]);
-                        setNote('Uống thuốc đúng giờ');
-                        
-                        console.log('✅ Đã set dữ liệu thuốc test');
-                        console.log('📝 Nhấn "Gửi yêu cầu" để submit');
-                    }}
-                    style={{
-                        background: "#28a745",
-                        border: "none",
-                        borderRadius: "4px",
-                        padding: "8px 12px",
-                        fontSize: "12px",
-                        color: "white",
-                        cursor: "pointer"
-                    }}
-                >
-                    Test Gửi Thuốc
-                </button>
                 <button
                     type="button"
                     onClick={() => {
@@ -484,7 +505,6 @@ function DangKyThuocForm({ onBack }) {
                 >
                     Set Dữ Liệu Thực
                 </button>
-
               </div>
             </>
           )}
@@ -609,7 +629,7 @@ function DangKyThuocForm({ onBack }) {
             + Thêm thuốc
           </button>
         </div>
-        
+
         {/* Ghi chú chung */}
         <div style={{ marginBottom: 24 }}>
           <label style={{ fontWeight: 600, fontSize: 13, color: "#1E90FF", marginBottom: 4, display: "block" }}>Ghi chú chung</label>
@@ -659,13 +679,13 @@ function DangKyThuocForm({ onBack }) {
               if (!loading && students.length > 0 && selectedStudentId) { 
                 e.target.style.background = 'linear-gradient(90deg,#1877d2 60%,#4fa3d1 100%)'; 
                 e.target.style.boxShadow = '0 4px 16px rgba(30,144,255,0.18)'; 
-              } 
+              }
             }}
             onMouseOut={e => { 
               if (!loading && students.length > 0 && selectedStudentId) { 
                 e.target.style.background = 'linear-gradient(90deg,#1E90FF 60%,#6ec1e4 100%)'; 
                 e.target.style.boxShadow = '0 2px 8px rgba(30,144,255,0.10)'; 
-              } 
+              }
             }}
           >
             <span style={{ fontSize: 18, marginRight: 6 }}>📤</span>
