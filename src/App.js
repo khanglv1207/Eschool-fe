@@ -12,7 +12,7 @@ import UpdateProfile from "./pages/UpdateProfile";
 import ContactSupport from "./pages/ContactSupport";
 import Vaccination from "./pages/Vaccination";
 import MedicalCheckup from "./pages/MedicalCheckup";
-import MedicalEvents from "./pages/MedicalEvents";
+
 import ChangePassword from "./pages/ChangePassword";
 import BlogList from "./pages/BlogList";
 import BlogDetail from "./pages/BlogDetail";
@@ -58,8 +58,7 @@ function App() {
         <Route path="/health-declaration" element={<KhaiBaoSucKhoe />} />
         <Route path="/vaccination" element={<Vaccination />} />
         <Route path="/medical-checkup" element={<MedicalCheckup />} />
-        <Route path="/medical-events" element={<HealthIncidentForm />} />
-        <Route path="/incident-form" element={<HealthIncidentForm />} />
+        <Route path="/health-incident-form" element={<HealthIncidentForm />} />
         <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/blogs" element={<BlogList />} />
         <Route path="/blog/:id" element={<BlogDetail />} />

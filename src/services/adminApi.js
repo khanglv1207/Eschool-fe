@@ -404,6 +404,18 @@ export const createMedicalRecord = async (medicalData) => {
         throw new Error(errorMsg || "Không thể tạo hồ sơ y tế mới");
     }
 }
+
+// ==================== MEDICAL INCIDENT MANAGEMENT ====================
+export const createMedicalIncident = async (incidentData) => {
+    try {
+        // Sử dụng endpoint có sẵn để lưu vào database
+        const response = await api.post("/api/admin/create-medical-record", incidentData);
+        return response.data.result;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể tạo sự cố y tế mới");
+    }
+}
 export const updateMedicalRecord = async (medicalId, medicalData) => {
     try {
         const response = await api.put(`/api/admin/medical-records/${medicalId}`, medicalData);
@@ -505,3 +517,44 @@ export const sendNotification = async (accountId) => {
         throw new Error(errorMsg || "Không thể gửi thông báo");
     }
 }
+
+// ==================== HEALTH INCIDENT MANAGEMENT ====================
+export const createHealthIncident = async (incidentData) => {
+    try {
+        const response = await api.post("/api/medicalIncident/create_medicalIncident", incidentData);
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể tạo bản ghi sự cố y tế");
+    }
+};
+
+export const getAllHealthIncidents = async () => {
+    try {
+        const response = await api.get("/api/admin/health-incidents");
+        return response.data.result;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể lấy danh sách sự cố y tế");
+    }
+};
+
+export const updateHealthIncident = async (incidentId, incidentData) => {
+    try {
+        const response = await api.put(`/api/admin/health-incidents/${incidentId}`, incidentData);
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể cập nhật sự cố y tế");
+    }
+};
+
+export const deleteHealthIncident = async (incidentId) => {
+    try {
+        const response = await api.delete(`/api/admin/health-incidents/${incidentId}`);
+        return response.data;
+    } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        throw new Error(errorMsg || "Không thể xóa sự cố y tế");
+    }
+};

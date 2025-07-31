@@ -16,7 +16,7 @@ const MENU_ITEMS = [
   {
     title: "Sự cố y tế",
     submenu: [
-      { title: "Ghi nhận sự kiện", link: "/medical-events" },
+      { title: "Ghi nhận sự kiện", link: "/health-incident-form" },
     ],
   },
   {
