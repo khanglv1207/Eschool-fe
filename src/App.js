@@ -37,6 +37,7 @@ import VaccinManage from "./pages/admin/VaccineManage";
 // import UserManagement from "./pages/manager/UserManagement";
 import ConsultationManagement from "./pages/admin/ConsultationManagement";
 import DangKyThuocForm from "./pages/DangKyThuocForm";
+import ParentMedicineList from "./pages/ParentMedicineList";
 
 function App() {
 
@@ -78,6 +79,7 @@ function App() {
         <Route path="/manager" element={<ManagerLayout />} />
         <Route path="/manager/dashboard" element={<ManagerDashboard />} />
         <Route path="/medicine-registration" element={<DangKyThuocForm onBack={() => window.history.back()} />} />
+        <Route path="/parent-medicine-list" element={<ParentMedicineList />} />
       </Routes>
     </Router>
   );

@@ -65,6 +65,7 @@ function Navbar() {
         title: "Quản lí thuốc",
         submenu: [
           { title: "Gửi thuốc cho con", link: "/medicine-registration" },
+          { title: "Danh sách thuốc đã gửi", link: "/parent-medicine-list" },
         ],
       },
       { title: "Blog", link: "/blogs" },

@@ -191,3 +191,47 @@ export const getParentStudentsFromDB = async () => {
     throw error;
   }
 }; 
+
+// Lấy danh sách thuốc phụ huynh đã gửi
+export const getParentMedicalRequests = async () => {
+  try {
+    console.log('=== LẤY DANH SÁCH THUỐC PHỤ HUYNH ĐÃ GỬI ===');
+    
+    // Lấy thông tin user hiện tại
+    const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+    const userEmail = loggedInUser.email;
+    
+    console.log('Current user email:', userEmail);
+    
+    // Thử các endpoint khác nhau
+    const endpoints = [
+      '/api/parents/medical-requests',
+      '/api/parent/medical-requests',
+      `/api/parents/medical-requests?email=${encodeURIComponent(userEmail)}`,
+      `/api/parent/medical-requests?email=${encodeURIComponent(userEmail)}`,
+      '/api/parents/medicine-requests',
+      '/api/parent/medicine-requests',
+      `/api/parents/medicine-requests?email=${encodeURIComponent(userEmail)}`,
+      `/api/parent/medicine-requests?email=${encodeURIComponent(userEmail)}`
+    ];
+    
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`Trying endpoint: ${endpoint}`);
+        const response = await api.get(endpoint);
+        console.log(`✅ Success with ${endpoint}:`, response);
+        return response.data;
+      } catch (err) {
+        console.log(`❌ Failed with ${endpoint}:`, err.response?.status);
+        if (err.response?.status === 404) continue;
+        throw err;
+      }
+    }
+    
+    console.log('No API endpoint found, returning empty result');
+    return { result: [] };
+  } catch (error) {
+    console.error('❌ Error getting medical requests:', error);
+    return { result: [] };
+  }
+}; 
