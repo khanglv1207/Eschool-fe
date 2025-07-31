@@ -2,32 +2,7 @@ import React from "react";
 import logo from "../assets/logoeSchoolMed.jpg";
 import loginIcon from "../assets/login.jpg";
 
-// Danh sách menu
-const MENU_ITEMS = [
-  { title: "Trang chủ", link: "/" },
-  {
-    title: "Hồ sơ & Tiêm chủng",
-    submenu: [
-      { title: "Khai báo sức khỏe", link: "/health-declaration" },
-      { title: "Tiêm chủng", link: "/vaccination" },
-      { title: "Kiểm tra y tế định kỳ", link: "/medical-checkup" },
-    ],
-  },
-  {
-    title: "Sự cố y tế",
-    submenu: [
-      { title: "Ghi nhận sự kiện", link: "/health-incident-form" },
-    ],
-  },
-  {
-    title: "Quản lí thuốc",
-    submenu: [
-      { title: "Gửi thuốc cho con", link: "/medicine-registration" },
-    ],
-  },
-  { title: "Blog", link: "/blogs" },
-  { title: "Liên hệ & Hỗ trợ", link: "/contact" },
-];
+
 
 const menuStyle = {
   textDecoration: "none",
@@ -56,16 +31,60 @@ const submenuStyle = {
 function Navbar() {
   let fullName = null;
   let isLoggedIn = false;
+  let userRole = null;
+  
   try {
     const stored = localStorage.getItem("loggedInUser");
     if (stored) {
       const parsed = JSON.parse(stored);
       fullName = parsed?.fullName || null;
       isLoggedIn = true;
+      userRole = parsed?.role || parsed?.authorities?.[0] || null;
     }
   } catch (e) {
     console.warn("Lỗi đọc loggedInUser:", e);
   }
+
+  // Kiểm tra xem user có phải là nurse không
+  const isNurse = userRole === 'NURSE' || userRole === 'nurse' || 
+                  (Array.isArray(userRole) && userRole.includes('NURSE'));
+
+  // Tạo menu items dựa trên role
+  const getMenuItems = () => {
+    const baseMenuItems = [
+      { title: "Trang chủ", link: "/" },
+      {
+        title: "Hồ sơ & Tiêm chủng",
+        submenu: [
+          { title: "Khai báo sức khỏe", link: "/health-declaration" },
+          { title: "Tiêm chủng", link: "/vaccination" },
+          { title: "Kiểm tra y tế định kỳ", link: "/medical-checkup" },
+        ],
+      },
+      {
+        title: "Quản lí thuốc",
+        submenu: [
+          { title: "Gửi thuốc cho con", link: "/medicine-registration" },
+        ],
+      },
+      { title: "Blog", link: "/blogs" },
+      { title: "Liên hệ & Hỗ trợ", link: "/contact" },
+    ];
+
+    // Chỉ thêm menu "Sự cố y tế" nếu user là nurse
+    if (isNurse) {
+      baseMenuItems.splice(2, 0, {
+        title: "Sự cố y tế",
+        submenu: [
+          { title: "Ghi nhận sự kiện", link: "/health-incident-form" },
+        ],
+      });
+    }
+
+    return baseMenuItems;
+  };
+
+  const MENU_ITEMS = getMenuItems();
 
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
