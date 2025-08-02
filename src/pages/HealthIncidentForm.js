@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getAllParentStudent, createHealthIncident } from "../services/adminApi";
 import api from "../services/api";
+import nurseApi from "../services/nurseApi";
 
 // Thêm import Roboto font cho toàn trang nếu chưa có
 const robotoFont = document.getElementById('roboto-font');
@@ -124,12 +125,26 @@ export default function HealthIncidentForm() {
   useEffect(() => {
     const fetchNurseInfo = async () => {
       try {
-        // Tạm thời sử dụng UUID mặc định, sau này có thể lấy từ API
-        setNurseInfo({
-          id: "550e8400-e29b-41d4-a716-446655440000"
-        });
+        // Lấy thông tin nurse hiện tại từ API
+        const nurseData = await nurseApi.getCurrentNurse();
+        console.log('👩‍⚕️ Nurse info from API:', nurseData);
+        
+        // Kiểm tra cấu trúc response từ backend theo GetAllNurseResponse
+        if (nurseData && nurseData.nurseId) {
+          setNurseInfo({
+            id: nurseData.nurseId,
+            name: nurseData.fullName,
+            code: nurseData.specialization || 'N/A', // Sử dụng specialization làm code
+            email: nurseData.email,
+            phone: nurseData.phone
+          });
+        } else {
+          throw new Error('Dữ liệu nurse không hợp lệ');
+        }
       } catch (error) {
         console.error("Lỗi khi lấy thông tin nurse:", error);
+        // Không set nurse info nếu không lấy được từ database
+        setError("Không thể lấy thông tin nurse từ database. Vui lòng thử lại.");
       }
     };
 
@@ -137,7 +152,7 @@ export default function HealthIncidentForm() {
   }, []);
 
   // Xử lý khi chọn học sinh
-  const handleStudentChange = (e) => {
+  const handleStudentChange = async (e) => {
     const selectedStudentId = e.target.value;
     const selectedStudent = students.find(student => student.id === selectedStudentId);
     
@@ -153,11 +168,26 @@ export default function HealthIncidentForm() {
       // Lưu thông tin parent-student
       setParentStudentInfo(selectedStudent);
       
-      // Lấy thông tin nurse (có thể lấy từ localStorage hoặc API)
-      // Tạm thời sử dụng một UUID mặc định cho nurse
-      setNurseInfo({
-        id: "550e8400-e29b-41d4-a716-446655440000" // UUID mặc định cho nurse
-      });
+      // Lấy thông tin nurse từ API (nếu chưa có)
+      if (!nurseInfo?.id) {
+        try {
+          const nurseData = await nurseApi.getCurrentNurse();
+          if (nurseData && nurseData.nurseId) {
+            setNurseInfo({
+              id: nurseData.nurseId,
+              name: nurseData.fullName,
+              code: nurseData.specialization || 'N/A', // Sử dụng specialization làm code
+              email: nurseData.email,
+              phone: nurseData.phone
+            });
+          } else {
+            throw new Error('Dữ liệu nurse không hợp lệ');
+          }
+        } catch (error) {
+          console.error("Lỗi khi lấy thông tin nurse:", error);
+          setError("Không thể lấy thông tin nurse từ database.");
+        }
+      }
     }
   };
 
@@ -193,7 +223,7 @@ export default function HealthIncidentForm() {
         monitoredBySchool: formData.monitoredAtSchool,
         currentStatus: status === "Khác" ? otherStatus : status,
         imageUrl: file ? file.name : null,
-        nurseId: nurseInfo?.id || "550e8400-e29b-41d4-a716-446655440000", // UUID của nurse
+        nurseId: nurseInfo?.id, // UUID của nurse từ database
         parentStudentId: parentStudentInfo?.id || formData.studentId // UUID của parent/student
       };
 
@@ -202,9 +232,14 @@ export default function HealthIncidentForm() {
         throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc");
       }
 
-      // Validate UUID fields
-      if (!incidentData.nurseId || !incidentData.parentStudentId) {
-        throw new Error("Thiếu thông tin nurse hoặc parent-student");
+      // Validate nurse info
+      if (!incidentData.nurseId) {
+        throw new Error("Không thể lấy thông tin nurse từ database. Vui lòng thử lại.");
+      }
+
+      // Validate parent-student info
+      if (!incidentData.parentStudentId) {
+        throw new Error("Thiếu thông tin parent-student");
       }
 
       console.log("Data being sent:", incidentData); // Debug log
@@ -266,10 +301,24 @@ export default function HealthIncidentForm() {
         position: 'relative',
         fontFamily: 'Arial, Helvetica, sans-serif',
       }}>
-        <h1 style={{ color: "#2979e8", fontWeight: 700, fontSize: 36, marginBottom: 10, fontFamily: 'Roboto, Segoe UI, Arial, sans-serif' }}>Ghi nhận sự cố y tế</h1>
-        <div style={{ color: "#444", fontSize: 18, marginBottom: 36, fontWeight: 500 }}>
-          Vui lòng điền đầy đủ thông tin về sự cố sức khỏe của học sinh để được xử lý và theo dõi.
-        </div>
+                 <h1 style={{ color: "#2979e8", fontWeight: 700, fontSize: 36, marginBottom: 10, fontFamily: 'Roboto, Segoe UI, Arial, sans-serif' }}>Ghi nhận sự cố y tế</h1>
+         <div style={{ color: "#444", fontSize: 18, marginBottom: 36, fontWeight: 500 }}>
+           Vui lòng điền đầy đủ thông tin về sự cố sức khỏe của học sinh để được xử lý và theo dõi.
+         </div>
+         
+         {/* Hiển thị thông tin nurse */}
+         {nurseInfo && (
+           <div style={{
+             background: '#e3f2fd',
+             border: '1px solid #2196f3',
+             borderRadius: '8px',
+             padding: '12px 16px',
+             marginBottom: '20px',
+             fontSize: '14px'
+           }}>
+             <strong>👩‍⚕️ Nurse:</strong> {nurseInfo.name} ({nurseInfo.code})
+           </div>
+         )}
 
 
 
