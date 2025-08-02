@@ -29,6 +29,15 @@ function HealthProfileForm() {
       navigate("/login");
       return;
     }
+
+    // Debug: Hiển thị thông tin user và quyền
+    try {
+      const userObj = JSON.parse(loggedInUser);
+      console.log('🔍 User info:', userObj);
+      console.log('🔑 User role:', userObj.role || userObj.authorities || 'Không có thông tin quyền');
+    } catch (error) {
+      console.error('❌ Lỗi parse user info:', error);
+    }
   }, [navigate]);
 
   const handleChange = (e) => {
@@ -47,20 +56,60 @@ function HealthProfileForm() {
     setSuccess("");
     setError("");
 
+    // Validation cơ bản
+    if (!form.medicalHistory.trim()) {
+      setError("❌ Vui lòng nhập tiền sử bệnh");
+      setLoading(false);
+      return;
+    }
+
+    if (!form.eyesight) {
+      setError("❌ Vui lòng chọn thị lực");
+      setLoading(false);
+      return;
+    }
+
+    if (!form.hearing) {
+      setError("❌ Vui lòng chọn thính lực");
+      setLoading(false);
+      return;
+    }
+
     try {
+      console.log('📤 Gửi khai báo sức khỏe lên database...');
+      console.log('📋 Dữ liệu gửi lên:', form);
       const response = await healthProfileApi.createOrUpdateHealthProfile(form);
       
       if (response && response.result === "OK") {
-        setSuccess("Khai báo sức khỏe thành công!");
+        setSuccess("✅ Khai báo sức khỏe đã được lưu vào database thành công!");
         
         // Lấy thông tin mới khai báo để hiển thị
         try {
+          console.log('🔄 Đang lấy thông tin khai báo mới nhất...');
           const latestData = await healthProfileApi.getLatestHealthDeclaration();
-          console.log('📋 Latest declaration:', latestData);
-          setLatestDeclaration(latestData);
-          setShowLatestDeclaration(true);
+          console.log('📋 Latest declaration from database:', latestData);
+          
+          if (latestData) {
+            setLatestDeclaration(latestData);
+            setShowLatestDeclaration(true);
+            console.log('✅ Modal sẽ hiển thị dữ liệu từ database');
+          } else {
+            console.log('⚠️ Không có dữ liệu khai báo mới nhất');
+          }
         } catch (declarationError) {
-          console.log('⚠️ Không thể lấy thông tin mới khai báo:', declarationError.message);
+          console.error('❌ Lỗi lấy thông tin mới khai báo:', declarationError.message);
+          // Vẫn hiển thị modal với dữ liệu vừa gửi
+          setLatestDeclaration({
+            studentName: 'Đã khai báo thành công',
+            allergies: form.allergies,
+            chronicDiseases: form.chronicDiseases,
+            medicalHistory: form.medicalHistory,
+            eyesight: form.eyesight,
+            hearing: form.hearing,
+            vaccinationRecord: form.vaccinationRecord,
+            updatedAt: new Date().toISOString()
+          });
+          setShowLatestDeclaration(true);
         }
         
         // Reset form sau khi thành công
@@ -75,10 +124,11 @@ function HealthProfileForm() {
           });
         }, 2000);
       } else {
-        setError("Có lỗi xảy ra khi gửi khai báo");
+        setError("❌ Có lỗi xảy ra khi gửi khai báo lên database");
       }
     } catch (err) {
-      setError(err.message || "Có lỗi xảy ra khi gửi khai báo");
+      console.error('❌ Lỗi gửi khai báo:', err);
+      setError(err.message || "❌ Có lỗi xảy ra khi gửi khai báo lên database");
     } finally {
       setLoading(false);
     }
@@ -115,18 +165,6 @@ function HealthProfileForm() {
         </div>
 
         <form onSubmit={handleSubmit} style={styles.form}>
-          {/* Thông báo hướng dẫn */}
-          <div style={styles.infoBox}>
-            <div style={styles.infoIcon}>ℹ️</div>
-            <div style={styles.infoContent}>
-              <strong>Lưu ý:</strong> Để khai báo sức khỏe thành công, tài khoản của bạn cần:
-              <ul style={styles.infoList}>
-                <li>Được thiết lập thông tin phụ huynh</li>
-                <li>Có học sinh được liên kết</li>
-              </ul>
-              Nếu gặp lỗi, vui lòng liên hệ admin để được hỗ trợ.
-            </div>
-          </div>
 
           <div style={styles.formGroup}>
             <label style={styles.label}>Dị ứng:</label>
@@ -230,11 +268,14 @@ function HealthProfileForm() {
               className="ripple"
             >
               {loading ? (
-                <div style={styles.loadingSpinner}></div>
+                <>
+                  <div style={styles.loadingSpinner}></div>
+                  Đang gửi lên database...
+                </>
               ) : (
                 <>
                   <FaSave style={{ marginRight: 8, fontSize: 18 }} />
-                  Gửi khai báo sức khỏe
+                  Lưu khai báo sức khỏe vào database
                 </>
               )}
             </button>

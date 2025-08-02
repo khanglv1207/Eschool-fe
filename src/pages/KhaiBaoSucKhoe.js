@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaSearch, FaPlusCircle, FaUserCircle, FaMoon, FaSun } from "react-icons/fa";
+import { FaSearch, FaPlusCircle, FaMoon, FaSun } from "react-icons/fa";
 
 function KhaiBaoSucKhoe() {
   const [declarations, setDeclarations] = useState([]);
-  const [search, setSearch] = useState("");
   const [dark, setDark] = useState(false);
   const navigate = useNavigate();
 
@@ -24,29 +23,16 @@ function KhaiBaoSucKhoe() {
   }, []);
 
   const handleKhaiBao = () => {
-    // Hiển thị dialog để chọn loại khai báo
-    const choice = window.confirm(
-      "Chọn loại khai báo:\n\n" +
-      "OK - Khai báo sức khỏe chi tiết (gửi lên database)\n" +
-      "Cancel - Khai báo sức khỏe đơn giản (lưu local)"
-    );
-    
-    if (choice) {
-      navigate("/health-profile-form");
-    } else {
-      navigate("/nurse/health-declaration");
-    }
+    // Chuyển đến trang form khai báo sức khỏe mới
+    navigate("/health-declaration-form");
   };
 
-  // Lọc danh sách theo từ khóa
-  const filteredDeclarations = declarations.filter(item => {
-    const keyword = search.toLowerCase();
-    return (
-      item.name?.toLowerCase().includes(keyword) ||
-      item.symptoms?.toLowerCase().includes(keyword) ||
-      String(item.age).includes(keyword)
-    );
-  });
+  const handleViewList = () => {
+    // Chuyển đến trang danh sách khai báo sức khỏe
+    navigate("/health-declaration-list");
+  };
+
+
 
   return (
     <div style={{...styles.background, ...(dark ? styles.backgroundDark : {})}}>
@@ -62,59 +48,76 @@ function KhaiBaoSucKhoe() {
               {dark ? <FaSun /> : <FaMoon />}
             </button>
             <button
+              onClick={handleViewList}
+              style={styles.button}
+              className="ripple"
+            >
+              <FaSearch style={{ marginRight: 8, fontSize: 18 }} /> Xem danh sách
+            </button>
+            <button
               onClick={handleKhaiBao}
               style={styles.button}
               className="ripple"
             >
-              <FaPlusCircle style={{ marginRight: 8, fontSize: 18 }} /> Gửi khai báo sức khỏe
+              <FaPlusCircle style={{ marginRight: 8, fontSize: 18 }} /> Tạo khai báo mới
             </button>
           </div>
         </div>
-        {/* Ô tìm kiếm từ khóa */}
-        <div style={styles.searchBox}>
-          <FaSearch style={styles.searchIcon} />
-          <input
-            type="text"
-            placeholder="Tìm kiếm theo tên, triệu chứng hoặc tuổi..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            style={styles.input}
-          />
-        </div>
-        {filteredDeclarations.length === 0 ? (
-          <div style={styles.noData}>Chưa có khai báo nào.</div>
-        ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table style={styles.table}>
-              <thead style={styles.thead}>
-                <tr>
-                  <th style={styles.th}></th>
-                  <th style={styles.th}>Họ tên</th>
-                  <th style={styles.th}>Tuổi</th>
-                  <th style={styles.th}>Triệu chứng</th>
-                  <th style={styles.th}>Có sốt?</th>
-                  <th style={styles.th}>Thời gian khai báo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredDeclarations.map((item, idx) => (
-                  <tr key={idx} style={styles.tr} className="fade-in-row">
-                    <td style={styles.avatarTd}>
-                      <div style={styles.avatarGlass}>
-                        <FaUserCircle style={{fontSize:28,color:'#36d1c4'}} />
-                      </div>
-                    </td>
-                    <td style={styles.td}>{item.name}</td>
-                    <td style={styles.td}>{item.age}</td>
-                    <td style={styles.td}>{item.symptoms}</td>
-                    <td style={styles.td}>{item.hasFever ? "Có" : "Không"}</td>
-                    <td style={styles.td}>{new Date(item.createdAt).toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Nội dung chính */}
+        <div style={styles.mainContent}>
+          <div style={styles.welcomeSection}>
+            <div style={styles.welcomeIcon}>🏥</div>
+            <h3 style={styles.welcomeTitle}>Chào mừng đến với Hệ thống Khai báo Sức khỏe</h3>
+            <p style={styles.welcomeText}>
+              Hệ thống giúp bạn theo dõi và quản lý thông tin sức khỏe một cách an toàn và hiệu quả.
+            </p>
           </div>
-        )}
+
+                      <div style={styles.optionsGrid}>
+              <div style={styles.optionCard} className="optionCard" onClick={handleKhaiBao}>
+                <div style={styles.optionIcon}>
+                  <FaPlusCircle />
+                </div>
+                <h4 style={styles.optionTitle}>Tạo Khai Báo Mới</h4>
+                <p style={styles.optionDescription}>
+                  Khai báo thông tin sức khỏe chi tiết với form đầy đủ
+                </p>
+              </div>
+
+              <div style={styles.optionCard} className="optionCard" onClick={handleViewList}>
+                <div style={styles.optionIcon}>
+                  <FaSearch />
+                </div>
+                <h4 style={styles.optionTitle}>Xem Danh Sách</h4>
+                <p style={styles.optionDescription}>
+                  Xem và quản lý tất cả khai báo sức khỏe đã tạo
+                </p>
+              </div>
+            </div>
+
+          {/* Thống kê nhanh */}
+          <div style={styles.quickStats}>
+            <h4 style={styles.statsTitle}>📊 Thống Kê Nhanh</h4>
+            <div style={styles.statsGrid}>
+              <div style={styles.statItem}>
+                <div style={styles.statNumber}>{declarations.length}</div>
+                <div style={styles.statLabel}>Tổng khai báo</div>
+              </div>
+              <div style={styles.statItem}>
+                <div style={styles.statNumber}>
+                  {declarations.filter(d => d.status === 'pending').length}
+                </div>
+                <div style={styles.statLabel}>Chờ duyệt</div>
+              </div>
+              <div style={styles.statItem}>
+                <div style={styles.statNumber}>
+                  {declarations.filter(d => d.status === 'approved').length}
+                </div>
+                <div style={styles.statLabel}>Đã duyệt</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       {/* Hiệu ứng gradient động, glassmorphism, ripple, fade-in, dark mode */}
       <style>{`
@@ -145,6 +148,10 @@ function KhaiBaoSucKhoe() {
           transform: translate(-50%, -50%) scale(1);
           opacity: 0;
           transition: 0s;
+        }
+        .optionCard:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 25px rgba(91,134,229,0.15);
         }
         @media (max-width: 700px) {
           .fade-in-row td, .fade-in-row th { font-size: 13px !important; padding: 7px 4px !important; }
@@ -235,29 +242,100 @@ const styles = {
     background: 'rgba(40,40,60,0.7)',
     color: '#5b86e5',
   },
-  searchBox: {
-    display: 'flex', alignItems: 'center',
-    background: 'rgba(232,245,255,0.7)',
-    borderRadius: 12,
-    padding: '8px 16px',
-    marginBottom: 18,
-    boxShadow: '0 1px 8px rgba(91,134,229,0.04)',
-    border: '1.5px solid #e3f2fd',
-    maxWidth: 420,
-    backdropFilter: 'blur(4px)',
-    WebkitBackdropFilter: 'blur(4px)',
+
+  mainContent: {
+    marginTop: '24px',
   },
-  searchIcon: {
-    color: '#5b86e5', fontSize: 18, marginRight: 8,
+  welcomeSection: {
+    textAlign: 'center',
+    marginBottom: '32px',
+    padding: '24px',
+    background: 'rgba(248,250,255,0.7)',
+    borderRadius: '16px',
+    border: '1px solid #e3f2fd',
   },
-  input: {
-    border: 'none',
-    outline: 'none',
-    background: 'transparent',
-    fontSize: 16,
-    width: '100%',
-    fontFamily: "'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    color: '#263238',
+  welcomeIcon: {
+    fontSize: '48px',
+    marginBottom: '16px',
+  },
+  welcomeTitle: {
+    fontSize: '24px',
+    color: '#1565c0',
+    margin: '0 0 12px 0',
+    fontWeight: 600,
+  },
+  welcomeText: {
+    fontSize: '16px',
+    color: '#666',
+    margin: 0,
+    lineHeight: 1.5,
+  },
+  optionsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '24px',
+    marginBottom: '32px',
+  },
+  optionCard: {
+    background: 'rgba(255,255,255,0.8)',
+    borderRadius: '16px',
+    padding: '24px',
+    border: '1px solid #e3f2fd',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    textAlign: 'center',
+  },
+  optionIcon: {
+    fontSize: '32px',
+    color: '#5b86e5',
+    marginBottom: '16px',
+  },
+  optionTitle: {
+    fontSize: '18px',
+    color: '#1565c0',
+    margin: '0 0 12px 0',
+    fontWeight: 600,
+  },
+  optionDescription: {
+    fontSize: '14px',
+    color: '#666',
+    margin: 0,
+    lineHeight: 1.5,
+  },
+  quickStats: {
+    background: 'rgba(248,250,255,0.7)',
+    borderRadius: '16px',
+    padding: '24px',
+    border: '1px solid #e3f2fd',
+  },
+  statsTitle: {
+    fontSize: '18px',
+    color: '#1565c0',
+    margin: '0 0 16px 0',
+    fontWeight: 600,
+  },
+  statsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+    gap: '16px',
+  },
+  statItem: {
+    textAlign: 'center',
+    padding: '16px',
+    background: 'rgba(255,255,255,0.8)',
+    borderRadius: '12px',
+    border: '1px solid #e3f2fd',
+  },
+  statNumber: {
+    fontSize: '24px',
+    fontWeight: 700,
+    color: '#3a7bd5',
+    marginBottom: '4px',
+  },
+  statLabel: {
+    fontSize: '14px',
+    color: '#666',
+    fontWeight: 500,
   },
   noData: {
     color: "#90a4ae",
@@ -266,71 +344,7 @@ const styles = {
     padding: '32px 0',
     fontStyle: 'italic',
   },
-  table: {
-    width: "100%",
-    borderCollapse: "separate",
-    borderSpacing: 0,
-    marginTop: "10px",
-    background: "#fff",
-    borderRadius: "18px",
-    overflow: "hidden",
-    boxShadow: "0 2px 16px rgba(91,134,229,0.06)",
-    fontFamily: "'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    backdropFilter: 'blur(2px)',
-    WebkitBackdropFilter: 'blur(2px)',
-  },
-  thead: {
-    position: 'sticky',
-    top: 0,
-    zIndex: 1,
-    background: 'rgba(232,245,255,0.95)',
-    backdropFilter: 'blur(1px)',
-    WebkitBackdropFilter: 'blur(1px)',
-  },
-  th: {
-    background: "#e3f2fd",
-    color: "#1565c0",
-    padding: "13px 10px",
-    borderBottom: "2px solid #e3f2fd",
-    fontWeight: 700,
-    fontSize: 16,
-    textAlign: 'center',
-    position: 'sticky',
-    top: 0,
-    zIndex: 2,
-  },
-  td: {
-    padding: "12px 10px",
-    borderBottom: "1px solid #e3f2fd",
-    textAlign: "center",
-    fontSize: 15,
-    background: '#fff',
-    color: '#263238',
-    transition: 'background 0.2s',
-    backdropFilter: 'blur(1px)',
-    WebkitBackdropFilter: 'blur(1px)',
-  },
-  tr: {
-    cursor: 'pointer',
-    transition: 'background 0.2s',
-  },
-  avatarTd: {
-    padding: '8px 0',
-    textAlign: 'center',
-    background: 'transparent',
-    border: 'none',
-  },
-  avatarGlass: {
-    width: 36, height: 36,
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #a8edea 0%, #5b86e5 100%)',
-    boxShadow: '0 2px 8px rgba(91,134,229,0.10)',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    margin: '0 auto',
-    border: '2.5px solid #fff',
-    position: 'relative',
-    top: 0,
-  },
+
 };
 
 export default KhaiBaoSucKhoe;

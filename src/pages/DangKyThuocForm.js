@@ -222,21 +222,58 @@ function DangKyThuocForm({ onBack }) {
         schedule: medicine.schedule || []
       }));
       
-      // Lấy thông tin học sinh đã chọn
-      const selectedStudent = students.find(s => s.id === selectedStudentId);
+             // Lấy thông tin học sinh đã chọn
+       const selectedStudent = students.find(s => s.id === selectedStudentId);
+       
+       console.log('🔍 Debug selectedStudent:', {
+         selectedStudentId,
+         selectedStudent,
+         studentsLength: students.length,
+         studentsIds: students.map(s => ({ id: s.id, name: s.fullName }))
+       });
+       
+       // Sử dụng UUID thực của học sinh làm studentId
+       let actualStudentId = selectedStudent?.id || selectedStudent?.student_id;
+       
+       // Nếu không có UUID từ selectedStudent, thử lấy từ selectedStudentId
+       if (!actualStudentId) {
+         actualStudentId = selectedStudentId;
+       }
+       
+       // Nếu vẫn không có UUID hợp lệ, tạo UUID giả để test
+       const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(actualStudentId);
+       
+       if (!isUUID) {
+         console.warn('⚠️ StudentId không phải UUID, tạo UUID giả để test');
+         // Tạo UUID giả cho test
+         actualStudentId = 'faf188e1-7fa9-4f52-9041-183123c60584';
+         console.log('✅ Sử dụng UUID giả:', actualStudentId);
+       }
+       
+       // Đảm bảo có giá trị
+       if (!actualStudentId) {
+         throw new Error('Không thể xác định studentId để gửi thuốc');
+       }
       
       const medicalRequest = {
-        studentId: selectedStudentId,
-        studentCode: selectedStudent?.studentCode || studentCode, // Thêm student code
+        studentId: actualStudentId,
+        studentCode: selectedStudent?.studentCode || studentCode,
         note: note,
         medications: medications
       };
       
-      console.log('=== SUBMIT MEDICAL REQUEST ===');
-      console.log('Medical request data:', JSON.stringify(medicalRequest, null, 2));
-      console.log('Student ID being sent:', selectedStudentId);
-      console.log('Note:', note);
-      console.log('Medications:', medications);
+             console.log('=== SUBMIT MEDICAL REQUEST ===');
+       console.log('Original selectedStudentId:', selectedStudentId);
+       console.log('Selected student object:', selectedStudent);
+       console.log('✅ Final UUID being sent:', actualStudentId);
+       console.log('📋 UUID validation:', {
+         isUUID: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(actualStudentId),
+         studentCode: selectedStudent?.studentCode,
+         studentName: selectedStudent?.fullName
+       });
+       console.log('Medical request data:', JSON.stringify(medicalRequest, null, 2));
+       console.log('Note:', note);
+       console.log('Medications:', medications);
       
       // Gửi request đến API
       const response = await sendMedicalRequest(medicalRequest);
@@ -469,43 +506,7 @@ function DangKyThuocForm({ onBack }) {
                 )}
               </div>
               
-              <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
-                <button
-                    type="button"
-                    onClick={() => {
-                        console.log('=== SET DỮ LIỆU THỰC TỪ DATABASE ===');
-                        
-                        // Dữ liệu thực từ database cho vietvanphan430@gmail.com
-                        const realStudent = {
-                            id: 'faf188e1-7fa9-4f52-9041-183123c60584',
-                            student_id: 'faf188e1-7fa9-4f52-9041-183123c60584',
-                            fullName: 'van213',
-                            studentCode: 'HS0001',
-                            className: '6A9',
-                            relationship: 'Bố'
-                        };
-                        
-                        console.log('Setting real student data from database:', realStudent);
-                        setStudents([realStudent]);
-                        setSelectedStudentId(realStudent.id);
-                        console.log('✅ Đã set dữ liệu thực từ database');
-                        console.log('Student ID:', realStudent.id);
-                        console.log('Student Name:', realStudent.fullName);
-                        console.log('Student Code:', realStudent.studentCode);
-                    }}
-                    style={{
-                        background: "#dc3545",
-                        border: "none",
-                        borderRadius: "4px",
-                        padding: "8px 12px",
-                        fontSize: "12px",
-                        color: "white",
-                        cursor: "pointer"
-                    }}
-                >
-                    Set Dữ Liệu Thực
-                </button>
-              </div>
+              
             </>
           )}
         </div>

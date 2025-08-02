@@ -4,6 +4,20 @@ import { FaCheckCircle, FaClock, FaUser } from 'react-icons/fa';
 function LatestDeclaration({ declaration, visible, onClose }) {
   if (!visible || !declaration) return null;
 
+  // Debug: Log dữ liệu nhận được
+  console.log('🔍 Modal data:', declaration);
+
+  const getHealthStatusColor = (status) => {
+    switch (status) {
+      case 'Tốt': return '#4caf50';
+      case 'Trung bình': return '#ff9800';
+      case 'Kém': return '#f44336';
+      case 'Cần đeo kính': return '#9c27b0';
+      case 'Cần máy trợ thính': return '#607d8b';
+      default: return '#9e9e9e';
+    }
+  };
+
   return (
     <div style={styles.overlay}>
       <div style={styles.modal}>
@@ -16,6 +30,13 @@ function LatestDeclaration({ declaration, visible, onClose }) {
         </div>
         
         <div style={styles.content}>
+          {/* Debug info */}
+          <div style={styles.debugInfo}>
+            <small style={{color: '#666', fontStyle: 'italic'}}>
+              📊 Dữ liệu từ: {declaration.studentName === 'Đã khai báo thành công' ? 'Form vừa gửi' : 'Database'}
+            </small>
+          </div>
+          
           <div style={styles.infoRow}>
             <FaUser style={styles.icon} />
             <span style={styles.label}>Học sinh:</span>
@@ -24,9 +45,13 @@ function LatestDeclaration({ declaration, visible, onClose }) {
           
           <div style={styles.infoRow}>
             <FaClock style={styles.icon} />
-            <span style={styles.label}>Thời gian:</span>
+            <span style={styles.label}>Cập nhật:</span>
             <span style={styles.value}>
-              {declaration.updatedAt ? new Date(declaration.updatedAt).toLocaleString('vi-VN') : 'Vừa khai báo'}
+              {declaration.updatedAt ? 
+                new Date(declaration.updatedAt).toLocaleDateString('vi-VN') + ' ' + 
+                new Date(declaration.updatedAt).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'}) : 
+                'Vừa khai báo'
+              }
             </span>
           </div>
           
@@ -35,32 +60,58 @@ function LatestDeclaration({ declaration, visible, onClose }) {
             
             <div style={styles.field}>
               <strong>Dị ứng:</strong>
-              <p style={styles.fieldValue}>{declaration.allergies || 'Không có'}</p>
+              <p style={styles.fieldValue}>
+                {declaration.allergies && declaration.allergies.trim() ? 
+                  declaration.allergies : 'Không có dị ứng'
+                }
+              </p>
             </div>
             
             <div style={styles.field}>
               <strong>Bệnh mãn tính:</strong>
-              <p style={styles.fieldValue}>{declaration.chronicDiseases || 'Không có'}</p>
+              <p style={styles.fieldValue}>
+                {declaration.chronicDiseases && declaration.chronicDiseases.trim() ? 
+                  declaration.chronicDiseases : 'Không có bệnh mãn tính'
+                }
+              </p>
             </div>
             
             <div style={styles.field}>
               <strong>Tiền sử bệnh:</strong>
-              <p style={styles.fieldValue}>{declaration.medicalHistory || 'Không có'}</p>
+              <p style={styles.fieldValue}>
+                {declaration.medicalHistory && declaration.medicalHistory.trim() ? 
+                  declaration.medicalHistory : 'Chưa khai báo tiền sử bệnh'
+                }
+              </p>
             </div>
             
             <div style={styles.field}>
               <strong>Thị lực:</strong>
-              <p style={styles.fieldValue}>{declaration.eyesight || 'Chưa khai báo'}</p>
+              <span style={{
+                ...styles.healthBadge,
+                backgroundColor: getHealthStatusColor(declaration.eyesight)
+              }}>
+                {declaration.eyesight || 'Chưa khai báo'}
+              </span>
             </div>
             
             <div style={styles.field}>
               <strong>Thính lực:</strong>
-              <p style={styles.fieldValue}>{declaration.hearing || 'Chưa khai báo'}</p>
+              <span style={{
+                ...styles.healthBadge,
+                backgroundColor: getHealthStatusColor(declaration.hearing)
+              }}>
+                {declaration.hearing || 'Chưa khai báo'}
+              </span>
             </div>
             
             <div style={styles.field}>
               <strong>Lịch sử tiêm chủng:</strong>
-              <p style={styles.fieldValue}>{declaration.vaccinationRecord || 'Không có'}</p>
+              <p style={styles.fieldValue}>
+                {declaration.vaccinationRecord && declaration.vaccinationRecord.trim() ? 
+                  declaration.vaccinationRecord : 'Chưa khai báo lịch sử tiêm chủng'
+                }
+              </p>
             </div>
           </div>
         </div>
@@ -132,6 +183,13 @@ const styles = {
   content: {
     marginBottom: '20px'
   },
+  debugInfo: {
+    marginBottom: '15px',
+    padding: '8px',
+    backgroundColor: '#f8f9fa',
+    borderRadius: '6px',
+    textAlign: 'center'
+  },
   infoRow: {
     display: 'flex',
     alignItems: 'center',
@@ -172,6 +230,15 @@ const styles = {
     margin: '5px 0 0 0',
     color: '#666',
     lineHeight: '1.4'
+  },
+  healthBadge: {
+    padding: '4px 12px',
+    borderRadius: '12px',
+    color: '#fff',
+    fontSize: '12px',
+    fontWeight: 600,
+    display: 'inline-block',
+    marginTop: '5px'
   },
   footer: {
     display: 'flex',

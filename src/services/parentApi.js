@@ -111,6 +111,19 @@ export const sendMedicalRequest = async (medicalRequestData) => {
     console.log('Student ID:', medicalRequestData.studentId);
     console.log('Student Code:', medicalRequestData.studentCode);
     
+         // Sử dụng dữ liệu gốc, không tự động chuyển đổi
+     let requestData = { ...medicalRequestData };
+     
+     // Log để debug
+            console.log('📋 StudentId (using UUID):', {
+         studentId: medicalRequestData.studentId,
+         studentCode: medicalRequestData.studentCode,
+         isUUID: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(medicalRequestData.studentId),
+         type: typeof medicalRequestData.studentId
+       });
+    
+    console.log('Final request data:', JSON.stringify(requestData, null, 2));
+    
     // Thử các endpoint khác nhau
     const endpoints = [
       '/api/parents/medical-request',
@@ -120,7 +133,7 @@ export const sendMedicalRequest = async (medicalRequestData) => {
     for (const endpoint of endpoints) {
       try {
         console.log(`Trying endpoint: ${endpoint}`);
-        const response = await api.post(endpoint, medicalRequestData);
+        const response = await api.post(endpoint, requestData);
         console.log(`✅ Success with ${endpoint}:`, response);
         return response.data;
       } catch (err) {

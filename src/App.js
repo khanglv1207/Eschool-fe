@@ -5,12 +5,14 @@ import Home from "./components/Home";
 
 
 import KhaiBaoSucKhoe from "./pages/KhaiBaoSucKhoe";
+import HealthDeclarationForm from "./pages/HealthDeclarationForm";
+import HealthDeclarationList from "./pages/HealthDeclarationList";
 import HealthIncidentForm from "./pages/HealthIncidentForm";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import UpdateProfile from "./pages/UpdateProfile";
 import ContactSupport from "./pages/ContactSupport";
-import Vaccination from "./pages/Vaccination";
+import VaccinationManagement from "./pages/VaccinationManagement";
 import MedicalCheckup from "./pages/MedicalCheckup";
 
 import ChangePassword from "./pages/ChangePassword";
@@ -58,7 +60,9 @@ function App() {
         <Route path="/update-profile" element={<UpdateProfile />} />
         <Route path="/contact" element={<ContactSupport />} />
         <Route path="/health-declaration" element={<KhaiBaoSucKhoe />} />
-        <Route path="/vaccination" element={<Vaccination />} />
+        <Route path="/health-declaration-form" element={<HealthProfileForm />} />
+        <Route path="/health-declaration-list" element={<HealthDeclarationList />} />
+        <Route path="/vaccination" element={<VaccinationManagement />} />
         <Route path="/medical-checkup" element={<MedicalCheckup />} />
         <Route path="/health-incident-form" element={<HealthIncidentForm />} />
         <Route path="/change-password" element={<ChangePassword />} />
