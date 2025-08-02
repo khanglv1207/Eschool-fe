@@ -24,7 +24,18 @@ function KhaiBaoSucKhoe() {
   }, []);
 
   const handleKhaiBao = () => {
-    navigate("/nurse/health-declaration");
+    // Hiển thị dialog để chọn loại khai báo
+    const choice = window.confirm(
+      "Chọn loại khai báo:\n\n" +
+      "OK - Khai báo sức khỏe chi tiết (gửi lên database)\n" +
+      "Cancel - Khai báo sức khỏe đơn giản (lưu local)"
+    );
+    
+    if (choice) {
+      navigate("/health-profile-form");
+    } else {
+      navigate("/nurse/health-declaration");
+    }
   };
 
   // Lọc danh sách theo từ khóa

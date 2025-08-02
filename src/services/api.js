@@ -2,7 +2,7 @@
 import axios from "axios";
 
 // Cấu hình của Axios
-const API_BASE_URL = "";
+const API_BASE_URL = "http://localhost:8080"; // Backend server URL
 export const ACCESS_TOKEN = "access_token";
 
 const isClient = typeof window !== "undefined";
@@ -28,12 +28,7 @@ api.interceptors.request.use(
       delete config.headers["Content-Type"];
     }
 
-    console.log("API Request:", {
-      url: config.url,
-      method: config.method,
-      data: config.data,
-      headers: config.headers,
-    });
+
 
     return config;
   },
@@ -46,19 +41,9 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
-    console.log("API Response:", {
-      url: response.config.url,
-      status: response.status,
-      data: response.data,
-    });
     return response;
   },
   (error) => {
-    console.error("Response Error:", {
-      url: error.config?.url,
-      status: error.response?.status,
-      data: error.response?.data,
-    });
     return Promise.reject(error);
   }
 );

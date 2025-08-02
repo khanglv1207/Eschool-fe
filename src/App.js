@@ -27,6 +27,7 @@ import SchoolNurseManagement from "./pages/admin/SchoolNurseManagement";
 import MedicalManagement from "./pages/admin/MedicalManagement";
 import MedicalEventRecording from "./pages/admin/MedicalEventRecording";
 import NurseHealthDeclaration from "./pages/NurseHealthDeclaration";
+import HealthProfileForm from "./pages/HealthProfileForm";
 import ManagerLayout from "./pages/manager/ManagerLayout";
 import ManagerDashboard from "./pages/manager/ManagerDashboard";
 import VaccinManage from "./pages/admin/VaccineManage";
@@ -76,6 +77,7 @@ function App() {
         <Route path="/admin/medicaleventrecording" element={<MedicalEventRecording />} />
         <Route path="/admin/VaccineManage" element={<VaccinManage />} />
         <Route path="/nurse/health-declaration" element={<NurseHealthDeclaration />} />
+        <Route path="/health-profile-form" element={<HealthProfileForm />} />
         <Route path="/manager" element={<ManagerLayout />} />
         <Route path="/manager/dashboard" element={<ManagerDashboard />} />
         <Route path="/medicine-registration" element={<DangKyThuocForm onBack={() => window.history.back()} />} />
