@@ -167,6 +167,39 @@ const VaccinationManagement = () => {
       
       const response = await getStudentsToVaccinate(selectedVaccine);
       console.log('✅ Danh sách học sinh chưa tiêm từ API:', response);
+      console.log('🔍 Chi tiết từng học sinh:');
+      response.forEach((student, index) => {
+        console.log(`=== HỌC SINH ${index + 1} ===`);
+        console.log('📋 Tất cả fields:', Object.keys(student));
+        console.log('🎯 Student Code fields:', {
+          studentCode: student.studentCode,
+          code: student.code,
+          student_code: student.student_code,
+          studentId: student.studentId,
+          id: student.id,
+          student_id: student.student_id
+        });
+        console.log('📧 Email fields:', {
+          parentEmail: student.parentEmail,
+          email: student.email,
+          parent_email: student.parent_email,
+          contactEmail: student.contactEmail,
+          contact_email: student.contact_email
+        });
+        console.log('👤 Name fields:', {
+          studentName: student.studentName,
+          fullName: student.fullName,
+          name: student.name,
+          student_name: student.student_name
+        });
+        console.log('🏫 Class fields:', {
+          className: student.className,
+          class_name: student.class_name,
+          class: student.class
+        });
+        console.log('📄 Full object:', student);
+        console.log('========================');
+      });
       
       setStudentsToVaccinate(response);
       setMessage(`✅ Tìm thấy ${response.length} học sinh chưa tiêm ${selectedVaccine} (dữ liệu từ khai báo sức khỏe)`);
@@ -435,18 +468,18 @@ const VaccinationManagement = () => {
                     <tbody>
                       {studentsToVaccinate.map((student, index) => (
                         <tr key={index}>
-                                                  <td>{student.studentCode}</td>
-                        <td>{student.studentName}</td>
-                        <td>{student.className}</td>
-                        <td>{student.parentEmail}</td>
-                        <td>
-                          <span style={{color: '#e67e22', fontSize: '12px'}}>
-                            {student.reason || 'Chưa tiêm vaccine'}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="status pending">Chờ xác nhận</span>
-                        </td>
+                          <td>{student.studentCode || 'N/A'}</td>
+                          <td>{student.studentName || student.fullName || student.name || student.student_name || 'N/A'}</td>
+                          <td>{student.className || student.class_name || student.class || 'N/A'}</td>
+                          <td>{student.parent_email || 'N/A'}</td>
+                          <td>
+                            <span style={{color: '#e67e22', fontSize: '12px'}}>
+                              {student.reason || student.vaccinationStatus || 'Chưa tiêm vaccine'}
+                            </span>
+                          </td>
+                          <td>
+                            <span className="status pending">Chờ xác nhận</span>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
