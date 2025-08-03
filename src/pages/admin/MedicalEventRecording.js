@@ -6,15 +6,16 @@ import {
     getAllMedicalRecords,
     createMedicalRecord,
     deleteMedicalRecord,
-    updateMedicalRecord
+    updateMedicalRecord,
+    getAllParentStudent
 } from "../../services/adminApi";
-// import MedicalEvents from "../MedicalEvents";
 
 const sampleRecords = [];
 
 function MedicalEventRecording() {
     const [search, setSearch] = useState("");
     const [records, setRecords] = useState(sampleRecords);
+    const [students, setStudents] = useState([]);
     const [isImporting, setIsImporting] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newRecord, setNewRecord] = useState({
@@ -42,6 +43,20 @@ function MedicalEventRecording() {
             }
         };
         fetchData();
+    }, []);
+
+    useEffect(() => {
+        const fetchStudents = async () => {
+            try {
+                const data = await getAllParentStudent();
+                // data là mảng các học sinh/phụ huynh từ BE
+                // Nếu muốn giữ lại các chức năng import/thêm mới, có thể nối thêm vào students sau này
+                setStudents(data);
+            } catch (error) {
+                alert(error.message);
+            }
+        };
+        fetchStudents();
     }, []);
 
     const handleImportExcel = async (e) => {
@@ -273,15 +288,29 @@ function MedicalEventRecording() {
                                 </div>
                                 <div className="modal-body">
                                     <div className="mb-3">
-                                        <label className="form-label">Student Code</label>
-                                        <input
-                                            type="text"
+                                        <label className="form-label">Select Student</label>
+                                        <select
                                             className="form-control"
                                             name="studentCode"
                                             value={newRecord.studentCode}
-                                            onChange={handleChange}
+                                            onChange={(e) => {
+                                                const selectedStudent = students.find(s => s.studentCode === e.target.value);
+                                                setNewRecord({
+                                                    ...newRecord,
+                                                    studentCode: e.target.value,
+                                                    studentName: selectedStudent ? selectedStudent.studentName : "",
+                                                    classId: selectedStudent ? selectedStudent.classId : ""
+                                                });
+                                            }}
                                             required
-                                        />
+                                        >
+                                            <option value="">-- Chọn học sinh --</option>
+                                            {students.map((student, index) => (
+                                                <option key={index} value={student.studentCode}>
+                                                    {student.studentCode} - {student.studentName} - {student.classId}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Student Name</label>
@@ -292,6 +321,7 @@ function MedicalEventRecording() {
                                             value={newRecord.studentName}
                                             onChange={handleChange}
                                             required
+                                            readOnly
                                         />
                                     </div>
                                     <div className="mb-3">
@@ -380,15 +410,29 @@ function MedicalEventRecording() {
                                 </div>
                                 <div className="modal-body">
                                     <div className="mb-3">
-                                        <label className="form-label">Student Code</label>
-                                        <input
-                                            type="text"
+                                        <label className="form-label">Select Student</label>
+                                        <select
                                             className="form-control"
                                             name="studentCode"
                                             value={editRecord.studentCode}
-                                            onChange={handleEditChange}
+                                            onChange={(e) => {
+                                                const selectedStudent = students.find(s => s.studentCode === e.target.value);
+                                                setEditRecord({
+                                                    ...editRecord,
+                                                    studentCode: e.target.value,
+                                                    studentName: selectedStudent ? selectedStudent.studentName : "",
+                                                    classId: selectedStudent ? selectedStudent.classId : ""
+                                                });
+                                            }}
                                             required
-                                        />
+                                        >
+                                            <option value="">-- Chọn học sinh --</option>
+                                            {students.map((student, index) => (
+                                                <option key={index} value={student.studentCode}>
+                                                    {student.studentCode} - {student.studentName} - {student.classId}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Student Name</label>
@@ -399,6 +443,7 @@ function MedicalEventRecording() {
                                             value={editRecord.studentName}
                                             onChange={handleEditChange}
                                             required
+                                            readOnly
                                         />
                                     </div>
                                     <div className="mb-3">

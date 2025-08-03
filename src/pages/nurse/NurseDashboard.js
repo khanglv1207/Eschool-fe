@@ -1,281 +1,279 @@
-import React, { useState, useEffect } from "react";
-import NurseLayout from "./NurseLayout";
-import {
-    getPendingMedicationRequests,
-    getConfirmedStudents,
-    getTodaySchedules
-} from "../../services/nurseApi";
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { FaUserMd, FaPills, FaClock, FaClipboardList, FaUsers, FaChartLine } from 'react-icons/fa';
+import { getPendingMedicationRequests, getTodaySchedules } from '../../services/medicineApi';
 
 function NurseDashboard() {
-    const [stats, setStats] = useState({
-        pendingMedications: 0,
-        confirmedStudents: 0,
-        todaySchedules: 0
-    });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
+  const [stats, setStats] = useState({
+    pendingRequests: 0,
+    todaySchedules: 0,
+    totalStudents: 0,
+    completedToday: 0
+  });
+  const [loading, setLoading] = useState(true);
 
-    const loadDashboardData = async () => {
-        setLoading(true);
-        setError("");
-        try {
-            // Load pending medication requests
-            const medicationResponse = await getPendingMedicationRequests();
-            const pendingMedications = medicationResponse.code === 0 ?
-                (medicationResponse.result?.length || 0) : 0;
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
 
-            // Load confirmed students
-            const studentsResponse = await getConfirmedStudents();
-            const confirmedStudents = studentsResponse.code === 0 ?
-                (studentsResponse.result?.length || 0) : 0;
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Load pending medication requests
+      const requests = await getPendingMedicationRequests();
+      
+      // Load today schedules
+      const schedules = await getTodaySchedules('all');
+      
+      // Calculate completed schedules
+      const completedSchedules = schedules.filter(schedule => schedule.isTaken);
+      
+      setStats({
+        pendingRequests: requests.length,
+        todaySchedules: schedules.length,
+        totalStudents: schedules.length > 0 ? new Set(schedules.map(s => s.studentId)).size : 0,
+        completedToday: completedSchedules.length
+      });
+      
+    } catch (error) {
+      console.error('❌ Lỗi tải dữ liệu dashboard:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            // Load today schedules (sample data for now)
-            const todaySchedules = 5; // Mock data
+  const StatCard = ({ icon, title, value, color, link }) => (
+    <div style={{
+      background: '#fff',
+      borderRadius: '12px',
+      padding: '24px',
+      boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+      border: `2px solid ${color}20`,
+      transition: 'all 0.3s ease',
+      cursor: link ? 'pointer' : 'default'
+    }}
+    onMouseEnter={(e) => {
+      if (link) {
+        e.target.style.transform = 'translateY(-2px)';
+        e.target.style.boxShadow = '0 8px 15px rgba(0,0,0,0.15)';
+      }
+    }}
+    onMouseLeave={(e) => {
+      if (link) {
+        e.target.style.transform = 'translateY(0)';
+        e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+      }
+    }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+        <div style={{
+          width: '50px',
+          height: '50px',
+          borderRadius: '12px',
+          background: color,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginRight: '16px'
+        }}>
+          {icon}
+        </div>
+        <div>
+          <div style={{ fontSize: '14px', color: '#6c757d', marginBottom: '4px' }}>
+            {title}
+          </div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#495057' }}>
+            {loading ? '...' : value}
+          </div>
+        </div>
+      </div>
+      {link && (
+        <Link to={link} style={{
+          color: color,
+          textDecoration: 'none',
+          fontSize: '12px',
+          fontWeight: '600',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px'
+        }}>
+          Xem chi tiết →
+        </Link>
+      )}
+    </div>
+  );
 
-            setStats({
-                pendingMedications,
-                confirmedStudents,
-                todaySchedules
-            });
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const QuickAction = ({ icon, title, description, link, color }) => (
+    <Link to={link} style={{ textDecoration: 'none' }}>
+      <div style={{
+        background: '#fff',
+        borderRadius: '12px',
+        padding: '24px',
+        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+        border: `2px solid ${color}20`,
+        transition: 'all 0.3s ease',
+        cursor: 'pointer'
+      }}
+      onMouseEnter={(e) => {
+        e.target.style.transform = 'translateY(-2px)';
+        e.target.style.boxShadow = '0 8px 15px rgba(0,0,0,0.15)';
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.transform = 'translateY(0)';
+        e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+      }}
+      >
+        <div style={{
+          width: '50px',
+          height: '50px',
+          borderRadius: '12px',
+          background: color,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: '16px'
+        }}>
+          {icon}
+        </div>
+        <div style={{ fontSize: '16px', fontWeight: '600', color: '#495057', marginBottom: '8px' }}>
+          {title}
+        </div>
+        <div style={{ fontSize: '14px', color: '#6c757d' }}>
+          {description}
+        </div>
+      </div>
+    </Link>
+  );
 
-    useEffect(() => {
-        loadDashboardData();
-    }, []);
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      padding: '20px'
+    }}>
+      <div style={{
+        maxWidth: '1200px',
+        margin: '0 auto'
+      }}>
+        {/* Header */}
+        <div style={{
+          background: '#fff',
+          borderRadius: '20px',
+          padding: '30px',
+          marginBottom: '30px',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+          textAlign: 'center'
+        }}>
+          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#495057', marginBottom: '8px' }}>
+            <FaUserMd style={{ marginRight: '12px', color: '#667eea' }} />
+            Dashboard Y Tá
+          </div>
+          <div style={{ fontSize: '16px', color: '#6c757d' }}>
+            Quản lý sức khỏe học sinh và theo dõi đơn thuốc
+          </div>
+        </div>
 
-    return (
-        <NurseLayout>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="fw-bold mb-0">
-                    <i className="fas fa-user-nurse me-2"></i> Dashboard Y tá
-                </h2>
-                <div className="text-muted">
-                    <i className="fas fa-calendar me-2"></i>
-                    {new Date().toLocaleDateString('vi-VN')}
-                </div>
+        {/* Statistics */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '20px',
+          marginBottom: '30px'
+        }}>
+          <StatCard
+            icon={<FaPills style={{ color: '#fff', fontSize: '20px' }} />}
+            title="Đơn thuốc chờ duyệt"
+            value={stats.pendingRequests}
+            color="#ffc107"
+            link="/nurse/medication-management"
+          />
+          <StatCard
+            icon={<FaClock style={{ color: '#fff', fontSize: '20px' }} />}
+            title="Lịch uống hôm nay"
+            value={stats.todaySchedules}
+            color="#28a745"
+            link="/nurse/medication-management"
+          />
+          <StatCard
+            icon={<FaUsers style={{ color: '#fff', fontSize: '20px' }} />}
+            title="Học sinh cần uống thuốc"
+            value={stats.totalStudents}
+            color="#17a2b8"
+          />
+          <StatCard
+            icon={<FaChartLine style={{ color: '#fff', fontSize: '20px' }} />}
+            title="Đã hoàn thành hôm nay"
+            value={stats.completedToday}
+            color="#6f42c1"
+          />
+        </div>
+
+        {/* Quick Actions */}
+        <div style={{
+          background: '#fff',
+          borderRadius: '20px',
+          padding: '30px',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
+        }}>
+          <h3 style={{ color: '#495057', marginBottom: '24px', fontSize: '20px', fontWeight: '600' }}>
+            Thao tác nhanh
+          </h3>
+          
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '20px'
+          }}>
+            <QuickAction
+              icon={<FaPills style={{ color: '#fff', fontSize: '20px' }} />}
+              title="Quản lý đơn thuốc"
+              description="Duyệt đơn thuốc và theo dõi lịch uống thuốc của học sinh"
+              link="/nurse/medication-management"
+              color="#667eea"
+            />
+            <QuickAction
+              icon={<FaClipboardList style={{ color: '#fff', fontSize: '20px' }} />}
+              title="Khai báo sức khỏe"
+              description="Xem và quản lý khai báo sức khỏe của học sinh"
+              link="/nurse/health-declaration"
+              color="#28a745"
+            />
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div style={{
+          background: '#fff',
+          borderRadius: '20px',
+          padding: '30px',
+          marginTop: '30px',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
+        }}>
+          <h3 style={{ color: '#495057', marginBottom: '24px', fontSize: '20px', fontWeight: '600' }}>
+            Hoạt động gần đây
+          </h3>
+          
+          <div style={{
+            background: '#f8f9fa',
+            borderRadius: '12px',
+            padding: '20px',
+            border: '2px solid #e9ecef'
+          }}>
+            <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
+              <h4 style={{ color: '#495057', marginBottom: '8px' }}>
+                Chưa có hoạt động gần đây
+              </h4>
+              <p style={{ color: '#6c757d', fontSize: '14px' }}>
+                Các hoạt động quản lý đơn thuốc và lịch uống sẽ được hiển thị ở đây.
+              </p>
             </div>
-
-            {/* Error Alert */}
-            {error && (
-                <div className="alert alert-danger alert-dismissible fade show" role="alert">
-                    {error}
-                    <button type="button" className="btn-close" onClick={() => setError("")}></button>
-                </div>
-            )}
-
-            {/* Stats Cards */}
-            <div className="row mb-4">
-                <div className="col-md-4 mb-3">
-                    <div className="card bg-primary text-white h-100">
-                        <div className="card-body">
-                            <div className="d-flex justify-content-between">
-                                <div>
-                                    <h4 className="card-title">Yêu cầu thuốc</h4>
-                                    <h2 className="mb-0">{loading ? "..." : stats.pendingMedications}</h2>
-                                    <small>Đang chờ xử lý</small>
-                                </div>
-                                <div className="align-self-center">
-                                    <i className="fas fa-pills fa-3x opacity-75"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="card-footer bg-primary-dark">
-                            <a href="/nurse/medication-requests" className="text-white text-decoration-none">
-                                <i className="fas fa-arrow-right me-2"></i>Xem chi tiết
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="col-md-4 mb-3">
-                    <div className="card bg-success text-white h-100">
-                        <div className="card-body">
-                            <div className="d-flex justify-content-between">
-                                <div>
-                                    <h4 className="card-title">Học sinh đã xác nhận</h4>
-                                    <h2 className="mb-0">{loading ? "..." : stats.confirmedStudents}</h2>
-                                    <small>Sẵn sàng kiểm tra</small>
-                                </div>
-                                <div className="align-self-center">
-                                    <i className="fas fa-user-check fa-3x opacity-75"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="card-footer bg-success-dark">
-                            <a href="/nurse/confirmed-students" className="text-white text-decoration-none">
-                                <i className="fas fa-arrow-right me-2"></i>Xem chi tiết
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="col-md-4 mb-3">
-                    <div className="card bg-info text-white h-100">
-                        <div className="card-body">
-                            <div className="d-flex justify-content-between">
-                                <div>
-                                    <h4 className="card-title">Lịch trình hôm nay</h4>
-                                    <h2 className="mb-0">{loading ? "..." : stats.todaySchedules}</h2>
-                                    <small>Cần thực hiện</small>
-                                </div>
-                                <div className="align-self-center">
-                                    <i className="fas fa-calendar-day fa-3x opacity-75"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="card-footer bg-info-dark">
-                            <a href="/nurse/schedules" className="text-white text-decoration-none">
-                                <i className="fas fa-arrow-right me-2"></i>Xem chi tiết
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="row mb-4">
-                <div className="col-12">
-                    <div className="card shadow border-0">
-                        <div className="card-header bg-light">
-                            <h5 className="mb-0">
-                                <i className="fas fa-bolt me-2"></i>Thao tác nhanh
-                            </h5>
-                        </div>
-                        <div className="card-body">
-                            <div className="row">
-                                <div className="col-md-3 mb-3">
-                                    <a href="/nurse/medication-requests" className="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
-                                        <i className="fas fa-pills fa-2x mb-2"></i>
-                                        <span>Xử lý yêu cầu thuốc</span>
-                                    </a>
-                                </div>
-                                <div className="col-md-3 mb-3">
-                                    <a href="/nurse/health-checkup" className="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
-                                        <i className="fas fa-stethoscope fa-2x mb-2"></i>
-                                        <span>Kiểm tra sức khỏe</span>
-                                    </a>
-                                </div>
-                                <div className="col-md-3 mb-3">
-                                    <a href="/nurse/schedules" className="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
-                                        <i className="fas fa-calendar-day fa-2x mb-2"></i>
-                                        <span>Xem lịch trình</span>
-                                    </a>
-                                </div>
-                                <div className="col-md-3 mb-3">
-                                    <a href="/nurse/medication-management" className="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
-                                        <i className="fas fa-clipboard-list fa-2x mb-2"></i>
-                                        <span>Quản lý thuốc</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Recent Activities */}
-            <div className="row">
-                <div className="col-md-6 mb-4">
-                    <div className="card shadow border-0 h-100">
-                        <div className="card-header bg-light">
-                            <h5 className="mb-0">
-                                <i className="fas fa-clock me-2"></i>Hoạt động gần đây
-                            </h5>
-                        </div>
-                        <div className="card-body">
-                            <div className="timeline">
-                                <div className="timeline-item">
-                                    <div className="timeline-marker bg-success"></div>
-                                    <div className="timeline-content">
-                                        <h6>Kiểm tra sức khỏe học sinh</h6>
-                                        <small className="text-muted">2 giờ trước</small>
-                                    </div>
-                                </div>
-                                <div className="timeline-item">
-                                    <div className="timeline-marker bg-primary"></div>
-                                    <div className="timeline-content">
-                                        <h6>Xử lý yêu cầu thuốc</h6>
-                                        <small className="text-muted">4 giờ trước</small>
-                                    </div>
-                                </div>
-                                <div className="timeline-item">
-                                    <div className="timeline-marker bg-info"></div>
-                                    <div className="timeline-content">
-                                        <h6>Cập nhật lịch trình</h6>
-                                        <small className="text-muted">6 giờ trước</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="col-md-6 mb-4">
-                    <div className="card shadow border-0 h-100">
-                        <div className="card-header bg-light">
-                            <h5 className="mb-0">
-                                <i className="fas fa-chart-pie me-2"></i>Thống kê tuần
-                            </h5>
-                        </div>
-                        <div className="card-body">
-                            <div className="row text-center">
-                                <div className="col-6 mb-3">
-                                    <div className="border-end">
-                                        <h4 className="text-primary">25</h4>
-                                        <small className="text-muted">Kiểm tra sức khỏe</small>
-                                    </div>
-                                </div>
-                                <div className="col-6 mb-3">
-                                    <h4 className="text-success">18</h4>
-                                    <small className="text-muted">Yêu cầu thuốc</small>
-                                </div>
-                                <div className="col-6">
-                                    <h4 className="text-info">12</h4>
-                                    <small className="text-muted">Lịch trình hoàn thành</small>
-                                </div>
-                                <div className="col-6">
-                                    <h4 className="text-warning">8</h4>
-                                    <small className="text-muted">Cần theo dõi</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* CSS for Timeline */}
-            <style jsx>{`
-                .timeline {
-                    position: relative;
-                    padding-left: 30px;
-                }
-                .timeline-item {
-                    position: relative;
-                    margin-bottom: 20px;
-                }
-                .timeline-marker {
-                    position: absolute;
-                    left: -35px;
-                    top: 5px;
-                    width: 12px;
-                    height: 12px;
-                    border-radius: 50%;
-                }
-                .timeline-content {
-                    padding-left: 15px;
-                }
-                .timeline-content h6 {
-                    margin-bottom: 5px;
-                    font-weight: 600;
-                }
-            `}</style>
-        </NurseLayout>
-    );
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default NurseDashboard; 

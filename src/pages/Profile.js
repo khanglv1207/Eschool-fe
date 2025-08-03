@@ -1,13 +1,35 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { FaBell, FaSyringe, FaCheck, FaTimes } from "react-icons/fa";
+import { getVaccinationNotifications } from "../services/vaccinationApi";
 
 function Profile() {
   const user = JSON.parse(localStorage.getItem("user"));
+  const [vaccinationNotifications, setVaccinationNotifications] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("loggedInUser");
     window.location.href = "/login";
   };
+
+  // Load vaccination notifications
+  useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        setLoading(true);
+        const notifications = await getVaccinationNotifications();
+        setVaccinationNotifications(notifications);
+        console.log('📋 Vaccination notifications:', notifications);
+      } catch (error) {
+        console.error('❌ Lỗi tải thông báo tiêm chủng:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadNotifications();
+  }, []);
 
   if (!user) {
     return (
@@ -64,6 +86,126 @@ function Profile() {
             Đăng xuất
           </button>
         </div>
+
+        {/* Vaccination Notifications Section */}
+        {vaccinationNotifications.length > 0 && (
+          <div style={{
+            marginTop: '30px',
+            background: '#f8f9fa',
+            borderRadius: '12px',
+            padding: '20px',
+            border: '2px solid #e9ecef'
+          }}>
+            <h3 style={{
+              color: '#495057',
+              marginBottom: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <FaBell style={{ color: '#667eea' }} />
+              Thông báo tiêm chủng
+            </h3>
+            
+            <div style={{ display: 'grid', gap: '15px' }}>
+              {vaccinationNotifications.map((notification, index) => (
+                <div key={index} style={{
+                  background: '#fff',
+                  borderRadius: '8px',
+                  padding: '15px',
+                  border: '1px solid #dee2e6',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: '600', color: '#495057', marginBottom: '5px' }}>
+                      <FaSyringe style={{ marginRight: '8px', color: '#667eea' }} />
+                      {notification.vaccineName}
+                    </div>
+                    <div style={{ fontSize: '14px', color: '#6c757d' }}>
+                      Học sinh: {notification.studentName} - Lớp: {notification.className}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#6c757d' }}>
+                      Ngày dự kiến: {new Date(notification.scheduledDate).toLocaleDateString('vi-VN')}
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    {notification.status === 'PENDING' && (
+                      <>
+                        <a
+                          href={`/vaccination-confirmation?id=${notification.confirmationId}`}
+                          style={{
+                            background: '#28a745',
+                            color: '#fff',
+                            border: 'none',
+                            padding: '8px 16px',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                          }}
+                        >
+                          <FaCheck />
+                          Xác nhận
+                        </a>
+                        <a
+                          href={`/vaccination-confirmation?id=${notification.confirmationId}`}
+                          style={{
+                            background: '#dc3545',
+                            color: '#fff',
+                            border: 'none',
+                            padding: '8px 16px',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                          }}
+                        >
+                          <FaTimes />
+                          Từ chối
+                        </a>
+                      </>
+                    )}
+                    {notification.status === 'CONFIRMED' && (
+                      <span style={{
+                        background: '#28a745',
+                        color: '#fff',
+                        padding: '6px 12px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: '600'
+                      }}>
+                        ✅ Đã xác nhận
+                      </span>
+                    )}
+                    {notification.status === 'REJECTED' && (
+                      <span style={{
+                        background: '#dc3545',
+                        color: '#fff',
+                        padding: '6px 12px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: '600'
+                      }}>
+                        ❌ Đã từ chối
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <style>{`

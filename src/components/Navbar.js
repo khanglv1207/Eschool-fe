@@ -2,32 +2,7 @@ import React from "react";
 import logo from "../assets/logoeSchoolMed.jpg";
 import loginIcon from "../assets/login.jpg";
 
-// Danh sách menu
-const MENU_ITEMS = [
-  { title: "Trang chủ", link: "/" },
-  {
-    title: "Hồ sơ & Tiêm chủng",
-    submenu: [
-      { title: "Khai báo sức khỏe", link: "/health-declaration" },
-      { title: "Tiêm chủng", link: "/vaccination" },
-      { title: "Kiểm tra y tế định kỳ", link: "/medical-checkup" },
-    ],
-  },
-  {
-    title: "Sự cố y tế",
-    submenu: [
-      { title: "Ghi nhận sự kiện", link: "/medical-events" },
-    ],
-  },
-  {
-    title: "Quản lí thuốc",
-    submenu: [
-      { title: "Gửi thuốc cho con", link: "/medicine-registration" },
-    ],
-  },
-  { title: "Blog", link: "/blogs" },
-  { title: "Liên hệ & Hỗ trợ", link: "/contact" },
-];
+
 
 const menuStyle = {
   textDecoration: "none",
@@ -56,16 +31,78 @@ const submenuStyle = {
 function Navbar() {
   let fullName = null;
   let isLoggedIn = false;
+  let userRole = null;
+  
   try {
     const stored = localStorage.getItem("loggedInUser");
     if (stored) {
       const parsed = JSON.parse(stored);
       fullName = parsed?.fullName || null;
       isLoggedIn = true;
+      userRole = parsed?.role || parsed?.authorities?.[0] || null;
     }
   } catch (e) {
     console.warn("Lỗi đọc loggedInUser:", e);
   }
+
+  // Kiểm tra role của user
+  const isNurse = userRole === 'NURSE' || userRole === 'nurse' || 
+                  (Array.isArray(userRole) && userRole.includes('NURSE'));
+  const isAdmin = userRole === 'ADMIN' || userRole === 'admin' || 
+                  (Array.isArray(userRole) && userRole.includes('ADMIN'));
+  const isParent = userRole === 'PARENT' || userRole === 'parent' || 
+                   (Array.isArray(userRole) && userRole.includes('PARENT'));
+  
+
+
+  // Tạo menu items dựa trên role
+  const getMenuItems = () => {
+    // Tạo submenu cho "Hồ sơ & Tiêm chủng" dựa trên role
+    const profileSubmenu = [
+      { title: "Khai báo sức khỏe", link: "/health-declaration" },
+    ];
+    
+    // Chỉ thêm "Tiêm chủng" và "Kiểm tra y tế định kỳ" cho Admin và Nurse
+    if (isAdmin || isNurse) {
+      profileSubmenu.push(
+        { title: "Tiêm chủng", link: "/vaccination" },
+        { title: "Kiểm tra y tế định kỳ", link: "/medical-checkup" }
+      );
+    }
+    
+    const baseMenuItems = [
+      { title: "Trang chủ", link: "/" },
+      {
+        title: "Hồ sơ & Tiêm chủng",
+        submenu: profileSubmenu,
+      },
+      {
+        title: "Quản lí thuốc",
+        submenu: isParent ? [
+          { title: "Gửi thuốc cho con", link: "/medicine-registration" },
+          { title: "Danh sách thuốc đã gửi", link: "/parent-medicine-list" },
+        ] : [
+          { title: "Quản lý yêu cầu thuốc", link: "/medicine-list-management" },
+        ],
+      },
+      { title: "Blog", link: "/blogs" },
+      { title: "Liên hệ & Hỗ trợ", link: "/contact" },
+    ];
+
+    // Chỉ thêm menu "Sự cố y tế" nếu user là nurse
+    if (isNurse) {
+      baseMenuItems.splice(2, 0, {
+        title: "Sự cố y tế",
+        submenu: [
+          { title: "Ghi nhận sự kiện", link: "/health-incident-form" },
+        ],
+      });
+    }
+
+    return baseMenuItems;
+  };
+
+  const MENU_ITEMS = getMenuItems();
 
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
@@ -108,6 +145,8 @@ function Navbar() {
         <div style={{ display: "flex", alignItems: "center" }}>
           <img src={logo} alt="eSchoolMed Logo" style={{ height: "90px", marginRight: 12, marginLeft: 32 }} />
         </div>
+
+
 
         {/* Menu chính */}
         <div
