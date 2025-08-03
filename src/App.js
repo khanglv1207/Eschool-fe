@@ -10,7 +10,6 @@ import HealthDeclarationList from "./pages/HealthDeclarationList";
 import HealthIncidentForm from "./pages/HealthIncidentForm";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
-import UpdateProfile from "./pages/UpdateProfile";
 import ParentProfile from "./pages/ParentProfile";
 import ContactSupport from "./pages/ContactSupport";
 import VaccinationManagement from "./pages/VaccinationManagement";
@@ -48,18 +47,20 @@ import NurseLayout from "./pages/nurse/NurseLayout";
 import NurseDashboard from "./pages/nurse/NurseDashboard";
 import DangKyThuocForm from "./pages/DangKyThuocForm";
 import ParentMedicineList from "./pages/ParentMedicineList";
+import MedicationRequests from "./pages/nurse/MedicationRequests";
+import HealthCheckup from "./pages/nurse/HealthCheckup";
+import Schedules from "./pages/nurse/Schedules";
+import NurseManagement from "./pages/nurse/NurseManagement";
 
 function App() {
 
   const isAdminRoute = window.location.pathname.startsWith("/admin");
-  const isManagerRoute = window.location.pathname.startsWith("/manager");
+  const isNurseRoute = window.location.pathname.startsWith("/nurse");
 
   return (
     <Router>
       {/* Chỉ hiển thị Navbar nếu không phải trang admin & manager  */}
-      {!isAdminRoute && !isManagerRoute && <Navbar />}
-      
-
+      {!isAdminRoute && !isNurseRoute  && <Navbar />}
 
       {/* Phần nội dung sẽ thay đổi theo Route */}
       <Routes>
@@ -92,18 +93,22 @@ function App() {
         <Route path="/admin/MedicalManagement" element={<MedicalManagement />} />
         <Route path="/admin/medicaleventrecording" element={<MedicalEventRecording />} />
         <Route path="/admin/VaccineManage" element={<VaccinManage />} />
+        {/* NurseHealthDeclaration component removed - not found */}
         <Route path="/health-profile-form" element={<HealthProfileForm />} />
                     <Route path="/manager" element={<ManagerLayout />} />
             <Route path="/manager/dashboard" element={<ManagerDashboard />} />
             <Route path="/medicine-registration" element={<DangKyThuocForm onBack={() => window.history.back()} />} />
             <Route path="/parent-medicine-list" element={<MedicineListManagement />} />
-            <Route path="/medication-management" element={<MedicationManagement />} />
-            <Route path="/medicine-list-management" element={<MedicationManagement />} />
             
             {/* Nurse Routes */}
             <Route path="/nurse" element={<NurseLayout><NurseDashboard /></NurseLayout>} />
             <Route path="/nurse/dashboard" element={<NurseLayout><NurseDashboard /></NurseLayout>} />
             <Route path="/nurse/medication-management" element={<NurseLayout><MedicationManagement /></NurseLayout>} />
+            <Route path="/nurse/dashboard" element={<NurseDashboard />} />
+        <Route path="/nurse/medication-requests" element={<MedicationRequests />} />
+        <Route path="/nurse/health-checkup" element={<HealthCheckup />} />
+        <Route path="/nurse/schedules" element={<Schedules />} />
+        <Route path="/nurse/nurse-management" element={<NurseManagement />} />
       </Routes>
     </Router>
   );

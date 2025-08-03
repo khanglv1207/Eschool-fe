@@ -1,466 +1,347 @@
-import React, { useState, useEffect } from 'react';
-import { FaPills, FaClock, FaCheck, FaTimes, FaSync, FaCalendarAlt, FaUserMd } from 'react-icons/fa';
-import { 
-  getPendingMedicationRequests, 
-  updateMedicationStatus, 
-  getTodaySchedules, 
-  markScheduleAsTaken 
-} from '../../services/medicineApi';
+import React, { useState, useEffect } from "react";
+import NurseLayout from "./NurseLayout";
 
 function MedicationManagement() {
-  const [pendingRequests, setPendingRequests] = useState([]);
-  const [todaySchedules, setTodaySchedules] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('requests'); // 'requests' or 'schedules'
-  const [message, setMessage] = useState('');
-  const [selectedStudentId, setSelectedStudentId] = useState('');
+    const [medications, setMedications] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filterStatus, setFilterStatus] = useState("all");
 
-  useEffect(() => {
-    loadData();
-  }, []);
+    // Mock data cho danh sách thuốc
+    const mockMedications = [
+        {
+            id: "med-1",
+            name: "Paracetamol",
+            category: "Thuốc giảm đau",
+            dosage: "500mg",
+            form: "Viên nén",
+            quantity: 150,
+            minQuantity: 20,
+            expiryDate: "2025-12-31",
+            status: "AVAILABLE"
+        },
+        {
+            id: "med-2",
+            name: "Ibuprofen",
+            category: "Thuốc chống viêm",
+            dosage: "400mg",
+            form: "Viên nén",
+            quantity: 8,
+            minQuantity: 20,
+            expiryDate: "2025-06-30",
+            status: "LOW_STOCK"
+        },
+        {
+            id: "med-3",
+            name: "Vitamin C",
+            category: "Vitamin",
+            dosage: "1000mg",
+            form: "Viên nén",
+            quantity: 200,
+            minQuantity: 50,
+            expiryDate: "2026-03-15",
+            status: "AVAILABLE"
+        },
+        {
+            id: "med-4",
+            name: "Amoxicillin",
+            category: "Kháng sinh",
+            dosage: "500mg",
+            form: "Viên nén",
+            quantity: 0,
+            minQuantity: 30,
+            expiryDate: "2025-08-20",
+            status: "OUT_OF_STOCK"
+        }
+    ];
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      
-      // Load pending medication requests
-      const requests = await getPendingMedicationRequests();
-      setPendingRequests(requests);
-      
-      // Load today schedules for all students
-      const schedules = await getTodaySchedules('all'); // Assuming 'all' gets all students
-      setTodaySchedules(schedules);
-      
-      console.log('📋 Data loaded:', { requests, schedules });
-    } catch (error) {
-      console.error('❌ Lỗi tải dữ liệu:', error);
-      setMessage('❌ Lỗi tải dữ liệu: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    useEffect(() => {
+        setMedications(mockMedications);
+    }, []);
 
-  const handleStatusUpdate = async (requestId, status) => {
-    try {
-      setLoading(true);
-      await updateMedicationStatus({
-        requestId: requestId,
-        status: status
-      });
-      setMessage(`✅ Đã cập nhật trạng thái thành ${status === 'APPROVED' ? 'duyệt' : 'từ chối'}`);
-      loadData(); // Reload data
-    } catch (error) {
-      console.error('❌ Lỗi cập nhật trạng thái:', error);
-      setMessage('❌ Lỗi cập nhật trạng thái: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const getStatusBadge = (status) => {
+        const statusConfig = {
+            'AVAILABLE': { class: 'bg-success', text: 'Có sẵn' },
+            'LOW_STOCK': { class: 'bg-warning', text: 'Sắp hết' },
+            'OUT_OF_STOCK': { class: 'bg-danger', text: 'Hết hàng' },
+            'EXPIRED': { class: 'bg-secondary', text: 'Hết hạn' }
+        };
+        const config = statusConfig[status] || statusConfig['AVAILABLE'];
+        return <span className={`badge ${config.class}`}>{config.text}</span>;
+    };
 
-  const handleMarkAsTaken = async (scheduleId) => {
-    try {
-      setLoading(true);
-      await markScheduleAsTaken(scheduleId);
-      setMessage('✅ Đã đánh dấu uống thuốc thành công');
-      loadData(); // Reload data
-    } catch (error) {
-      console.error('❌ Lỗi đánh dấu uống thuốc:', error);
-      setMessage('❌ Lỗi đánh dấu uống thuốc: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const getQuantityBadge = (quantity, minQuantity) => {
+        if (quantity === 0) {
+            return <span className="badge bg-danger">0</span>;
+        } else if (quantity <= minQuantity) {
+            return <span className="badge bg-warning">{quantity}</span>;
+        } else {
+            return <span className="badge bg-success">{quantity}</span>;
+        }
+    };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'PENDING': return '#ffc107';
-      case 'APPROVED': return '#28a745';
-      case 'REJECTED': return '#dc3545';
-      default: return '#6c757d';
-    }
-  };
+    const getExpiryBadge = (expiryDate) => {
+        const today = new Date();
+        const expiry = new Date(expiryDate);
+        const diffDays = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
 
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'PENDING': return 'Chờ xử lý';
-      case 'APPROVED': return 'Đã duyệt';
-      case 'REJECTED': return 'Đã từ chối';
-      default: return 'Không xác định';
-    }
-  };
+        if (diffDays < 0) {
+            return <span className="badge bg-danger">Hết hạn</span>;
+        } else if (diffDays <= 30) {
+            return <span className="badge bg-warning">{diffDays} ngày</span>;
+        } else {
+            return <span className="badge bg-success">{diffDays} ngày</span>;
+        }
+    };
 
-  if (loading) {
+    const filteredMedications = medications.filter(medication => {
+        const matchesSearch = medication.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            medication.category.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesFilter = filterStatus === "all" || medication.status === filterStatus;
+        return matchesSearch && matchesFilter;
+    });
+
+    const stats = {
+        total: medications.length,
+        available: medications.filter(m => m.status === 'AVAILABLE').length,
+        lowStock: medications.filter(m => m.status === 'LOW_STOCK').length,
+        outOfStock: medications.filter(m => m.status === 'OUT_OF_STOCK').length
+    };
+
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div style={{
-          background: '#fff',
-          borderRadius: '20px',
-          padding: '40px',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-          textAlign: 'center',
-          maxWidth: '400px',
-          width: '90%'
-        }}>
-          <div style={{
-            width: '60px',
-            height: '60px',
-            border: '4px solid #f3f3f3',
-            borderTop: '4px solid #667eea',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 20px'
-          }}></div>
-          <div style={{ color: '#667eea', fontSize: '18px', fontWeight: '600' }}>
-            Đang tải dữ liệu...
-          </div>
-          <style>{`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}</style>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '20px'
-    }}>
-      <div style={{
-        maxWidth: '1200px',
-        margin: '0 auto',
-        background: '#fff',
-        borderRadius: '20px',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-        overflow: 'hidden'
-      }}>
-        {/* Header */}
-        <div style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: '#fff',
-          padding: '30px',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>
-            <FaUserMd style={{ marginRight: '10px' }} />
-            Quản lý đơn thuốc và lịch uống
-          </div>
-          <div style={{ fontSize: '14px', opacity: 0.9 }}>
-            Duyệt đơn thuốc và theo dõi lịch uống thuốc của học sinh
-          </div>
-        </div>
-
-        {/* Content */}
-        <div style={{ padding: '40px' }}>
-          {message && (
-            <div style={{
-              marginBottom: '20px',
-              padding: '15px',
-              borderRadius: '8px',
-              textAlign: 'center',
-              fontWeight: '600',
-              color: message.includes("✅") ? '#155724' : '#721c24',
-              background: message.includes("✅") ? '#d4edda' : '#f8d7da',
-              border: `1px solid ${message.includes("✅") ? '#c3e6cb' : '#f5c6cb'}`
-            }}>
-              {message}
-            </div>
-          )}
-
-          {/* Tabs */}
-          <div style={{
-            display: 'flex',
-            gap: '10px',
-            marginBottom: '30px',
-            borderBottom: '2px solid #e9ecef'
-          }}>
-            <button
-              onClick={() => setActiveTab('requests')}
-              style={{
-                background: activeTab === 'requests' ? '#667eea' : 'transparent',
-                color: activeTab === 'requests' ? '#fff' : '#495057',
-                border: 'none',
-                padding: '12px 24px',
-                borderRadius: '8px 8px 0 0',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: '600',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              <FaPills />
-              Đơn thuốc chờ duyệt ({pendingRequests.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('schedules')}
-              style={{
-                background: activeTab === 'schedules' ? '#667eea' : 'transparent',
-                color: activeTab === 'schedules' ? '#fff' : '#495057',
-                border: 'none',
-                padding: '12px 24px',
-                borderRadius: '8px 8px 0 0',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: '600',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              <FaClock />
-              Lịch uống hôm nay ({todaySchedules.length})
-            </button>
-          </div>
-
-          {/* Refresh Button */}
-          <div style={{ textAlign: 'right', marginBottom: '20px' }}>
-            <button
-              onClick={loadData}
-              disabled={loading}
-              style={{
-                background: '#667eea',
-                color: '#fff',
-                border: 'none',
-                padding: '10px 20px',
-                borderRadius: '8px',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                fontSize: '14px',
-                fontWeight: '600',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                opacity: loading ? 0.6 : 1
-              }}
-            >
-              <FaSync />
-              {loading ? 'Đang tải...' : 'Làm mới'}
-            </button>
-          </div>
-
-          {/* Pending Requests Tab */}
-          {activeTab === 'requests' && (
-            <div>
-              <h3 style={{ color: '#495057', marginBottom: '20px' }}>
-                Đơn thuốc chờ duyệt
-              </h3>
-              
-              {pendingRequests.length > 0 ? (
-                <div style={{
-                  background: '#f8f9fa',
-                  borderRadius: '12px',
-                  padding: '20px',
-                  border: '2px solid #e9ecef'
-                }}>
-                  <div style={{ display: 'grid', gap: '15px' }}>
-                    {pendingRequests.map((request, index) => (
-                      <div key={index} style={{
-                        background: '#fff',
-                        borderRadius: '8px',
-                        padding: '20px',
-                        border: '1px solid #dee2e6',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                      }}>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: '600', color: '#495057', marginBottom: '8px' }}>
-                            <FaPills style={{ marginRight: '8px', color: '#667eea' }} />
-                            {request.medicineName}
-                          </div>
-                          <div style={{ fontSize: '14px', color: '#6c757d', marginBottom: '4px' }}>
-                            Học sinh: {request.studentName} - Lớp: {request.className}
-                          </div>
-                          <div style={{ fontSize: '14px', color: '#6c757d', marginBottom: '4px' }}>
-                            Phụ huynh: {request.parentName} - SĐT: {request.parentPhone}
-                          </div>
-                          <div style={{ fontSize: '12px', color: '#6c757d' }}>
-                            Liều lượng: {request.dosage} - Tần suất: {request.frequency}
-                          </div>
-                          {request.note && (
-                            <div style={{ fontSize: '12px', color: '#856404', fontStyle: 'italic', marginTop: '4px' }}>
-                              Ghi chú: {request.note}
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                          <button
-                            onClick={() => handleStatusUpdate(request.id, 'APPROVED')}
-                            disabled={loading}
-                            style={{
-                              background: '#28a745',
-                              color: '#fff',
-                              border: 'none',
-                              padding: '8px 16px',
-                              borderRadius: '6px',
-                              fontSize: '12px',
-                              cursor: loading ? 'not-allowed' : 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px'
-                            }}
-                          >
-                            <FaCheck />
-                            Duyệt
-                          </button>
-                          <button
-                            onClick={() => handleStatusUpdate(request.id, 'REJECTED')}
-                            disabled={loading}
-                            style={{
-                              background: '#dc3545',
-                              color: '#fff',
-                              border: 'none',
-                              padding: '8px 16px',
-                              borderRadius: '6px',
-                              fontSize: '12px',
-                              cursor: loading ? 'not-allowed' : 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px'
-                            }}
-                          >
-                            <FaTimes />
-                            Từ chối
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+        <NurseLayout>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2 className="fw-bold mb-0">
+                    <i className="fas fa-clipboard-list me-2"></i> Quản lý Thuốc
+                </h2>
+                <div className="text-muted">
+                    <i className="fas fa-calendar me-2"></i>
+                    {new Date().toLocaleDateString('vi-VN')}
                 </div>
-              ) : (
-                <div style={{
-                  textAlign: 'center',
-                  padding: '60px 20px',
-                  background: '#f8f9fa',
-                  borderRadius: '12px',
-                  border: '2px solid #e9ecef'
-                }}>
-                  <div style={{ fontSize: '48px', marginBottom: '20px' }}>✅</div>
-                  <h3 style={{ color: '#495057', marginBottom: '10px' }}>
-                    Không có đơn thuốc chờ duyệt
-                  </h3>
-                  <p style={{ color: '#6c757d', fontSize: '14px' }}>
-                    Tất cả đơn thuốc đã được xử lý hoặc chưa có đơn thuốc nào được gửi.
-                  </p>
-                </div>
-              )}
             </div>
-          )}
 
-          {/* Today Schedules Tab */}
-          {activeTab === 'schedules' && (
-            <div>
-              <h3 style={{ color: '#495057', marginBottom: '20px' }}>
-                Lịch uống thuốc hôm nay
-              </h3>
-              
-              {todaySchedules.length > 0 ? (
-                <div style={{
-                  background: '#f8f9fa',
-                  borderRadius: '12px',
-                  padding: '20px',
-                  border: '2px solid #e9ecef'
-                }}>
-                  <div style={{ display: 'grid', gap: '15px' }}>
-                    {todaySchedules.map((schedule, index) => (
-                      <div key={index} style={{
-                        background: '#fff',
-                        borderRadius: '8px',
-                        padding: '20px',
-                        border: '1px solid #dee2e6',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                      }}>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: '600', color: '#495057', marginBottom: '8px' }}>
-                            <FaClock style={{ marginRight: '8px', color: '#667eea' }} />
-                            {schedule.medicineName}
-                          </div>
-                          <div style={{ fontSize: '14px', color: '#6c757d', marginBottom: '4px' }}>
-                            Học sinh: {schedule.studentName} - Lớp: {schedule.className}
-                          </div>
-                          <div style={{ fontSize: '14px', color: '#6c757d', marginBottom: '4px' }}>
-                            Thời gian: {schedule.scheduledTime} - Liều lượng: {schedule.dosage}
-                          </div>
-                          <div style={{ fontSize: '12px', color: '#6c757d' }}>
-                            Ghi chú: {schedule.notes || 'Không có'}
-                          </div>
+            {/* Error Alert */}
+            {error && (
+                <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                    {error}
+                    <button type="button" className="btn-close" onClick={() => setError("")}></button>
+                </div>
+            )}
+
+            {/* Stats Cards */}
+            <div className="row mb-4">
+                <div className="col-md-3 mb-3">
+                    <div className="card bg-primary text-white">
+                        <div className="card-body text-center">
+                            <h4>{stats.total}</h4>
+                            <small>Tổng số thuốc</small>
                         </div>
-                        
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          {schedule.isTaken ? (
-                            <span style={{
-                              background: '#28a745',
-                              color: '#fff',
-                              padding: '6px 12px',
-                              borderRadius: '20px',
-                              fontSize: '12px',
-                              fontWeight: '600'
-                            }}>
-                              ✅ Đã uống
-                            </span>
-                          ) : (
-                            <button
-                              onClick={() => handleMarkAsTaken(schedule.id)}
-                              disabled={loading}
-                              style={{
-                                background: '#ffc107',
-                                color: '#000',
-                                border: 'none',
-                                padding: '8px 16px',
-                                borderRadius: '6px',
-                                fontSize: '12px',
-                                cursor: loading ? 'not-allowed' : 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px'
-                              }}
+                    </div>
+                </div>
+                <div className="col-md-3 mb-3">
+                    <div className="card bg-success text-white">
+                        <div className="card-body text-center">
+                            <h4>{stats.available}</h4>
+                            <small>Có sẵn</small>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-md-3 mb-3">
+                    <div className="card bg-warning text-white">
+                        <div className="card-body text-center">
+                            <h4>{stats.lowStock}</h4>
+                            <small>Sắp hết</small>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-md-3 mb-3">
+                    <div className="card bg-danger text-white">
+                        <div className="card-body text-center">
+                            <h4>{stats.outOfStock}</h4>
+                            <small>Hết hàng</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Filters */}
+            <div className="card shadow border-0 mb-4">
+                <div className="card-body">
+                    <div className="row">
+                        <div className="col-md-6">
+                            <label className="form-label">Tìm kiếm</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Tìm theo tên thuốc hoặc danh mục..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <div className="col-md-6">
+                            <label className="form-label">Trạng thái</label>
+                            <select
+                                className="form-select"
+                                value={filterStatus}
+                                onChange={(e) => setFilterStatus(e.target.value)}
                             >
-                              <FaCheck />
-                              Đã uống
-                            </button>
-                          )}
+                                <option value="all">Tất cả</option>
+                                <option value="AVAILABLE">Có sẵn</option>
+                                <option value="LOW_STOCK">Sắp hết</option>
+                                <option value="OUT_OF_STOCK">Hết hàng</option>
+                            </select>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                    </div>
                 </div>
-              ) : (
-                <div style={{
-                  textAlign: 'center',
-                  padding: '60px 20px',
-                  background: '#f8f9fa',
-                  borderRadius: '12px',
-                  border: '2px solid #e9ecef'
-                }}>
-                  <div style={{ fontSize: '48px', marginBottom: '20px' }}>📅</div>
-                  <h3 style={{ color: '#495057', marginBottom: '10px' }}>
-                    Không có lịch uống thuốc hôm nay
-                  </h3>
-                  <p style={{ color: '#6c757d', fontSize: '14px' }}>
-                    Hôm nay không có học sinh nào cần uống thuốc theo lịch.
-                  </p>
-                </div>
-              )}
             </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+
+            {/* Medications List */}
+            <div className="card shadow border-0">
+                <div className="card-header bg-light">
+                    <h5 className="mb-0">
+                        <i className="fas fa-list me-2"></i>
+                        Danh sách thuốc
+                    </h5>
+                </div>
+                <div className="card-body">
+                    {loading ? (
+                        <div className="text-center py-4">
+                            <div className="spinner-border" role="status">
+                                <span className="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="table-responsive">
+                            <table className="table table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Tên thuốc</th>
+                                        <th>Danh mục</th>
+                                        <th>Liều lượng</th>
+                                        <th>Dạng bào chế</th>
+                                        <th>Số lượng</th>
+                                        <th>Hạn sử dụng</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredMedications.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="8" className="text-center text-muted py-4">
+                                                <i className="fas fa-clipboard-list fa-2x mb-2 text-muted"></i>
+                                                <br />
+                                                Không tìm thấy thuốc nào.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        filteredMedications.map((medication) => (
+                                            <tr key={medication.id}>
+                                                <td>
+                                                    <div className="fw-bold">{medication.name}</div>
+                                                    <small className="text-muted">ID: {medication.id}</small>
+                                                </td>
+                                                <td>
+                                                    <span className="badge bg-info">{medication.category}</span>
+                                                </td>
+                                                <td>
+                                                    <span className="fw-bold">{medication.dosage}</span>
+                                                </td>
+                                                <td>
+                                                    <span className="text-muted">{medication.form}</span>
+                                                </td>
+                                                <td>
+                                                    {getQuantityBadge(medication.quantity, medication.minQuantity)}
+                                                    <br />
+                                                    <small className="text-muted">Tối thiểu: {medication.minQuantity}</small>
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <small className="text-muted">
+                                                            {new Date(medication.expiryDate).toLocaleDateString('vi-VN')}
+                                                        </small>
+                                                        <br />
+                                                        {getExpiryBadge(medication.expiryDate)}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    {getStatusBadge(medication.status)}
+                                                </td>
+                                                <td>
+                                                    <div className="btn-group" role="group">
+                                                        <button
+                                                            className="btn btn-sm btn-outline-primary me-1"
+                                                            title="Xem chi tiết"
+                                                        >
+                                                            <i className="fas fa-eye"></i>
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-sm btn-outline-warning me-1"
+                                                            title="Cập nhật số lượng"
+                                                        >
+                                                            <i className="fas fa-edit"></i>
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-sm btn-outline-success"
+                                                            title="Thêm vào kho"
+                                                        >
+                                                            <i className="fas fa-plus"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="row mt-4">
+                <div className="col-12">
+                    <div className="card shadow border-0">
+                        <div className="card-header bg-light">
+                            <h5 className="mb-0">
+                                <i className="fas fa-bolt me-2"></i>Thao tác nhanh
+                            </h5>
+                        </div>
+                        <div className="card-body">
+                            <div className="row">
+                                <div className="col-md-3 mb-3">
+                                    <button className="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                                        <i className="fas fa-plus fa-2x mb-2"></i>
+                                        <span>Thêm thuốc mới</span>
+                                    </button>
+                                </div>
+                                <div className="col-md-3 mb-3">
+                                    <button className="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                                        <i className="fas fa-download fa-2x mb-2"></i>
+                                        <span>Nhập kho</span>
+                                    </button>
+                                </div>
+                                <div className="col-md-3 mb-3">
+                                    <button className="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                                        <i className="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                                        <span>Báo cáo thiếu</span>
+                                    </button>
+                                </div>
+                                <div className="col-md-3 mb-3">
+                                    <button className="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                                        <i className="fas fa-file-export fa-2x mb-2"></i>
+                                        <span>Xuất báo cáo</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </NurseLayout>
+    );
 }
 
 export default MedicationManagement; 

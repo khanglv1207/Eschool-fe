@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getAllParentStudent, createHealthIncident } from "../services/adminApi";
 import api from "../services/api";
-import nurseApi from "../services/nurseApi";
 
 // Thêm import Roboto font cho toàn trang nếu chưa có
 const robotoFont = document.getElementById('roboto-font');
@@ -73,7 +72,7 @@ export default function HealthIncidentForm() {
   const [status, setStatus] = useState("");
   const [otherStatus, setOtherStatus] = useState("");
   const [file, setFile] = useState(null);
-  
+
   // Thêm state cho form data
   const [formData, setFormData] = useState({
     studentId: "",
@@ -98,7 +97,7 @@ export default function HealthIncidentForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  
+
   // State cho nurse và parent-student info
   const [nurseInfo, setNurseInfo] = useState(null);
   const [parentStudentInfo, setParentStudentInfo] = useState(null);
@@ -126,9 +125,9 @@ export default function HealthIncidentForm() {
     const fetchNurseInfo = async () => {
       try {
         // Lấy thông tin nurse hiện tại từ API
-        const nurseData = await nurseApi.getCurrentNurse();
+        const nurseData = await api.getCurrentNurse();
         console.log('👩‍⚕️ Nurse info from API:', nurseData);
-        
+
         // Kiểm tra cấu trúc response từ backend theo GetAllNurseResponse
         if (nurseData && nurseData.nurseId) {
           setNurseInfo({
@@ -155,7 +154,7 @@ export default function HealthIncidentForm() {
   const handleStudentChange = async (e) => {
     const selectedStudentId = e.target.value;
     const selectedStudent = students.find(student => student.id === selectedStudentId);
-    
+
     if (selectedStudent) {
       setFormData(prev => ({
         ...prev,
@@ -164,14 +163,14 @@ export default function HealthIncidentForm() {
         studentCode: selectedStudent.studentCode || "",
         className: selectedStudent.className || selectedStudent.class || ""
       }));
-      
+
       // Lưu thông tin parent-student
       setParentStudentInfo(selectedStudent);
-      
+
       // Lấy thông tin nurse từ API (nếu chưa có)
       if (!nurseInfo?.id) {
         try {
-          const nurseData = await nurseApi.getCurrentNurse();
+          const nurseData = await api.getCurrentNurse();
           if (nurseData && nurseData.nurseId) {
             setNurseInfo({
               id: nurseData.nurseId,
@@ -203,7 +202,7 @@ export default function HealthIncidentForm() {
   // Xử lý submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       setSubmitting(true);
       setError("");
@@ -250,7 +249,7 @@ export default function HealthIncidentForm() {
       // Lưu vào database qua API thực sự
       await createHealthIncident(incidentData);
       setSuccess("Ghi nhận sự cố y tế thành công và đã lưu vào database!");
-      
+
       // Reset form
       setFormData({
         studentId: "",
@@ -273,7 +272,7 @@ export default function HealthIncidentForm() {
       setStatus("");
       setOtherStatus("");
       setFile(null);
-      
+
     } catch (error) {
       console.error("Lỗi khi gửi form:", error);
       setError(error.message || "Có lỗi xảy ra khi gửi ghi nhận");
@@ -301,24 +300,24 @@ export default function HealthIncidentForm() {
         position: 'relative',
         fontFamily: 'Arial, Helvetica, sans-serif',
       }}>
-                 <h1 style={{ color: "#2979e8", fontWeight: 700, fontSize: 36, marginBottom: 10, fontFamily: 'Roboto, Segoe UI, Arial, sans-serif' }}>Ghi nhận sự cố y tế</h1>
-         <div style={{ color: "#444", fontSize: 18, marginBottom: 36, fontWeight: 500 }}>
-           Vui lòng điền đầy đủ thông tin về sự cố sức khỏe của học sinh để được xử lý và theo dõi.
-         </div>
-         
-         {/* Hiển thị thông tin nurse */}
-         {nurseInfo && (
-           <div style={{
-             background: '#e3f2fd',
-             border: '1px solid #2196f3',
-             borderRadius: '8px',
-             padding: '12px 16px',
-             marginBottom: '20px',
-             fontSize: '14px'
-           }}>
-             <strong>👩‍⚕️ Nurse:</strong> {nurseInfo.name} ({nurseInfo.code})
-           </div>
-         )}
+        <h1 style={{ color: "#2979e8", fontWeight: 700, fontSize: 36, marginBottom: 10, fontFamily: 'Roboto, Segoe UI, Arial, sans-serif' }}>Ghi nhận sự cố y tế</h1>
+        <div style={{ color: "#444", fontSize: 18, marginBottom: 36, fontWeight: 500 }}>
+          Vui lòng điền đầy đủ thông tin về sự cố sức khỏe của học sinh để được xử lý và theo dõi.
+        </div>
+
+        {/* Hiển thị thông tin nurse */}
+        {nurseInfo && (
+          <div style={{
+            background: '#e3f2fd',
+            border: '1px solid #2196f3',
+            borderRadius: '8px',
+            padding: '12px 16px',
+            marginBottom: '20px',
+            fontSize: '14px'
+          }}>
+            <strong>👩‍⚕️ Nurse:</strong> {nurseInfo.name} ({nurseInfo.code})
+          </div>
+        )}
 
 
 
@@ -336,7 +335,7 @@ export default function HealthIncidentForm() {
             {error}
           </div>
         )}
-        
+
         {success && (
           <div style={{
             background: '#e8f5e8',
@@ -356,9 +355,9 @@ export default function HealthIncidentForm() {
           <SectionTitle>1. Thông tin học sinh</SectionTitle>
           <div style={{ marginBottom: 18 }}>
             <label className="label-luxury">Chọn học sinh <span style={{ color: '#e53935' }}>*</span></label>
-            <select 
-              className="input-luxury" 
-              style={{ ...inputStyle, marginTop: 6 }} 
+            <select
+              className="input-luxury"
+              style={{ ...inputStyle, marginTop: 6 }}
               value={formData.studentId}
               onChange={handleStudentChange}
               required
@@ -373,17 +372,17 @@ export default function HealthIncidentForm() {
             </select>
             {loading && <div style={{ marginTop: 8, color: '#2979e8', fontSize: '14px' }}>Đang tải danh sách học sinh...</div>}
           </div>
-          
+
           <div style={{ display: 'flex', gap: 24, marginBottom: 18, flexWrap: 'wrap' }}>
-            <InputGroup 
-              label="Họ và tên học sinh" 
+            <InputGroup
+              label="Họ và tên học sinh"
               value={formData.studentName}
               onChange={handleInputChange}
               name="studentName"
               readOnly
             />
-            <InputGroup 
-              label="Mã học sinh" 
+            <InputGroup
+              label="Mã học sinh"
               value={formData.studentCode}
               onChange={handleInputChange}
               name="studentCode"
@@ -391,8 +390,8 @@ export default function HealthIncidentForm() {
             />
           </div>
           <div style={{ maxWidth: 320, marginBottom: 32 }}>
-            <InputGroup 
-              label="Lớp" 
+            <InputGroup
+              label="Lớp"
               value={formData.className}
               onChange={handleInputChange}
               name="className"
@@ -403,13 +402,13 @@ export default function HealthIncidentForm() {
           {/* 2. Thông tin sự cố */}
           <SectionTitle>2. Thông tin sự cố</SectionTitle>
           <div style={{ marginBottom: 18 }}>
-            <InputGroup 
-              label="Thời gian xảy ra sự cố" 
-              type="datetime-local" 
+            <InputGroup
+              label="Thời gian xảy ra sự cố"
+              type="datetime-local"
               value={formData.incidentTime}
               onChange={handleInputChange}
               name="incidentTime"
-              required 
+              required
             />
           </div>
           <div style={{ marginBottom: 18 }}>
@@ -424,9 +423,9 @@ export default function HealthIncidentForm() {
           </div>
           <div style={{ marginBottom: 32 }}>
             <label className="label-luxury">Mô tả chi tiết sự cố</label>
-            <textarea 
-              className="input-luxury" 
-              style={{ ...inputStyle, minHeight: 80, marginTop: 6 }} 
+            <textarea
+              className="input-luxury"
+              style={{ ...inputStyle, minHeight: 80, marginTop: 6 }}
               placeholder="Ghi rõ hoàn cảnh, mức độ tổn thương…"
               value={formData.incidentDescription}
               onChange={handleInputChange}
@@ -438,9 +437,9 @@ export default function HealthIncidentForm() {
           <SectionTitle>3. Xử lý ban đầu</SectionTitle>
           <div style={{ marginBottom: 18 }}>
             <label className="label-luxury">Biện pháp xử lý</label>
-            <textarea 
-              className="input-luxury" 
-              style={{ ...inputStyle, minHeight: 60, marginTop: 6 }} 
+            <textarea
+              className="input-luxury"
+              style={{ ...inputStyle, minHeight: 60, marginTop: 6 }}
               placeholder="Ví dụ: rửa vết thương, đo nhiệt độ, sơ cứu…"
               value={formData.initialTreatment}
               onChange={handleInputChange}
@@ -448,8 +447,8 @@ export default function HealthIncidentForm() {
             />
           </div>
           <div style={{ marginBottom: 18 }}>
-            <InputGroup 
-              label="Người xử lý ban đầu" 
+            <InputGroup
+              label="Người xử lý ban đầu"
               placeholder="Tên cán bộ y tế, giáo viên…"
               value={formData.treatedBy}
               onChange={handleInputChange}
@@ -458,8 +457,8 @@ export default function HealthIncidentForm() {
           </div>
           <div style={{ display: 'flex', gap: 32, marginBottom: 32, flexWrap: 'wrap' }}>
             <label style={checkboxLabel}>
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 style={checkboxStyle}
                 checked={formData.calledParent}
                 onChange={handleInputChange}
@@ -468,8 +467,8 @@ export default function HealthIncidentForm() {
               Có gọi phụ huynh
             </label>
             <label style={checkboxLabel}>
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 style={checkboxStyle}
                 checked={formData.transferredToHospital}
                 onChange={handleInputChange}
@@ -478,8 +477,8 @@ export default function HealthIncidentForm() {
               Có chuyển viện
             </label>
             <label style={checkboxLabel}>
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 style={checkboxStyle}
                 checked={formData.monitoredAtSchool}
                 onChange={handleInputChange}
@@ -505,17 +504,17 @@ export default function HealthIncidentForm() {
           {/* 5. Đính kèm hình ảnh */}
           <SectionTitle>5. Đính kèm hình ảnh (nếu có)</SectionTitle>
           <div style={{ marginBottom: 36 }}>
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={e => setFile(e.target.files[0])} 
-              style={{ marginTop: 8 }} 
+            <input
+              type="file"
+              accept="image/*"
+              onChange={e => setFile(e.target.files[0])}
+              style={{ marginTop: 8 }}
             />
             {file && <div style={{ marginTop: 10, color: '#2979e8', fontWeight: 600 }}>Đã chọn: {file.name}</div>}
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             style={{
               ...luxuryButtonStyle,
               opacity: submitting ? 0.7 : 1,
@@ -542,15 +541,15 @@ function InputGroup({ label, type = "text", required, placeholder, value, onChan
       <label className="label-luxury">
         {label} {required && <span style={{ color: '#e53935' }}>*</span>}
       </label>
-      <input 
-        type={type} 
-        className="input-luxury" 
-        style={{ 
-          ...inputStyle, 
+      <input
+        type={type}
+        className="input-luxury"
+        style={{
+          ...inputStyle,
           marginTop: 6,
           backgroundColor: readOnly ? '#f5f5f5' : '#f8fbff'
-        }} 
-        required={required} 
+        }}
+        required={required}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
