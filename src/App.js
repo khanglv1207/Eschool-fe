@@ -15,6 +15,10 @@ import ParentProfile from "./pages/ParentProfile";
 import ContactSupport from "./pages/ContactSupport";
 import VaccinationManagement from "./pages/VaccinationManagement";
 import VaccinationConfirmation from "./pages/VaccinationConfirmation";
+import VaccinationNotifications from "./pages/VaccinationNotifications";
+import VaccinationResults from "./pages/VaccinationResults";
+import VaccinationTest from "./pages/VaccinationTest";
+import VaccinationCreateTest from "./pages/VaccinationCreateTest";
 import MedicalCheckup from "./pages/MedicalCheckup";
 
 import ChangePassword from "./pages/ChangePassword";
@@ -68,7 +72,11 @@ function App() {
         <Route path="/health-declaration-form" element={<HealthProfileForm />} />
         <Route path="/health-declaration-list" element={<HealthDeclarationList />} />
         <Route path="/vaccination" element={<VaccinationManagement />} />
-        <Route path="/vaccination-confirmation" element={<VaccinationConfirmation />} />
+        <Route path="/vaccination-confirmation/:confirmationId" element={<VaccinationConfirmation />} />
+        <Route path="/vaccination-notifications" element={<VaccinationNotifications />} />
+        <Route path="/vaccination-results" element={<VaccinationResults />} />
+        <Route path="/vaccination-test" element={<VaccinationTest />} />
+        <Route path="/vaccination-create-test" element={<VaccinationCreateTest />} />
         <Route path="/medical-checkup" element={<MedicalCheckup />} />
         <Route path="/health-incident-form" element={<HealthIncidentForm />} />
         <Route path="/change-password" element={<ChangePassword />} />

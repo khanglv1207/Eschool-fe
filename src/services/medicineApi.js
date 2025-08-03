@@ -65,29 +65,18 @@ export const updateMedicineStatus = async (requestId, status) => {
 };
 
 // Tạo yêu cầu thuốc mới (cho phụ huynh)
-// TODO: Tạo API endpoint cho việc tạo medication request
 export const createMedicineRequest = async (requestData) => {
   try {
     console.log('📝 Tạo yêu cầu thuốc mới...', requestData);
     
-    // TODO: Tạo API endpoint /api/medicines/requests cho việc tạo yêu cầu thuốc
-    // Hiện tại tạm thời trả về mock data
-    console.log('⚠️ API endpoint chưa được tạo, trả về mock data');
+    const response = await api.post('/api/medicines/requests', requestData);
+    console.log('✅ Response:', response.data);
     
-    return {
-      id: Date.now(),
-      status: 'PENDING',
-      message: 'Yêu cầu thuốc đã được gửi thành công'
-    };
-    
-    // const response = await api.post('/api/medicines/requests', requestData);
-    // console.log('✅ Response:', response.data);
-    
-    // if (response.data && response.data.code === 1000) {
-    //   return response.data.result;
-    // } else {
-    //   throw new Error(response.data?.message || 'Không thể tạo yêu cầu thuốc');
-    // }
+    if (response.data && response.data.code === 1000) {
+      return response.data.result;
+    } else {
+      throw new Error(response.data?.message || 'Không thể tạo yêu cầu thuốc');
+    }
   } catch (error) {
     console.error('❌ Lỗi tạo yêu cầu thuốc:', error);
     

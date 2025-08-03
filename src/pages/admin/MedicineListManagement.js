@@ -24,19 +24,35 @@ function MedicineListManagement() {
       setLoading(true);
       let requests;
       
-             if (isParent) {
-         // Phụ huynh chỉ thấy yêu cầu của mình
-         requests = await getParentMedicineRequests();
-       } else if (isNurse) {
-         // Y tá thấy đơn thuốc chờ duyệt
-         requests = await getPendingMedicationRequests();
-       } else {
-         // Admin thấy tất cả yêu cầu
-         requests = await getMedicineRequests();
-       }
+      if (isParent) {
+        // Phụ huynh chỉ thấy yêu cầu của mình
+        requests = await getParentMedicineRequests();
+      } else if (isNurse) {
+        // Y tá thấy đơn thuốc chờ duyệt
+        requests = await getPendingMedicationRequests();
+      } else {
+        // Admin thấy tất cả yêu cầu
+        requests = await getMedicineRequests();
+      }
       
-      setMedicineRequests(requests);
-      console.log('📋 Medicine requests loaded:', requests);
+      // Transform API response to match component expectations
+      const transformedRequests = requests.map(request => ({
+        id: request.requestId || request.id,
+        studentName: request.studentName || 'Không có tên học sinh',
+        studentCode: request.studentCode || 'N/A',
+        className: request.className || 'N/A',
+        medicineName: request.medicineName || 'Thuốc chưa được chỉ định',
+        dosage: request.dosage || 'N/A',
+        frequency: request.frequency || 'N/A',
+        note: request.note || '',
+        parentName: request.parentName || 'Không có tên phụ huynh',
+        parentPhone: request.parentPhone || 'N/A',
+        status: request.status || 'PENDING',
+        createdAt: request.requestDate || request.createdAt || new Date().toISOString()
+      }));
+      
+      setMedicineRequests(transformedRequests);
+      console.log('📋 Medicine requests loaded:', transformedRequests);
     } catch (error) {
       console.error('❌ Lỗi tải danh sách thuốc:', error);
       setMessage('❌ Lỗi tải danh sách thuốc: ' + error.message);

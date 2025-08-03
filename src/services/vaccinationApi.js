@@ -103,12 +103,14 @@ export const sendVaccinationNotices = async (notificationData) => {
 export const confirmVaccination = async (confirmationData) => {
   try {
     console.log('✅ Xác nhận tiêm chủng...', confirmationData);
+    console.log('✅ Request URL:', '/api/vaccinations/confirm-vaccination');
+    console.log('✅ Request Body:', JSON.stringify(confirmationData, null, 2));
 
     const response = await api.post('/api/vaccinations/confirm-vaccination', confirmationData);
     console.log('✅ Response:', response.data);
 
     if (response.data && response.data.code === 1000) {
-      return response.data.result;
+      return response.data;
     } else {
       throw new Error(response.data?.message || 'Không thể xác nhận tiêm chủng');
     }
@@ -194,7 +196,7 @@ export const getVaccinationNotifications = async () => {
   try {
     console.log('📋 Lấy danh sách thông báo tiêm chủng cho phụ huynh...');
 
-    const response = await api.get('/api/vaccinations/parent-notifications');
+    const response = await api.get('/api/vaccinations/notifications');
     console.log('✅ Response:', response.data);
 
     if (response.data && response.data.code === 1000) {
@@ -314,7 +316,7 @@ export const getVaccinationResult = async () => {
   try {
     console.log('📋 Lấy kết quả tiêm chủng...');
 
-    const response = await api.get('/api/vaccinations/vaccination-result');
+    const response = await api.get('/api/vaccinations/results');
     console.log('✅ Response:', response.data);
 
     if (response.data && response.data.code === 1000) {
@@ -332,7 +334,7 @@ export const getVaccinationResult = async () => {
     } else if (error.response?.status === 403) {
       throw new Error('Không có quyền truy cập. Vui lòng liên hệ admin.');
     } else if (error.response?.status === 404) {
-      throw new Error('API endpoint không tồn tại. Vui lòng liên hệ admin để cấu hình backend.');
+      return []; // Không có kết quả nào
     } else {
       throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
     }

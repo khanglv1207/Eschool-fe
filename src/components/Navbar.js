@@ -62,11 +62,22 @@ function Navbar() {
       { title: "Khai báo sức khỏe", link: "/health-declaration" },
     ];
 
-    // Chỉ thêm "Tiêm chủng" và "Kiểm tra y tế định kỳ" cho Admin và Nurse
+    // Thêm menu tiêm chủng cho tất cả roles
     if (isAdmin || isNurse) {
       profileSubmenu.push(
         { title: "Tiêm chủng", link: "/vaccination" },
         { title: "Kiểm tra y tế định kỳ", link: "/medical-checkup" }
+      );
+    } else if (isParent) {
+      // Menu cho phụ huynh
+      profileSubmenu.push(
+        { title: "Thông báo tiêm chủng", link: "/vaccination-notifications" },
+        { title: "Kết quả tiêm chủng", link: "/vaccination-results" }
+      );
+    } else {
+      // Menu cho user thường
+      profileSubmenu.push(
+        { title: "Thông báo tiêm chủng", link: "/vaccination-notifications" }
       );
     }
 
