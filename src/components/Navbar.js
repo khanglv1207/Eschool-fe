@@ -45,27 +45,44 @@ function Navbar() {
     console.warn("Lỗi đọc loggedInUser:", e);
   }
 
-  // Kiểm tra xem user có phải là nurse không
+  // Kiểm tra role của user
   const isNurse = userRole === 'NURSE' || userRole === 'nurse' || 
                   (Array.isArray(userRole) && userRole.includes('NURSE'));
+  const isAdmin = userRole === 'ADMIN' || userRole === 'admin' || 
+                  (Array.isArray(userRole) && userRole.includes('ADMIN'));
+  const isParent = userRole === 'PARENT' || userRole === 'parent' || 
+                   (Array.isArray(userRole) && userRole.includes('PARENT'));
+  
+
 
   // Tạo menu items dựa trên role
   const getMenuItems = () => {
+    // Tạo submenu cho "Hồ sơ & Tiêm chủng" dựa trên role
+    const profileSubmenu = [
+      { title: "Khai báo sức khỏe", link: "/health-declaration" },
+    ];
+    
+    // Chỉ thêm "Tiêm chủng" và "Kiểm tra y tế định kỳ" cho Admin và Nurse
+    if (isAdmin || isNurse) {
+      profileSubmenu.push(
+        { title: "Tiêm chủng", link: "/vaccination" },
+        { title: "Kiểm tra y tế định kỳ", link: "/medical-checkup" }
+      );
+    }
+    
     const baseMenuItems = [
       { title: "Trang chủ", link: "/" },
       {
         title: "Hồ sơ & Tiêm chủng",
-        submenu: [
-          { title: "Khai báo sức khỏe", link: "/health-declaration" },
-          { title: "Tiêm chủng", link: "/vaccination" },
-          { title: "Kiểm tra y tế định kỳ", link: "/medical-checkup" },
-        ],
+        submenu: profileSubmenu,
       },
       {
         title: "Quản lí thuốc",
-        submenu: [
+        submenu: isParent ? [
           { title: "Gửi thuốc cho con", link: "/medicine-registration" },
           { title: "Danh sách thuốc đã gửi", link: "/parent-medicine-list" },
+        ] : [
+          { title: "Quản lý yêu cầu thuốc", link: "/medicine-list-management" },
         ],
       },
       { title: "Blog", link: "/blogs" },
@@ -128,6 +145,8 @@ function Navbar() {
         <div style={{ display: "flex", alignItems: "center" }}>
           <img src={logo} alt="eSchoolMed Logo" style={{ height: "90px", marginRight: 12, marginLeft: 32 }} />
         </div>
+
+
 
         {/* Menu chính */}
         <div

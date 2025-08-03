@@ -9,12 +9,41 @@ export const updateParentProfile = async (profileData) => {
   }
 };
 
+// Lấy thông tin parent profile
 export const getParentProfile = async () => {
   try {
-    const response = await api.get('/api/parents/profile');
-    return response.data;
+    console.log('📋 Lấy thông tin parent profile...');
+    console.log('🔗 API endpoint: /api/parents/parent-profile');
+    
+    const response = await api.get('/api/parents/parent-profile');
+    console.log('✅ Response:', response.data);
+    console.log('📊 Response structure:', {
+      code: response.data?.code,
+      message: response.data?.message,
+      result: response.data?.result
+    });
+    
+    if (response.data && response.data.code === 1000) {
+      console.log('✅ API call thành công, trả về data:', response.data.result);
+      return response.data.result;
+    } else {
+      console.error('❌ API response không đúng format:', response.data);
+      throw new Error(response.data?.message || 'Không lấy được thông tin parent profile');
+    }
   } catch (error) {
-    throw error;
+    console.error('❌ Lỗi lấy parent profile:', error);
+    
+    if (error.response?.status === 400) {
+      throw new Error('Dữ liệu không hợp lệ. Vui lòng kiểm tra thông tin.');
+    } else if (error.response?.status === 401) {
+      throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    } else if (error.response?.status === 403) {
+      throw new Error('Không có quyền truy cập. Vui lòng liên hệ admin.');
+    } else if (error.response?.status === 404) {
+      throw new Error('API endpoint không tồn tại. Vui lòng liên hệ admin để cấu hình backend.');
+    } else {
+      throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
+    }
   }
 };
 

@@ -217,21 +217,55 @@ const VaccinationManagement = () => {
       return;
     }
 
+    // Xác nhận trước khi gửi
+    const confirmed = window.confirm(
+      `Bạn có chắc chắn muốn gửi thông báo tiêm chủng ${selectedVaccine} cho ${studentsToVaccinate.length} học sinh?\n\n` +
+      `📅 Ngày dự kiến: ${new Date().toLocaleDateString('vi-VN')}\n` +
+      `📍 Địa điểm: Phòng y tế trường học\n` +
+      `📝 Ghi chú: Thông báo tiêm chủng ${selectedVaccine} cho học sinh\n\n` +
+      `Hệ thống sẽ tự động gửi email thông báo đến phụ huynh của ${studentsToVaccinate.length} học sinh.`
+    );
+    
+    if (!confirmed) {
+      return;
+    }
+
     try {
       setLoading(true);
+      console.log('📧 Chuẩn bị gửi thông báo tiêm chủng...');
+      console.log('🎯 Vaccine:', selectedVaccine);
+      console.log('👥 Số học sinh:', studentsToVaccinate.length);
+      
       const request = {
         vaccineName: selectedVaccine,
-        students: studentsToVaccinate.map(student => ({
-          studentId: student.studentId,
-          studentName: student.studentName,
-          parentEmail: student.parentEmail
-        }))
+        scheduledDate: new Date().toISOString().split('T')[0], // Ngày hiện tại
+        location: 'Phòng y tế trường học',
+        note: `Thông báo tiêm chủng ${selectedVaccine} cho học sinh`,
+        studentIds: studentsToVaccinate
+          .filter(student => student.studentId || student.studentCode || student.id)
+          .map(student => student.studentId || student.studentCode || student.id)
       };
+      
+      console.log('📋 Request body:', request);
+      console.log('🎯 Vaccine:', request.vaccineName);
+      console.log('📅 Scheduled date:', request.scheduledDate);
+      console.log('📍 Location:', request.location);
+      console.log('📝 Note:', request.note);
+      console.log('👥 Student IDs:', request.studentIds);
+      console.log('📊 Số học sinh:', request.studentIds.length);
+      
+      // Kiểm tra có học sinh nào không
+      if (request.studentIds.length === 0) {
+        throw new Error('Không có học sinh nào để gửi thông báo');
+      }
+      
+      console.log('✅ Số học sinh sẽ gửi thông báo:', request.studentIds.length);
       
       await sendVaccinationNotices(request);
       setMessage('✅ Đã gửi thông báo tiêm chủng thành công!');
       setStudentsToVaccinate([]);
     } catch (error) {
+      console.error('❌ Lỗi gửi thông báo:', error);
       setMessage('❌ Lỗi gửi thông báo: ' + error.message);
     } finally {
       setLoading(false);
@@ -471,7 +505,7 @@ const VaccinationManagement = () => {
                           <td>{student.studentCode || 'N/A'}</td>
                           <td>{student.studentName || student.fullName || student.name || student.student_name || 'N/A'}</td>
                           <td>{student.className || student.class_name || student.class || 'N/A'}</td>
-                          <td>{student.parent_email || 'N/A'}</td>
+                          <td>{student.parentEmail || student.parent_email || student.email || 'N/A'}</td>
                           <td>
                             <span style={{color: '#e67e22', fontSize: '12px'}}>
                               {student.reason || student.vaccinationStatus || 'Chưa tiêm vaccine'}
@@ -488,9 +522,14 @@ const VaccinationManagement = () => {
                 <button 
                   onClick={handleSendVaccinationNotices}
                   className="btn-primary"
-                  disabled={loading}
+                  disabled={loading || studentsToVaccinate.length === 0}
+                  style={{
+                    opacity: studentsToVaccinate.length === 0 ? 0.6 : 1,
+                    cursor: studentsToVaccinate.length === 0 ? 'not-allowed' : 'pointer'
+                  }}
                 >
-                  <FaEnvelope /> Gửi Thông Báo Tiêm Chủng
+                  <FaEnvelope /> 
+                  {loading ? 'Đang gửi...' : `Gửi Thông Báo Tiêm Chủng (${studentsToVaccinate.length} học sinh)`}
                 </button>
               </div>
             )}

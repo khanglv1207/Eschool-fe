@@ -8,6 +8,7 @@ const sidebarItems = [
     { icon: "fa-user-nurse", label: "School Nurse", link: "/admin/manageSchoolNurse" },
     { icon: "fa-blog", label: "Blogs", link: "/admin/manageBlogs" },
     { icon: "fa-comments", label: "Consultations", link: "/admin/ConsultationManagement" },
+    { icon: "fa-pills", label: "Medicine List", link: "/admin/MedicineListManagement" },
     // { icon: "fa-comment-dots", label: "Feedbacks", link: "/admin/manageFeedbacks" },
     // { icon: "fa-medical", label: "Medicals", link: "/admin/MedicalManagement" },
     { icon: "fa-calendar-check", label: "Medical Event Recording", link: "/admin/medicaleventrecording" },
