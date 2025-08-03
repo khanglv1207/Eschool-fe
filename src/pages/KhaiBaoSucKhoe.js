@@ -112,7 +112,7 @@ function KhaiBaoSucKhoe() {
             {isNurse && <span style={{ fontSize: '16px', opacity: 0.8, marginLeft: '10px', color: '#1976d2' }}>(Y Tá)</span>}
             {isParent && <span style={{ fontSize: '16px', opacity: 0.8, marginLeft: '10px', color: '#2e7d32' }}>(Phụ Huynh)</span>}
           </h2>
-          <div style={{display:'flex',alignItems:'center',gap:16}}>
+          <div style={{display:'flex',alignItems:'center',gap:12}}>
             <button
               onClick={() => setDark(d => !d)}
               style={{...styles.iconButton, ...(dark ? styles.iconButtonDark : {})}}
@@ -121,27 +121,14 @@ function KhaiBaoSucKhoe() {
               {dark ? <FaSun /> : <FaMoon />}
             </button>
             <button
-              onClick={handleViewList}
-              style={styles.button}
-              className="ripple"
-            >
-              <FaSearch style={{ marginRight: 8, fontSize: 18 }} /> Xem danh sách
-            </button>
-            <button
               onClick={loadData}
               style={{...styles.button, background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)'}}
               className="ripple"
               disabled={loading}
+              title="Làm mới dữ liệu"
             >
               <FaSearch style={{ marginRight: 8, fontSize: 18 }} /> 
               {loading ? 'Đang tải...' : 'Làm mới'}
-            </button>
-            <button
-              onClick={handleKhaiBao}
-              style={styles.button}
-              className="ripple"
-            >
-              <FaPlusCircle style={{ marginRight: 8, fontSize: 18 }} /> Tạo khai báo mới
             </button>
           </div>
         </div>
@@ -164,8 +151,8 @@ function KhaiBaoSucKhoe() {
           <div style={{
             ...styles.optionsGrid,
             gridTemplateColumns: (isAdmin || isNurse) 
-              ? 'repeat(auto-fit, minmax(280px, 1fr))' 
-              : 'repeat(auto-fit, minmax(320px, 1fr))'
+              ? 'repeat(auto-fit, minmax(300px, 1fr))' 
+              : 'repeat(auto-fit, minmax(350px, 1fr))'
           }}>
             {/* Options cho tất cả roles */}
             <div style={styles.optionCard} className="optionCard" onClick={handleKhaiBao}>
@@ -189,11 +176,11 @@ function KhaiBaoSucKhoe() {
             </div>
 
             {/* Options chỉ cho Admin và Nurse */}
-            {(isAdmin || isNurse) && (
+            {showAdminOptions && (
               <>
                 <div 
                   style={styles.optionCard}
-                  className="optionCard"
+                  className="optionCard parent-hidden"
                   onClick={() => navigate('/vaccination-management')}
                 >
                   <div style={styles.optionIcon}>
@@ -207,7 +194,7 @@ function KhaiBaoSucKhoe() {
 
                 <div 
                   style={styles.optionCard}
-                  className="optionCard"
+                  className="optionCard parent-hidden"
                   onClick={() => navigate('/medical-checkup')}
                 >
                   <div style={styles.optionIcon}>
@@ -296,6 +283,10 @@ function KhaiBaoSucKhoe() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         body { font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        .parent-hidden {
+          display: none !important;
+        }
         
         @keyframes gradientMove {
           0% { background-position: 0% 50% }

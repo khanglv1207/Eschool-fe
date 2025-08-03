@@ -219,7 +219,7 @@ function ParentProfile() {
 
         {/* Form Content */}
         <div style={{ padding: '40px' }}>
-          <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
             {/* Parent Information Section */}
             <div style={{ marginBottom: '40px' }}>
               <div style={{
@@ -499,7 +499,7 @@ function ParentProfile() {
                 </button>
               </div>
 
-              {form.students.map((student, idx) => (
+        {form.students.map((student, idx) => (
                 <div key={idx} style={{
                   marginBottom: '20px',
                   border: '2px solid #e9ecef',

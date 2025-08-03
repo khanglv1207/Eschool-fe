@@ -247,6 +247,8 @@ const VaccinationManagement = () => {
       };
       
       console.log('📋 Request body:', request);
+      
+      console.log('📋 Request body:', request);
       console.log('🎯 Vaccine:', request.vaccineName);
       console.log('📅 Scheduled date:', request.scheduledDate);
       console.log('📍 Location:', request.location);

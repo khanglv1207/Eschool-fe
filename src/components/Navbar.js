@@ -1,6 +1,7 @@
 import React from "react";
 import logo from "../assets/logoeSchoolMed.jpg";
 import loginIcon from "../assets/login.jpg";
+import Mailbox from "./Mailbox";
 
 
 
@@ -57,10 +58,17 @@ function Navbar() {
 
   // Tạo menu items dựa trên role
   const getMenuItems = () => {
-    // Tạo submenu cho "Hồ sơ & Tiêm chủng" dựa trên role
-    const profileSubmenu = [
-      { title: "Khai báo sức khỏe", link: "/health-declaration" },
-    ];
+         // Tạo submenu cho "Hồ sơ & Tiêm chủng" dựa trên role
+     const profileSubmenu = [
+       { title: "Khai báo sức khỏe", link: "/health-declaration" },
+     ];
+     
+     // Thêm thông báo tiêm chủng cho phụ huynh
+     if (isParent) {
+       profileSubmenu.push(
+         { title: "Thông báo tiêm chủng", link: "/vaccination-notifications" }
+       );
+     }
     
     // Chỉ thêm "Tiêm chủng" và "Kiểm tra y tế định kỳ" cho Admin và Nurse
     if (isAdmin || isNurse) {
@@ -187,24 +195,27 @@ function Navbar() {
               )}
             </div>
           ))}
-          <span style={{ marginLeft: 32, fontWeight: 600, fontSize: 18, color: '#4395F7' }}>Buổi sáng / Buổi chiều</span>
+          
+                      {/* Hòm thư */}
+            <Mailbox />
         </div>
 
         {/* Nút Book Appointment */}
         {/* Đã xóa nút Book Appointment theo yêu cầu */}
 
-        {/* Người dùng */}
-        <div
-          className="login-container"
-          style={{
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            cursor: "pointer",
-          }}
-        >
-          {isLoggedIn ? (
+                                   {/* Người dùng */}
+         <div
+           className="login-container"
+           style={{
+             position: "relative",
+             display: "flex",
+             alignItems: "center",
+             gap: "15px",
+             cursor: "pointer",
+           }}
+         >
+
+           {isLoggedIn ? (
             <>
               <img
                 src={loginIcon}
