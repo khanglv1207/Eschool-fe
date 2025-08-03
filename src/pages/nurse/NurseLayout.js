@@ -1,57 +1,129 @@
-import React from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-
-const nurseSidebarItems = [
-    { icon: "fa-home", label: "Trang chủ", link: "/nurse/dashboard" },
-    { icon: "fa-calendar-day", label: "Lịch trình hôm nay", link: "/nurse/schedules" },
-    { icon: "fa-pills", label: "Yêu cầu thuốc", link: "/nurse/medication-requests" },
-    { icon: "fa-user-check", label: "Học sinh đã xác nhận", link: "/nurse/confirmed-students" },
-    { icon: "fa-stethoscope", label: "Kiểm tra sức khỏe", link: "/nurse/health-checkup" },
-    { icon: "fa-clipboard-list", label: "Quản lý thuốc", link: "/nurse/medication-management" },
-    { icon: "fa-user-nurse", label: "Quản lý y tá", link: "/nurse/nurse-management" },
-];
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { FaUserMd, FaPills, FaClipboardList, FaSignOutAlt, FaHome } from 'react-icons/fa';
 
 function NurseLayout({ children }) {
-    return (
-        <div style={{ minHeight: "100vh", background: "#f5f6fa" }}>
-            {/* Header */}
-            <nav className="navbar navbar-dark bg-primary px-4" style={{ height: 56 }}>
-                <span className="navbar-brand fw-bold">
-                    <i className="fas fa-user-nurse me-2"></i>
-                    EschoolMED - Nurse Portal
-                </span>
-                <div className="ms-auto text-white">
-                    <span className="me-3">Y tá</span>
-                    <i className="fas fa-user-circle"></i>
-                </div>
-            </nav>
-            <div className="container-fluid">
-                <div className="row">
-                    {/* Sidebar */}
-                    <nav className="col-md-2 d-none d-md-block bg-primary sidebar py-4" style={{ minHeight: "calc(100vh - 56px)", color: "#fff" }}>
-                        <div className="sidebar-sticky">
-                            <ul className="nav flex-column">
-                                <li className="nav-item mb-2 text-uppercase text-light small" style={{ letterSpacing: 1 }}>Chức năng chính</li>
-                                {nurseSidebarItems.map((item) => (
-                                    <li className="nav-item mb-2" key={item.label}>
-                                        <a className="nav-link text-white" href={item.link}>
-                                            <i className={`fas ${item.icon} me-2`}></i> {item.label}
-                                        </a>
-                                    </li>
-                                ))}
-                            </ul>
-                            <div className="position-absolute bottom-0 start-0 w-100 p-3 small text-light" style={{ fontSize: 13 }}>
-                                Đăng nhập với tư cách:<br />Y tá trường học
-                            </div>
-                        </div>
-                    </nav>
-                    <main className="col-md-10 ms-sm-auto px-md-4 py-4">
-                        {children}
-                    </main>
-                </div>
-            </div>
+  const location = useLocation();
+
+  const menuItems = [
+    { icon: "fa-home", label: "Dashboard", link: "/nurse/dashboard" },
+    { icon: "fa-pills", label: "Quản lý đơn thuốc", link: "/nurse/medication-management" },
+  ];
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  };
+
+  return (
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
+      {/* Sidebar */}
+      <div style={{
+        width: '250px',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: '#fff',
+        padding: '20px 0',
+        boxShadow: '2px 0 10px rgba(0,0,0,0.1)'
+      }}>
+        {/* Logo */}
+        <div style={{
+          textAlign: 'center',
+          padding: '20px',
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          marginBottom: '20px'
+        }}>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>
+            <FaUserMd style={{ marginRight: '10px' }} />
+            Y Tá
+          </div>
+          <div style={{ fontSize: '12px', opacity: 0.8 }}>
+            Quản lý sức khỏe học sinh
+          </div>
         </div>
-    );
+
+        {/* Menu Items */}
+        <nav>
+          {menuItems.map((item, index) => (
+            <Link
+              key={index}
+              to={item.link}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '15px 25px',
+                color: location.pathname === item.link ? '#fff' : 'rgba(255,255,255,0.8)',
+                textDecoration: 'none',
+                background: location.pathname === item.link ? 'rgba(255,255,255,0.1)' : 'transparent',
+                borderLeft: location.pathname === item.link ? '4px solid #fff' : '4px solid transparent',
+                transition: 'all 0.3s ease',
+                fontSize: '14px',
+                fontWeight: location.pathname === item.link ? '600' : '400'
+              }}
+              onMouseEnter={(e) => {
+                if (location.pathname !== item.link) {
+                  e.target.style.background = 'rgba(255,255,255,0.05)';
+                  e.target.style.color = '#fff';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (location.pathname !== item.link) {
+                  e.target.style.background = 'transparent';
+                  e.target.style.color = 'rgba(255,255,255,0.8)';
+                }
+              }}
+            >
+              <i className={`fas ${item.icon}`} style={{ marginRight: '12px', width: '16px' }}></i>
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Logout Button */}
+        <div style={{
+          position: 'absolute',
+          bottom: '20px',
+          left: '0',
+          right: '0',
+          padding: '0 25px'
+        }}>
+          <button
+            onClick={handleLogout}
+            style={{
+              width: '100%',
+              background: 'rgba(255,255,255,0.1)',
+              color: '#fff',
+              border: '1px solid rgba(255,255,255,0.2)',
+              padding: '12px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'rgba(255,255,255,0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'rgba(255,255,255,0.1)';
+            }}
+          >
+            <FaSignOutAlt />
+            Đăng xuất
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div style={{ flex: 1, background: '#f8f9fa' }}>
+        {children}
+      </div>
+    </div>
+  );
 }
 
 export default NurseLayout; 

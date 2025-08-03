@@ -5,14 +5,18 @@ import Home from "./components/Home";
 
 
 import KhaiBaoSucKhoe from "./pages/KhaiBaoSucKhoe";
+import HealthDeclarationForm from "./pages/HealthDeclarationForm";
+import HealthDeclarationList from "./pages/HealthDeclarationList";
 import HealthIncidentForm from "./pages/HealthIncidentForm";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import UpdateProfile from "./pages/UpdateProfile";
+import ParentProfile from "./pages/ParentProfile";
 import ContactSupport from "./pages/ContactSupport";
-import Vaccination from "./pages/Vaccination";
+import VaccinationManagement from "./pages/VaccinationManagement";
+import VaccinationConfirmation from "./pages/VaccinationConfirmation";
 import MedicalCheckup from "./pages/MedicalCheckup";
-import MedicalEvents from "./pages/MedicalEvents";
+
 import ChangePassword from "./pages/ChangePassword";
 import BlogList from "./pages/BlogList";
 import BlogDetail from "./pages/BlogDetail";
@@ -26,7 +30,9 @@ import StudentManagement from "./pages/admin/StudentManagement";
 import SchoolNurseManagement from "./pages/admin/SchoolNurseManagement";
 import MedicalManagement from "./pages/admin/MedicalManagement";
 import MedicalEventRecording from "./pages/admin/MedicalEventRecording";
-import NurseHealthDeclaration from "./pages/NurseHealthDeclaration";
+import HealthProfileForm from "./pages/HealthProfileForm";
+import ManagerLayout from "./pages/manager/ManagerLayout";
+import ManagerDashboard from "./pages/manager/ManagerDashboard";
 import VaccinManage from "./pages/admin/VaccineManage";
 // import BlogManagement from "./pages/manager/BlogManagement";
 // import FeedBackManagement from "./pages/manager/FeedBackManagement";
@@ -34,36 +40,37 @@ import VaccinManage from "./pages/admin/VaccineManage";
 // import SchoolNurseManagement from "./pages/manager/SchoolNurseManagement";
 // import UserManagement from "./pages/manager/UserManagement";
 import ConsultationManagement from "./pages/admin/ConsultationManagement";
-import DangKyThuocForm from "./pages/DangKyThuocForm";
-
-// Nurse Portal Components
+import MedicineListManagement from "./pages/admin/MedicineListManagement";
+import MedicationManagement from "./pages/nurse/MedicationManagement";
 import NurseLayout from "./pages/nurse/NurseLayout";
 import NurseDashboard from "./pages/nurse/NurseDashboard";
-import MedicationRequests from "./pages/nurse/MedicationRequests";
-import HealthCheckup from "./pages/nurse/HealthCheckup";
+import DangKyThuocForm from "./pages/DangKyThuocForm";
+import ParentMedicineList from "./pages/ParentMedicineList";
 
 function App() {
 
   const isAdminRoute = window.location.pathname.startsWith("/admin");
-  const isNurseRoute = window.location.pathname.startsWith("/nurse");
+  const isManagerRoute = window.location.pathname.startsWith("/manager");
 
   return (
     <Router>
-      {/* Chỉ hiển thị Navbar nếu không phải trang admin, manager & nurse  */}
-      {!isAdminRoute && !isNurseRoute && <Navbar />}
+      {/* Chỉ hiển thị Navbar nếu không phải trang admin & manager  */}
+      {!isAdminRoute && !isManagerRoute && <Navbar />}
 
       {/* Phần nội dung sẽ thay đổi theo Route */}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/update-profile" element={<UpdateProfile />} />
+        <Route path="/update-profile" element={<ParentProfile />} />
         <Route path="/contact" element={<ContactSupport />} />
         <Route path="/health-declaration" element={<KhaiBaoSucKhoe />} />
-        <Route path="/vaccination" element={<Vaccination />} />
+        <Route path="/health-declaration-form" element={<HealthProfileForm />} />
+        <Route path="/health-declaration-list" element={<HealthDeclarationList />} />
+        <Route path="/vaccination" element={<VaccinationManagement />} />
+        <Route path="/vaccination-confirmation" element={<VaccinationConfirmation />} />
         <Route path="/medical-checkup" element={<MedicalCheckup />} />
-        <Route path="/medical-events" element={<HealthIncidentForm />} />
-        <Route path="/incident-form" element={<HealthIncidentForm />} />
+        <Route path="/health-incident-form" element={<HealthIncidentForm />} />
         <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/blogs" element={<BlogList />} />
         <Route path="/blog/:id" element={<BlogDetail />} />
@@ -76,18 +83,20 @@ function App() {
         <Route path="/admin/manageChildren" element={<StudentManagement />} />
         <Route path="/admin/manageSchoolNurse" element={<SchoolNurseManagement />} />
         <Route path="/admin/ConsultationManagement" element={<ConsultationManagement />} />
+        <Route path="/admin/MedicineListManagement" element={<MedicineListManagement />} />
         <Route path="/admin/MedicalManagement" element={<MedicalManagement />} />
         <Route path="/admin/medicaleventrecording" element={<MedicalEventRecording />} />
         <Route path="/admin/VaccineManage" element={<VaccinManage />} />
-        <Route path="/nurse/health-declaration" element={<NurseHealthDeclaration />} />
-
-        {/* Nurse Portal Routes */}
-        <Route path="/nurse" element={<NurseLayout />} />
-        <Route path="/nurse/dashboard" element={<NurseDashboard />} />
-        <Route path="/nurse/medication-requests" element={<MedicationRequests />} />
-        <Route path="/nurse/health-checkup" element={<HealthCheckup />} />
-
-        <Route path="/medicine-registration" element={<DangKyThuocForm onBack={() => window.history.back()} />} />
+        <Route path="/health-profile-form" element={<HealthProfileForm />} />
+                    <Route path="/manager" element={<ManagerLayout />} />
+            <Route path="/manager/dashboard" element={<ManagerDashboard />} />
+            <Route path="/medicine-registration" element={<DangKyThuocForm onBack={() => window.history.back()} />} />
+            <Route path="/parent-medicine-list" element={<MedicineListManagement />} />
+            
+            {/* Nurse Routes */}
+            <Route path="/nurse" element={<NurseLayout><NurseDashboard /></NurseLayout>} />
+            <Route path="/nurse/dashboard" element={<NurseLayout><NurseDashboard /></NurseLayout>} />
+            <Route path="/nurse/medication-management" element={<NurseLayout><MedicationManagement /></NurseLayout>} />
       </Routes>
     </Router>
   );
