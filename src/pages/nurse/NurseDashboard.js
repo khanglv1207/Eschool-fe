@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaUserMd, FaPills, FaClock, FaClipboardList, FaUsers, FaChartLine } from 'react-icons/fa';
-import { getPendingMedicationRequests, getTodaySchedules } from '../../services/medicineApi';
+import { getPendingMedicationRequests, getTodaySchedules } from '../../services/nurseApi';
 
 function NurseDashboard() {
   const [stats, setStats] = useState({
@@ -19,23 +19,23 @@ function NurseDashboard() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       // Load pending medication requests
       const requests = await getPendingMedicationRequests();
-      
+
       // Load today schedules
       const schedules = await getTodaySchedules('all');
-      
+
       // Calculate completed schedules
       const completedSchedules = schedules.filter(schedule => schedule.isTaken);
-      
+
       setStats({
         pendingRequests: requests.length,
         todaySchedules: schedules.length,
         totalStudents: schedules.length > 0 ? new Set(schedules.map(s => s.studentId)).size : 0,
         completedToday: completedSchedules.length
       });
-      
+
     } catch (error) {
       console.error('❌ Lỗi tải dữ liệu dashboard:', error);
     } finally {
@@ -53,18 +53,18 @@ function NurseDashboard() {
       transition: 'all 0.3s ease',
       cursor: link ? 'pointer' : 'default'
     }}
-    onMouseEnter={(e) => {
-      if (link) {
-        e.target.style.transform = 'translateY(-2px)';
-        e.target.style.boxShadow = '0 8px 15px rgba(0,0,0,0.15)';
-      }
-    }}
-    onMouseLeave={(e) => {
-      if (link) {
-        e.target.style.transform = 'translateY(0)';
-        e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-      }
-    }}
+      onMouseEnter={(e) => {
+        if (link) {
+          e.target.style.transform = 'translateY(-2px)';
+          e.target.style.boxShadow = '0 8px 15px rgba(0,0,0,0.15)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (link) {
+          e.target.style.transform = 'translateY(0)';
+          e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+        }
+      }}
     >
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
         <div style={{
@@ -115,14 +115,14 @@ function NurseDashboard() {
         transition: 'all 0.3s ease',
         cursor: 'pointer'
       }}
-      onMouseEnter={(e) => {
-        e.target.style.transform = 'translateY(-2px)';
-        e.target.style.boxShadow = '0 8px 15px rgba(0,0,0,0.15)';
-      }}
-      onMouseLeave={(e) => {
-        e.target.style.transform = 'translateY(0)';
-        e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-      }}
+        onMouseEnter={(e) => {
+          e.target.style.transform = 'translateY(-2px)';
+          e.target.style.boxShadow = '0 8px 15px rgba(0,0,0,0.15)';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.transform = 'translateY(0)';
+          e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+        }}
       >
         <div style={{
           width: '50px',
@@ -219,7 +219,7 @@ function NurseDashboard() {
           <h3 style={{ color: '#495057', marginBottom: '24px', fontSize: '20px', fontWeight: '600' }}>
             Thao tác nhanh
           </h3>
-          
+
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -253,7 +253,7 @@ function NurseDashboard() {
           <h3 style={{ color: '#495057', marginBottom: '24px', fontSize: '20px', fontWeight: '600' }}>
             Hoạt động gần đây
           </h3>
-          
+
           <div style={{
             background: '#f8f9fa',
             borderRadius: '12px',
