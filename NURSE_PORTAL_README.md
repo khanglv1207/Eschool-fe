@@ -26,7 +26,28 @@ Nurse Portal là hệ thống quản lý dành riêng cho y tá trường học 
   - Khuyến nghị điều trị
   - Theo dõi và tái khám
 
-### 4. Layout dành riêng cho Y tá
+### 4. Lịch Uống Thuốc
+- **Chọn học sinh**: Dropdown để chọn học sinh cần xem lịch trình
+- **Lịch trình chi tiết**: Hiển thị thời gian, loại thuốc, liều lượng
+- **Trạng thái lịch trình**: Chờ thực hiện, đã thực hiện, đã bỏ lỡ
+- **Đánh dấu thực hiện**: Nút để đánh dấu lịch trình đã hoàn thành
+- **Thống kê tổng quan**: Số lượng theo từng trạng thái
+
+### 5. Quản lý Thuốc
+- **Danh sách thuốc**: Hiển thị tất cả thuốc trong kho
+- **Thông tin chi tiết**: Tên, danh mục, liều lượng, số lượng, hạn sử dụng
+- **Trạng thái kho**: Có sẵn, sắp hết, hết hàng, hết hạn
+- **Tìm kiếm và lọc**: Theo tên thuốc, danh mục, trạng thái
+- **Thao tác nhanh**: Thêm thuốc mới, nhập kho, báo cáo thiếu
+
+### 6. Quản lý Y tá
+- **Danh sách y tá**: Hiển thị tất cả y tá trong hệ thống
+- **Thông tin chi tiết**: Họ tên, email, số điện thoại, chuyên môn
+- **Tìm kiếm**: Theo tên, email, số điện thoại, chuyên môn
+- **CRUD operations**: Tạo, đọc, cập nhật, xóa y tá
+- **Confirmation dialogs**: Xác nhận trước khi xóa
+
+### 7. Layout dành riêng cho Y tá
 - **Sidebar navigation**: Menu điều hướng với các chức năng chính
 - **Header**: Hiển thị thông tin y tá và logo
 - **Responsive design**: Tương thích với mọi thiết bị
@@ -103,7 +124,57 @@ Nurse Portal là hệ thống quản lý dành riêng cho y tá trường học 
 {
   "requestId": "uuid",
   "status": "APPROVED|REJECTED|COMPLETED",
-  "notes": "string"
+  "note": "string"
+}
+```
+
+### Cấu trúc Request cho Create Nurse:
+```json
+{
+  "fullName": "string",
+  "email": "string",
+  "phone": "string",
+  "specialization": "string"
+}
+```
+
+### Cấu trúc Request cho Update Nurse:
+```json
+{
+  "nurseId": "uuid",
+  "fullName": "string",
+  "email": "string",
+  "phone": "string",
+  "specialization": "string"
+}
+```
+
+### Cấu trúc Response cho Delete Nurse:
+```json
+{
+  "code": 0,
+  "message": "string",
+  "result": "string"
+}
+```
+
+### Cấu trúc Response cho Today Schedules:
+```json
+{
+  "code": 0,
+  "message": "string",
+  "result": [
+    {
+      "scheduleId": "uuid",
+      "studentId": "uuid",
+      "medicationName": "string",
+      "dosage": "string",
+      "frequency": "string",
+      "scheduledTime": "datetime",
+      "notes": "string",
+      "status": "PENDING|TAKEN|MISSED|SKIPPED"
+    }
+  ]
 }
 ```
 
@@ -160,6 +231,28 @@ Nurse Portal là hệ thống quản lý dành riêng cho y tá trường học 
 3. Click "Kiểm tra" bên cạnh học sinh
 4. Điền thông tin kiểm tra chi tiết
 5. Click "Gửi kết quả"
+
+### Lịch uống thuốc:
+1. Vào menu "Lịch uống thuốc"
+2. Chọn học sinh từ dropdown
+3. Xem lịch trình hôm nay
+4. Click "Đã thực hiện" để đánh dấu hoàn thành
+5. Xem thống kê tổng quan
+
+### Quản lý thuốc:
+1. Vào menu "Quản lý thuốc"
+2. Xem danh sách thuốc trong kho
+3. Sử dụng tìm kiếm và lọc
+4. Xem thống kê tổng quan
+5. Sử dụng các thao tác nhanh
+
+### Quản lý y tá:
+1. Vào menu "Quản lý y tá"
+2. Xem danh sách y tá trong hệ thống
+3. Sử dụng tìm kiếm theo tên, email, số điện thoại
+4. Click "Thêm y tá mới" để tạo y tá mới
+5. Click icon edit để chỉnh sửa thông tin
+6. Click icon delete để xóa y tá (có xác nhận)
 
 ### Dashboard:
 - Xem tổng quan thống kê

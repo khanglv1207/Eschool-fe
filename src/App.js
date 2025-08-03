@@ -41,6 +41,9 @@ import NurseLayout from "./pages/nurse/NurseLayout";
 import NurseDashboard from "./pages/nurse/NurseDashboard";
 import MedicationRequests from "./pages/nurse/MedicationRequests";
 import HealthCheckup from "./pages/nurse/HealthCheckup";
+import Schedules from "./pages/nurse/Schedules";
+import MedicationManagement from "./pages/nurse/MedicationManagement";
+import NurseManagement from "./pages/nurse/NurseManagement";
 
 function App() {
 
@@ -86,6 +89,9 @@ function App() {
         <Route path="/nurse/dashboard" element={<NurseDashboard />} />
         <Route path="/nurse/medication-requests" element={<MedicationRequests />} />
         <Route path="/nurse/health-checkup" element={<HealthCheckup />} />
+        <Route path="/nurse/schedules" element={<Schedules />} />
+        <Route path="/nurse/medication-management" element={<MedicationManagement />} />
+        <Route path="/nurse/nurse-management" element={<NurseManagement />} />
 
         <Route path="/medicine-registration" element={<DangKyThuocForm onBack={() => window.history.back()} />} />
       </Routes>

@@ -3,7 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const nurseSidebarItems = [
     { icon: "fa-home", label: "Trang chủ", link: "/nurse/dashboard" },
-    { icon: "fa-calendar-day", label: "Lịch trình hôm nay", link: "/nurse/schedules" },
+    { icon: "fa-calendar-day", label: "Lịch uống thuốc", link: "/nurse/schedules" },
     { icon: "fa-pills", label: "Yêu cầu thuốc", link: "/nurse/medication-requests" },
     { icon: "fa-user-check", label: "Học sinh đã xác nhận", link: "/nurse/confirmed-students" },
     { icon: "fa-stethoscope", label: "Kiểm tra sức khỏe", link: "/nurse/health-checkup" },
