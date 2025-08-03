@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaCheck, FaTimes, FaEnvelope, FaCalendarAlt, FaMapMarkerAlt, FaSyringe } from 'react-icons/fa';
-import { confirmVaccine, rejectVaccine, getVaccinationNotification } from '../services/vaccinationApi';
+import { confirmVaccination, rejectVaccination, getVaccinationNotification } from '../services/vaccinationApi';
 
 function VaccinationConfirmation() {
   const [notification, setNotification] = useState(null);
@@ -40,7 +40,11 @@ function VaccinationConfirmation() {
   const handleConfirm = async () => {
     try {
       setSubmitting(true);
-      await confirmVaccine(confirmationId, 'Phụ huynh đồng ý cho con tiêm vaccine');
+      await confirmVaccination({
+        confirmationId: confirmationId,
+        status: 'CONFIRMED',
+        note: 'Phụ huynh đồng ý cho con tiêm chủng'
+      });
       setMessage('✅ Đã xác nhận đồng ý tiêm chủng!');
       setTimeout(() => {
         window.location.href = '/profile';
@@ -56,7 +60,11 @@ function VaccinationConfirmation() {
   const handleReject = async () => {
     try {
       setSubmitting(true);
-      await rejectVaccine(confirmationId, 'Phụ huynh từ chối tiêm vaccine');
+      await rejectVaccination({
+        confirmationId: confirmationId,
+        status: 'REJECTED',
+        note: 'Phụ huynh từ chối tiêm chủng'
+      });
       setMessage('❌ Đã từ chối tiêm chủng');
       setTimeout(() => {
         window.location.href = '/profile';

@@ -13,11 +13,11 @@ function KhaiBaoSucKhoe() {
   // Kiểm tra role của user
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
-  
+
   const isAdmin = user.role === 'ADMIN' || loggedInUser.role === 'ADMIN';
   const isNurse = user.role === 'NURSE' || loggedInUser.role === 'NURSE';
   const isParent = user.role === 'PARENT' || loggedInUser.role === 'PARENT';
-  
+
   // Đảm bảo parent không thấy các options nhạy cảm
   const showAdminOptions = !isParent && (isAdmin || isNurse);
 
@@ -28,7 +28,7 @@ function KhaiBaoSucKhoe() {
   const loadData = async () => {
     try {
       setLoading(true);
-      
+
       // Kiểm tra đăng nhập
       const loggedInUser = localStorage.getItem("loggedInUser");
       if (!loggedInUser) {
@@ -43,7 +43,7 @@ function KhaiBaoSucKhoe() {
       // Lấy thống kê
       const statsData = await getHealthDeclarationStats();
       setStats(statsData);
-      
+
       console.log('📊 Data loaded:', { userDeclarations, statsData });
     } catch (error) {
       console.error('❌ Lỗi tải dữ liệu:', error);
@@ -71,7 +71,7 @@ function KhaiBaoSucKhoe() {
 
   if (loading) {
     return (
-      <div style={{...styles.background, ...(dark ? styles.backgroundDark : {})}}>
+      <div style={{ ...styles.background, ...(dark ? styles.backgroundDark : {}) }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -103,8 +103,8 @@ function KhaiBaoSucKhoe() {
   }
 
   return (
-    <div style={{...styles.background, ...(dark ? styles.backgroundDark : {})}}>
-      <div style={{...styles.container, ...(dark ? styles.containerDark : {})}}>
+    <div style={{ ...styles.background, ...(dark ? styles.backgroundDark : {}) }}>
+      <div style={{ ...styles.container, ...(dark ? styles.containerDark : {}) }}>
         <div style={styles.headerRow}>
           <h2 style={styles.title}>
             🩺 Khai Báo Sức Khỏe
@@ -112,36 +112,49 @@ function KhaiBaoSucKhoe() {
             {isNurse && <span style={{ fontSize: '16px', opacity: 0.8, marginLeft: '10px', color: '#1976d2' }}>(Y Tá)</span>}
             {isParent && <span style={{ fontSize: '16px', opacity: 0.8, marginLeft: '10px', color: '#2e7d32' }}>(Phụ Huynh)</span>}
           </h2>
-          <div style={{display:'flex',alignItems:'center',gap:12}}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <button
               onClick={() => setDark(d => !d)}
-              style={{...styles.iconButton, ...(dark ? styles.iconButtonDark : {})}}
+              style={{ ...styles.iconButton, ...(dark ? styles.iconButtonDark : {}) }}
               title={dark ? 'Chuyển sáng' : 'Chuyển tối'}
             >
               {dark ? <FaSun /> : <FaMoon />}
             </button>
             <button
+              onClick={handleViewList}
+              style={styles.button}
+              className="ripple"
+            >
+              <FaSearch style={{ marginRight: 8, fontSize: 18 }} /> Xem danh sách
+            </button>
+            <button
               onClick={loadData}
-              style={{...styles.button, background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)'}}
+              style={{ ...styles.button, background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' }}
               className="ripple"
               disabled={loading}
-              title="Làm mới dữ liệu"
             >
-              <FaSearch style={{ marginRight: 8, fontSize: 18 }} /> 
+              <FaSearch style={{ marginRight: 8, fontSize: 18 }} />
               {loading ? 'Đang tải...' : 'Làm mới'}
+            </button>
+            <button
+              onClick={handleKhaiBao}
+              style={styles.button}
+              className="ripple"
+            >
+              <FaPlusCircle style={{ marginRight: 8, fontSize: 18 }} /> Tạo khai báo mới
             </button>
           </div>
         </div>
-        
+
         {/* Nội dung chính */}
         <div style={styles.mainContent}>
           <div style={styles.welcomeSection}>
             <div style={styles.welcomeIcon}>🏥</div>
             <h3 style={styles.welcomeTitle}>Chào mừng đến với Hệ thống Khai báo Sức khỏe</h3>
             <p style={styles.welcomeText}>
-              {isParent 
+              {isParent
                 ? 'Hệ thống giúp bạn khai báo và theo dõi thông tin sức khỏe của con em một cách an toàn và hiệu quả.'
-                : isAdmin 
+                : isAdmin
                   ? 'Hệ thống quản lý toàn diện cho việc theo dõi sức khỏe học sinh, tiêm chủng và khám sức khỏe định kỳ.'
                   : 'Hệ thống hỗ trợ y tá quản lý thông tin sức khỏe học sinh, tiêm chủng và khám sức khỏe định kỳ.'
               }
@@ -150,9 +163,9 @@ function KhaiBaoSucKhoe() {
 
           <div style={{
             ...styles.optionsGrid,
-            gridTemplateColumns: (isAdmin || isNurse) 
-              ? 'repeat(auto-fit, minmax(300px, 1fr))' 
-              : 'repeat(auto-fit, minmax(350px, 1fr))'
+            gridTemplateColumns: (isAdmin || isNurse)
+              ? 'repeat(auto-fit, minmax(280px, 1fr))'
+              : 'repeat(auto-fit, minmax(320px, 1fr))'
           }}>
             {/* Options cho tất cả roles */}
             <div style={styles.optionCard} className="optionCard" onClick={handleKhaiBao}>
@@ -176,11 +189,11 @@ function KhaiBaoSucKhoe() {
             </div>
 
             {/* Options chỉ cho Admin và Nurse */}
-            {showAdminOptions && (
+            {(isAdmin || isNurse) && (
               <>
-                <div 
+                <div
                   style={styles.optionCard}
-                  className="optionCard parent-hidden"
+                  className="optionCard"
                   onClick={() => navigate('/vaccination-management')}
                 >
                   <div style={styles.optionIcon}>
@@ -192,9 +205,9 @@ function KhaiBaoSucKhoe() {
                   </p>
                 </div>
 
-                <div 
+                <div
                   style={styles.optionCard}
-                  className="optionCard parent-hidden"
+                  className="optionCard"
                   onClick={() => navigate('/medical-checkup')}
                 >
                   <div style={styles.optionIcon}>
@@ -241,7 +254,7 @@ function KhaiBaoSucKhoe() {
               boxShadow: '0 10px 25px rgba(102, 126, 234, 0.1)'
             }}>
               <div style={{ fontSize: '16px', color: '#1976d2', lineHeight: 1.6 }}>
-                🔧 <strong>Quản lý hệ thống:</strong> Bạn có quyền truy cập đầy đủ các tính năng quản lý tiêm chủng, 
+                🔧 <strong>Quản lý hệ thống:</strong> Bạn có quyền truy cập đầy đủ các tính năng quản lý tiêm chủng,
                 khám sức khỏe định kỳ và khai báo sức khỏe của học sinh.
               </div>
             </div>
@@ -283,10 +296,6 @@ function KhaiBaoSucKhoe() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         body { font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        
-        .parent-hidden {
-          display: none !important;
-        }
         
         @keyframes gradientMove {
           0% { background-position: 0% 50% }

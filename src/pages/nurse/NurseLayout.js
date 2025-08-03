@@ -1,29 +1,13 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { FaUserMd, FaSignOutAlt } from "react-icons/fa";
-import "bootstrap/dist/css/bootstrap.min.css";
-
-const nurseSidebarItems = [
-    { icon: "fa-home", label: "Trang chủ", link: "/nurse/dashboard" },
-    { icon: "fa-calendar-day", label: "Lịch uống thuốc", link: "/nurse/schedules" },
-    { icon: "fa-pills", label: "Yêu cầu thuốc", link: "/nurse/medication-requests" },
-    { icon: "fa-user-check", label: "Học sinh đã xác nhận", link: "/nurse/confirmed-students" },
-    { icon: "fa-stethoscope", label: "Kiểm tra sức khỏe", link: "/nurse/health-checkup" },
-    { icon: "fa-clipboard-list", label: "Quản lý thuốc", link: "/nurse/medication-management" },
-    { icon: "fa-user-nurse", label: "Quản lý y tá", link: "/nurse/nurse-management" },
-];
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { FaUserMd, FaPills, FaClipboardList, FaSignOutAlt, FaHome } from 'react-icons/fa';
 
 function NurseLayout({ children }) {
     const location = useLocation();
 
     const menuItems = [
         { icon: "fa-home", label: "Dashboard", link: "/nurse/dashboard" },
-        { icon: "fa-calendar-day", label: "Lịch uống thuốc", link: "/nurse/schedules" },
-        { icon: "fa-pills", label: "Yêu cầu thuốc", link: "/nurse/medication-requests" },
-        { icon: "fa-user-check", label: "Học sinh đã xác nhận", link: "/nurse/confirmed-students" },
-        { icon: "fa-stethoscope", label: "Kiểm tra sức khỏe", link: "/nurse/health-checkup" },
-        { icon: "fa-clipboard-list", label: "Quản lý thuốc", link: "/nurse/medication-management" },
-        { icon: "fa-user-nurse", label: "Quản lý y tá", link: "/nurse/nurse-management" },
+        { icon: "fa-pills", label: "Quản lý đơn thuốc", link: "/nurse/medication-management" },
     ];
 
     const handleLogout = () => {

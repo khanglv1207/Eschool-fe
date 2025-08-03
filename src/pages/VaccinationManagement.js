@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  FaPlus, 
-  FaUsers, 
-  FaEnvelope, 
-  FaCheck, 
-  FaTimes, 
-  FaSyringe, 
+import {
+  FaPlus,
+  FaUsers,
+  FaEnvelope,
+  FaCheck,
+  FaTimes,
+  FaSyringe,
   FaFileAlt,
   FaEdit
 } from 'react-icons/fa';
-import { 
-  createVaccineType, 
-  getStudentsToVaccinate, 
+import {
+  createVaccineType,
+  getStudentsToVaccinate,
   sendVaccinationNotices,
   getStudentsNeedVaccination,
   createVaccinationResult,
@@ -87,7 +87,7 @@ const VaccinationManagement = () => {
       const vaccineTypes = await getVaccineTypes();
       setVaccineTypes(vaccineTypes);
       console.log('✅ Vaccine types loaded from API:', vaccineTypes);
-      
+
       // Nếu có vaccine và chưa chọn vaccine nào, tự động chọn vaccine đầu tiên
       if (vaccineTypes.length > 0 && !selectedVaccine) {
         setSelectedVaccine(vaccineTypes[0].name);
@@ -111,21 +111,21 @@ const VaccinationManagement = () => {
 
   const handleCreateVaccine = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (!vaccineForm.vaccineName.trim()) {
       setMessage('❌ Vui lòng nhập tên vaccine');
       return;
     }
-    
+
     if (!vaccineForm.description.trim()) {
       setMessage('❌ Vui lòng nhập mô tả vaccine');
       return;
     }
-    
+
     try {
       setLoading(true);
-      
+
       // Chuyển đổi dữ liệu để phù hợp với CreateVaccineTypeRequest
       const vaccineData = {
         name: vaccineForm.vaccineName.trim(),
@@ -133,9 +133,9 @@ const VaccinationManagement = () => {
         dosesRequired: parseInt(vaccineForm.doseNumber) || 1,
         intervalDays: parseInt(vaccineForm.interval) || 0
       };
-      
+
       console.log('📤 Gửi dữ liệu vaccine:', vaccineData);
-      
+
       await createVaccineType(vaccineData);
       setMessage('✅ Tạo loại vaccine thành công!');
       setVaccineForm({
@@ -144,7 +144,7 @@ const VaccinationManagement = () => {
         doseNumber: '',
         interval: ''
       });
-      
+
       // Tự động load lại danh sách vaccine sau khi tạo thành công
       await loadVaccineTypes();
     } catch (error) {
@@ -164,7 +164,7 @@ const VaccinationManagement = () => {
     try {
       setLoading(true);
       console.log('🔍 Đang lấy danh sách học sinh chưa tiêm vaccine:', selectedVaccine);
-      
+
       const response = await getStudentsToVaccinate(selectedVaccine);
       console.log('✅ Danh sách học sinh chưa tiêm từ API:', response);
       console.log('🔍 Chi tiết từng học sinh:');
@@ -200,7 +200,7 @@ const VaccinationManagement = () => {
         console.log('📄 Full object:', student);
         console.log('========================');
       });
-      
+
       setStudentsToVaccinate(response);
       setMessage(`✅ Tìm thấy ${response.length} học sinh chưa tiêm ${selectedVaccine} (dữ liệu từ khai báo sức khỏe)`);
     } catch (error) {
@@ -225,7 +225,7 @@ const VaccinationManagement = () => {
       `📝 Ghi chú: Thông báo tiêm chủng ${selectedVaccine} cho học sinh\n\n` +
       `Hệ thống sẽ tự động gửi email thông báo đến phụ huynh của ${studentsToVaccinate.length} học sinh.`
     );
-    
+
     if (!confirmed) {
       return;
     }
@@ -235,7 +235,7 @@ const VaccinationManagement = () => {
       console.log('📧 Chuẩn bị gửi thông báo tiêm chủng...');
       console.log('🎯 Vaccine:', selectedVaccine);
       console.log('👥 Số học sinh:', studentsToVaccinate.length);
-      
+
       const request = {
         vaccineName: selectedVaccine,
         scheduledDate: new Date().toISOString().split('T')[0], // Ngày hiện tại
@@ -245,9 +245,7 @@ const VaccinationManagement = () => {
           .filter(student => student.studentId || student.studentCode || student.id)
           .map(student => student.studentId || student.studentCode || student.id)
       };
-      
-      console.log('📋 Request body:', request);
-      
+
       console.log('📋 Request body:', request);
       console.log('🎯 Vaccine:', request.vaccineName);
       console.log('📅 Scheduled date:', request.scheduledDate);
@@ -255,14 +253,14 @@ const VaccinationManagement = () => {
       console.log('📝 Note:', request.note);
       console.log('👥 Student IDs:', request.studentIds);
       console.log('📊 Số học sinh:', request.studentIds.length);
-      
+
       // Kiểm tra có học sinh nào không
       if (request.studentIds.length === 0) {
         throw new Error('Không có học sinh nào để gửi thông báo');
       }
-      
+
       console.log('✅ Số học sinh sẽ gửi thông báo:', request.studentIds.length);
-      
+
       await sendVaccinationNotices(request);
       setMessage('✅ Đã gửi thông báo tiêm chủng thành công!');
       setStudentsToVaccinate([]);
@@ -337,25 +335,25 @@ const VaccinationManagement = () => {
       )}
 
       <div className="vaccination-tabs">
-        <button 
+        <button
           className={`tab ${activeTab === 'create' ? 'active' : ''}`}
           onClick={() => setActiveTab('create')}
         >
           <FaPlus /> Tạo Vaccine
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'students' ? 'active' : ''}`}
           onClick={() => setActiveTab('students')}
         >
           <FaUsers /> Quản Lý Học Sinh
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'pending' ? 'active' : ''}`}
           onClick={() => setActiveTab('pending')}
         >
           <FaCheck /> Học Sinh Cần Tiêm
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'results' ? 'active' : ''}`}
           onClick={() => setActiveTab('results')}
         >
@@ -426,16 +424,16 @@ const VaccinationManagement = () => {
         {activeTab === 'students' && (
           <div className="students-management">
             <h2><FaUsers /> Quản Lý Học Sinh Tiêm Chủng</h2>
-            
+
             <div className="vaccine-selection">
               <div className="form-group">
                 <label>Chọn Loại Vaccine</label>
-                <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
-                  <select 
-                    value={selectedVaccine} 
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <select
+                    value={selectedVaccine}
                     onChange={(e) => setSelectedVaccine(e.target.value)}
                     disabled={loading}
-                    style={{flex: 1}}
+                    style={{ flex: 1 }}
                   >
                     <option value="">-- Chọn vaccine --</option>
                     {vaccineTypes.map((vaccine) => (
@@ -444,32 +442,32 @@ const VaccinationManagement = () => {
                       </option>
                     ))}
                   </select>
-                  <button 
+                  <button
                     onClick={loadVaccineTypes}
                     className="btn-secondary"
-                    style={{padding: '8px 12px', fontSize: '12px'}}
+                    style={{ padding: '8px 12px', fontSize: '12px' }}
                     disabled={loading}
                   >
                     {loading ? '⏳' : '🔄'}
                   </button>
                 </div>
-                {loading && <small style={{color: '#667eea'}}>Đang tải danh sách vaccine...</small>}
+                {loading && <small style={{ color: '#667eea' }}>Đang tải danh sách vaccine...</small>}
                 {vaccineTypes.length === 0 && !loading && (
-                  <small style={{color: '#e67e22'}}>Không có vaccine nào. Hãy tạo vaccine trước.</small>
+                  <small style={{ color: '#e67e22' }}>Không có vaccine nào. Hãy tạo vaccine trước.</small>
                 )}
                 {vaccineTypes.length > 0 && (
-                  <small style={{color: '#27ae60'}}>✅ Đã tải {vaccineTypes.length} loại vaccine từ database</small>
+                  <small style={{ color: '#27ae60' }}>✅ Đã tải {vaccineTypes.length} loại vaccine từ database</small>
                 )}
               </div>
-              <button 
+              <button
                 onClick={handleGetStudentsToVaccinate}
                 className="btn-secondary"
                 disabled={!selectedVaccine || loading}
               >
                 {loading ? 'Đang tải...' : 'Lấy Danh Sách Học Sinh Chưa Tiêm'}
               </button>
-              <div style={{marginTop: '10px'}}>
-                <small style={{color: '#666'}}>
+              <div style={{ marginTop: '10px' }}>
+                <small style={{ color: '#666' }}>
                   🔍 Tìm kiếm học sinh chưa tiêm vaccine dựa trên khai báo sức khỏe
                 </small>
               </div>
@@ -485,7 +483,7 @@ const VaccinationManagement = () => {
                   marginBottom: '15px',
                   border: '1px solid #27ae60'
                 }}>
-                  <small style={{color: '#27ae60'}}>
+                  <small style={{ color: '#27ae60' }}>
                     📋 Dữ liệu được lấy từ khai báo sức khỏe của học sinh
                   </small>
                 </div>
@@ -509,7 +507,7 @@ const VaccinationManagement = () => {
                           <td>{student.className || student.class_name || student.class || 'N/A'}</td>
                           <td>{student.parentEmail || student.parent_email || student.email || 'N/A'}</td>
                           <td>
-                            <span style={{color: '#e67e22', fontSize: '12px'}}>
+                            <span style={{ color: '#e67e22', fontSize: '12px' }}>
                               {student.reason || student.vaccinationStatus || 'Chưa tiêm vaccine'}
                             </span>
                           </td>
@@ -521,7 +519,7 @@ const VaccinationManagement = () => {
                     </tbody>
                   </table>
                 </div>
-                <button 
+                <button
                   onClick={handleSendVaccinationNotices}
                   className="btn-primary"
                   disabled={loading || studentsToVaccinate.length === 0}
@@ -530,7 +528,7 @@ const VaccinationManagement = () => {
                     cursor: studentsToVaccinate.length === 0 ? 'not-allowed' : 'pointer'
                   }}
                 >
-                  <FaEnvelope /> 
+                  <FaEnvelope />
                   {loading ? 'Đang gửi...' : `Gửi Thông Báo Tiêm Chủng (${studentsToVaccinate.length} học sinh)`}
                 </button>
               </div>
@@ -542,16 +540,16 @@ const VaccinationManagement = () => {
         {activeTab === 'pending' && (
           <div className="pending-vaccinations">
             <h2><FaCheck /> Học Sinh Cần Tiêm Chủng</h2>
-            
+
             <div className="actions">
-              <button 
+              <button
                 onClick={loadPendingVaccinations}
                 className="btn-secondary"
                 disabled={loading}
               >
                 {loading ? 'Đang tải...' : 'Làm Mới Danh Sách'}
               </button>
-              <button 
+              <button
                 onClick={() => setShowResultForm(true)}
                 className="btn-primary"
               >
@@ -585,7 +583,7 @@ const VaccinationManagement = () => {
                           <span className="status confirmed">Đã xác nhận</span>
                         </td>
                         <td>
-                          <button 
+                          <button
                             onClick={() => {
                               setResultForm(prev => ({
                                 ...prev,
@@ -616,16 +614,16 @@ const VaccinationManagement = () => {
         {activeTab === 'results' && (
           <div className="vaccination-results">
             <h2><FaFileAlt /> Kết Quả Tiêm Chủng</h2>
-            
+
             <div className="actions">
-              <button 
+              <button
                 onClick={loadVaccinationResults}
                 className="btn-secondary"
                 disabled={loading}
               >
                 {loading ? 'Đang tải...' : 'Làm Mới'}
               </button>
-              <button 
+              <button
                 onClick={handleSendVaccinationResults}
                 className="btn-primary"
                 disabled={loading}
@@ -682,7 +680,7 @@ const VaccinationManagement = () => {
           <div className="modal">
             <div className="modal-header">
               <h3>Ghi Nhận Kết Quả Tiêm Chủng</h3>
-              <button 
+              <button
                 onClick={() => setShowResultForm(false)}
                 className="close-btn"
               >
