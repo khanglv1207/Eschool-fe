@@ -46,6 +46,11 @@ import NurseLayout from "./pages/nurse/NurseLayout";
 import NurseDashboard from "./pages/nurse/NurseDashboard";
 import DangKyThuocForm from "./pages/DangKyThuocForm";
 import ParentMedicineList from "./pages/ParentMedicineList";
+import MedicationRequests from "./pages/nurse/MedicationRequests";
+import HealthCheckup from "./pages/nurse/HealthCheckup";
+import Schedules from "./pages/nurse/Schedules";
+import MedicationManagement from "./pages/nurse/MedicationManagement";
+import NurseManagement from "./pages/nurse/NurseManagement";
 
 function App() {
 
@@ -87,16 +92,23 @@ function App() {
         <Route path="/admin/MedicalManagement" element={<MedicalManagement />} />
         <Route path="/admin/medicaleventrecording" element={<MedicalEventRecording />} />
         <Route path="/admin/VaccineManage" element={<VaccinManage />} />
+        <Route path="/nurse/health-declaration" element={<NurseHealthDeclaration />} />
         <Route path="/health-profile-form" element={<HealthProfileForm />} />
-                    <Route path="/manager" element={<ManagerLayout />} />
-            <Route path="/manager/dashboard" element={<ManagerDashboard />} />
-            <Route path="/medicine-registration" element={<DangKyThuocForm onBack={() => window.history.back()} />} />
-            <Route path="/parent-medicine-list" element={<MedicineListManagement />} />
-            
-            {/* Nurse Routes */}
-            <Route path="/nurse" element={<NurseLayout><NurseDashboard /></NurseLayout>} />
-            <Route path="/nurse/dashboard" element={<NurseLayout><NurseDashboard /></NurseLayout>} />
-            <Route path="/nurse/medication-management" element={<NurseLayout><MedicationManagement /></NurseLayout>} />
+        <Route path="/manager" element={<ManagerLayout />} />
+        <Route path="/manager/dashboard" element={<ManagerDashboard />} />
+        <Route path="/medicine-registration" element={<DangKyThuocForm onBack={() => window.history.back()} />} />
+        <Route path="/parent-medicine-list" element={<MedicineListManagement />} />
+
+        {/* Nurse Portal Routes */}
+        <Route path="/nurse" element={<NurseLayout />} />
+        <Route path="/nurse/dashboard" element={<NurseDashboard />} />
+        <Route path="/nurse/medication-requests" element={<MedicationRequests />} />
+        <Route path="/nurse/health-checkup" element={<HealthCheckup />} />
+        <Route path="/nurse/schedules" element={<Schedules />} />
+        <Route path="/nurse/medication-management" element={<MedicationManagement />} />
+        <Route path="/nurse/nurse-management" element={<NurseManagement />} />
+
+        <Route path="/medicine-registration" element={<DangKyThuocForm onBack={() => window.history.back()} />} />
       </Routes>
     </Router>
   );
