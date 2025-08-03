@@ -43,7 +43,7 @@ function Login() {
 
       if (userObj.role === "nurse") {
         alert("Đăng nhập thành công!");
-        window.location.href = "/nurse/health-declaration";
+        window.location.href = "/health-declaration";
       } else if (userObj.firstLogin) {
         alert("Đây là lần đăng nhập đầu tiên. Vui lòng đổi mật khẩu.");
         window.location.href = "/change-password";
