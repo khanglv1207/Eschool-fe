@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaUserMd, FaPills, FaClock, FaClipboardList, FaUsers, FaChartLine } from 'react-icons/fa';
-import { getPendingMedicationRequests, getTodaySchedules } from '../../services/nurseApi';
+import { getPendingMedicationRequests, getTodaySchedules } from '../../services/medicineApi';
 
 function NurseDashboard() {
   const [stats, setStats] = useState({

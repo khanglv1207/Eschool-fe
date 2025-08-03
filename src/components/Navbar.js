@@ -1,7 +1,6 @@
 import React from "react";
 import logo from "../assets/logoeSchoolMed.jpg";
 import loginIcon from "../assets/login.jpg";
-import Mailbox from "./Mailbox";
 
 
 
@@ -33,7 +32,7 @@ function Navbar() {
   let fullName = null;
   let isLoggedIn = false;
   let userRole = null;
-  
+
   try {
     const stored = localStorage.getItem("loggedInUser");
     if (stored) {
@@ -47,29 +46,22 @@ function Navbar() {
   }
 
   // Kiểm tra role của user
-  const isNurse = userRole === 'NURSE' || userRole === 'nurse' || 
-                  (Array.isArray(userRole) && userRole.includes('NURSE'));
-  const isAdmin = userRole === 'ADMIN' || userRole === 'admin' || 
-                  (Array.isArray(userRole) && userRole.includes('ADMIN'));
-  const isParent = userRole === 'PARENT' || userRole === 'parent' || 
-                   (Array.isArray(userRole) && userRole.includes('PARENT'));
-  
+  const isNurse = userRole === 'NURSE' || userRole === 'nurse' ||
+    (Array.isArray(userRole) && userRole.includes('NURSE'));
+  const isAdmin = userRole === 'ADMIN' || userRole === 'admin' ||
+    (Array.isArray(userRole) && userRole.includes('ADMIN'));
+  const isParent = userRole === 'PARENT' || userRole === 'parent' ||
+    (Array.isArray(userRole) && userRole.includes('PARENT'));
+
 
 
   // Tạo menu items dựa trên role
   const getMenuItems = () => {
-         // Tạo submenu cho "Hồ sơ & Tiêm chủng" dựa trên role
-     const profileSubmenu = [
-       { title: "Khai báo sức khỏe", link: "/health-declaration" },
-     ];
-     
-     // Thêm thông báo tiêm chủng cho phụ huynh
-     if (isParent) {
-       profileSubmenu.push(
-         { title: "Thông báo tiêm chủng", link: "/vaccination-notifications" }
-       );
-     }
-    
+    // Tạo submenu cho "Hồ sơ & Tiêm chủng" dựa trên role
+    const profileSubmenu = [
+      { title: "Khai báo sức khỏe", link: "/health-declaration" },
+    ];
+
     // Chỉ thêm "Tiêm chủng" và "Kiểm tra y tế định kỳ" cho Admin và Nurse
     if (isAdmin || isNurse) {
       profileSubmenu.push(
@@ -77,7 +69,7 @@ function Navbar() {
         { title: "Kiểm tra y tế định kỳ", link: "/medical-checkup" }
       );
     }
-    
+
     const baseMenuItems = [
       { title: "Trang chủ", link: "/" },
       {
@@ -195,27 +187,24 @@ function Navbar() {
               )}
             </div>
           ))}
-          
-                      {/* Hòm thư */}
-            <Mailbox />
+          <span style={{ marginLeft: 32, fontWeight: 600, fontSize: 18, color: '#4395F7' }}>Buổi sáng / Buổi chiều</span>
         </div>
 
         {/* Nút Book Appointment */}
         {/* Đã xóa nút Book Appointment theo yêu cầu */}
 
-                                   {/* Người dùng */}
-         <div
-           className="login-container"
-           style={{
-             position: "relative",
-             display: "flex",
-             alignItems: "center",
-             gap: "15px",
-             cursor: "pointer",
-           }}
-         >
-
-           {isLoggedIn ? (
+        {/* Người dùng */}
+        <div
+          className="login-container"
+          style={{
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            cursor: "pointer",
+          }}
+        >
+          {isLoggedIn ? (
             <>
               <img
                 src={loginIcon}
