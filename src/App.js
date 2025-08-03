@@ -44,6 +44,8 @@ import MedicineListManagement from "./pages/admin/MedicineListManagement";
 import MedicationManagement from "./pages/nurse/MedicationManagement";
 import NurseLayout from "./pages/nurse/NurseLayout";
 import NurseDashboard from "./pages/nurse/NurseDashboard";
+import DangKyThuocForm from "./pages/DangKyThuocForm";
+import ParentMedicineList from "./pages/ParentMedicineList";
 import MedicationRequests from "./pages/nurse/MedicationRequests";
 import HealthCheckup from "./pages/nurse/HealthCheckup";
 import Schedules from "./pages/nurse/Schedules";
@@ -91,6 +93,11 @@ function App() {
         <Route path="/admin/medicaleventrecording" element={<MedicalEventRecording />} />
         <Route path="/admin/VaccineManage" element={<VaccinManage />} />
         <Route path="/nurse/health-declaration" element={<NurseHealthDeclaration />} />
+        <Route path="/health-profile-form" element={<HealthProfileForm />} />
+        <Route path="/manager" element={<ManagerLayout />} />
+        <Route path="/manager/dashboard" element={<ManagerDashboard />} />
+        <Route path="/medicine-registration" element={<DangKyThuocForm onBack={() => window.history.back()} />} />
+        <Route path="/parent-medicine-list" element={<MedicineListManagement />} />
 
         {/* Nurse Portal Routes */}
         <Route path="/nurse" element={<NurseLayout />} />
