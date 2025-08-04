@@ -88,9 +88,10 @@ const HealthCheckupResultForm = () => {
     }
 
     // Kiểm tra có mã học sinh không
-    const actualStudentCode = studentInfo?.studentCode || studentInfo?.student_code || formData.studentId;
-    if (!actualStudentCode) {
-      setMessage('❌ Không tìm thấy mã học sinh hợp lệ');
+    const actualStudentId = studentInfo?.id || studentInfo?.studentId || studentInfo?.uuid;
+    if (!actualStudentId) {
+      setMessage('❌ Không tìm thấy ID học sinh hợp lệ. Vui lòng chọn lại học sinh.');
+      console.error('❌ Missing studentId. StudentInfo:', studentInfo);
       return;
     }
 
@@ -100,7 +101,7 @@ const HealthCheckupResultForm = () => {
 
       // Tạo dữ liệu theo DTO CreateHealthCheckupRequest
       const resultData = {
-        studentCode: studentInfo?.studentCode || studentInfo?.student_code || 'HS001', // Backend yêu cầu studentCode (string)
+        studentCode: studentInfo?.studentCode || studentInfo?.student_code || studentInfo?.studentId || studentInfo?.id, // Sử dụng dữ liệu thật từ backend
         checkupDate: formData.checkupDate, // LocalDate sẽ tự động parse từ "YYYY-MM-DD"
         heightCm: parseFloat(formData.heightCm) || 0,
         weightKg: parseFloat(formData.weightKg) || 0,
@@ -110,30 +111,17 @@ const HealthCheckupResultForm = () => {
       };
 
       // Kiểm tra studentCode có hợp lệ không
-      if (!resultData.studentCode || resultData.studentCode.trim() === '') {
-        setMessage('❌ Mã học sinh không được để trống');
+      if (!resultData.studentCode || resultData.studentCode === 'undefined' || resultData.studentCode === 'null') {
+        setMessage('❌ Mã học sinh không hợp lệ. Vui lòng chọn lại học sinh.');
+        console.error('❌ Invalid studentCode:', resultData.studentCode);
+        console.error('❌ StudentInfo from backend:', studentInfo);
         return;
       }
 
-      // Kiểm tra và log chi tiết dữ liệu
-      console.log('📋 Dữ liệu gửi đến API:', resultData);
-      console.log('📋 Kiểm tra kiểu dữ liệu:');
-      console.log('- studentCode:', typeof resultData.studentCode, resultData.studentCode);
-      console.log('- checkupDate:', typeof resultData.checkupDate, resultData.checkupDate);
-      console.log('- heightCm:', typeof resultData.heightCm, resultData.heightCm);
-      console.log('- weightKg:', typeof resultData.weightKg, resultData.weightKg);
-      console.log('- visionLeft:', typeof resultData.visionLeft, resultData.visionLeft);
-      console.log('- visionRight:', typeof resultData.visionRight, resultData.visionRight);
-      console.log('- notes:', typeof resultData.notes, resultData.notes);
-      
-      // Log thêm thông tin debug
-      console.log('🔍 Student info from localStorage:', studentInfo);
-      console.log('🔍 Form data studentId:', formData.studentId);
-      console.log('🔍 Params studentId:', studentId);
-      console.log('🔍 StudentCode to use:', studentInfo?.studentCode || studentInfo?.student_code);
-      console.log('🔍 All studentInfo keys:', Object.keys(studentInfo || {}));
-      console.log('🔍 studentInfo.studentCode:', studentInfo?.studentCode);
-      console.log('🔍 studentInfo.student_code:', studentInfo?.student_code);
+      console.log('🔍 Final resultData to send:', resultData);
+      console.log('🔍 studentCode type:', typeof resultData.studentCode);
+      console.log('🔍 studentCode value:', resultData.studentCode);
+      console.log('🔍 StudentInfo from backend:', studentInfo);
 
       await saveCheckupResult(resultData);
       setMessage('✅ Đã lưu thông tin khám sức khỏe thành công!');
@@ -178,11 +166,15 @@ const HealthCheckupResultForm = () => {
           <div className="info-grid">
             <div className="info-item">
               <label>Mã HS:</label>
-              <span>{studentInfo.studentId || studentInfo.student_code || studentInfo.id}</span>
+              <span>{studentInfo.studentCode || studentInfo.student_code || studentInfo.studentId || studentInfo.id}</span>
+            </div>
+            <div className="info-item">
+              <label>ID HS:</label>
+              <span>{studentInfo.id || studentInfo.studentId || 'N/A'}</span>
             </div>
             <div className="info-item">
               <label>Họ Tên:</label>
-              <span>{studentInfo.studentName || studentInfo.fullName || studentInfo.name}</span>
+              <span>{studentInfo.studentName || studentInfo.fullName || studentInfo.name || studentInfo.student_name}</span>
             </div>
             <div className="info-item">
               <label>Lớp:</label>
@@ -191,6 +183,10 @@ const HealthCheckupResultForm = () => {
             <div className="info-item">
               <label>Email PH:</label>
               <span>{studentInfo.parentEmail || studentInfo.parent_email || studentInfo.email}</span>
+            </div>
+            <div className="info-item">
+              <label>Dữ liệu Backend:</label>
+              <span>{JSON.stringify(studentInfo, null, 2)}</span>
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaBell, FaSyringe, FaCalendarAlt, FaEye, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
-import { getVaccinationNotifications, confirmVaccination } from '../services/vaccinationApi';
+import { getVaccinationNotifications, confirmVaccination, rejectVaccination } from '../services/vaccinationApi';
 
 // Helper function to generate UUID
 const generateUUID = () => {
@@ -56,34 +56,18 @@ function VaccinationNotifications() {
       console.log('📋 Has id:', 'id' in notification);
       console.log('📋 id value:', notification.id);
       
-      setProcessingId(`notification-${notification.confirmationId || 'temp'}`);
+      setProcessingId(`notification-${notification.id || 'temp'}`);
       setMessage('');
       
-      // Luôn sử dụng confirmationId từ backend
-      let confirmationId = notification.confirmationId || generateUUID();
+      // Sử dụng notification.id thay vì generate UUID
+      const confirmationId = notification.id;
       
-      // Đảm bảo confirmationId là UUID format hợp lệ
-      if (typeof confirmationId === 'string' && confirmationId.includes('-')) {
-        // Đã là UUID format
-        confirmationId = confirmationId;
-      } else {
-        // Chuyển đổi thành UUID format
-        confirmationId = generateUUID();
-      }
-      
-      // Chỉ gửi đúng 3 field theo VaccinationConfirmationRequest DTO
-      const confirmationData = {
-        confirmationId: confirmationId,
-        status: 'ACCEPTED', // Backend yêu cầu ACCEPTED thay vì CONFIRMED
-        parentNote: parentNote
-      };
-
-      console.log('✅ Sending confirmation data:', confirmationData);
+      console.log('✅ Sending confirmation data:', { confirmationId, parentNote });
       console.log('✅ Notification object:', notification);
       console.log('✅ ConfirmationId type:', typeof confirmationId);
       console.log('✅ ConfirmationId value:', confirmationId);
       
-      const response = await confirmVaccination(confirmationData);
+      const response = await confirmVaccination(confirmationId, parentNote);
       
       console.log('✅ Confirmation response:', response);
       
@@ -105,32 +89,17 @@ function VaccinationNotifications() {
 
   const handleReject = async (notification, parentNote = 'Phụ huynh từ chối tiêm chủng') => {
     try {
-      setProcessingId(`notification-${notification.confirmationId || 'temp'}`);
+      setProcessingId(`notification-${notification.id || 'temp'}`);
       setMessage('');
       
-      // Luôn sử dụng confirmationId từ backend
-      let confirmationId = notification.confirmationId || generateUUID();
+      // Sử dụng notification.id thay vì generate UUID
+      const confirmationId = notification.id;
       
-      // Đảm bảo confirmationId là UUID format hợp lệ
-      if (typeof confirmationId === 'string' && confirmationId.includes('-')) {
-        // Đã là UUID format
-        confirmationId = confirmationId;
-      } else {
-        // Chuyển đổi thành UUID format
-        confirmationId = generateUUID();
-      }
-      
-      const rejectionData = {
-        confirmationId: confirmationId, // Sử dụng ID thật từ notification nếu có
-        status: 'DECLINED', // Backend yêu cầu DECLINED thay vì REJECTED
-        parentNote: parentNote
-      };
-
-      console.log('❌ Sending rejection data:', rejectionData);
+      console.log('❌ Sending rejection data:', { confirmationId, parentNote });
       console.log('❌ ConfirmationId type:', typeof confirmationId);
       console.log('❌ ConfirmationId value:', confirmationId);
       
-      const response = await confirmVaccination(rejectionData);
+      const response = await rejectVaccination(confirmationId, parentNote);
       
       console.log('✅ Rejection response:', response);
       
@@ -483,72 +452,72 @@ function VaccinationNotifications() {
 
                       <button
                         onClick={() => handleConfirm(notification)}
-                        disabled={processingId === `notification-${notification.confirmationId || 'temp'}`}
+                        disabled={processingId === `notification-${notification.id || 'temp'}`}
                         style={{
-                          background: processingId === `notification-${notification.confirmationId || 'temp'}`
+                          background: processingId === `notification-${notification.id || 'temp'}`
                             ? '#ccc' 
                             : 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
                           color: '#fff',
                           border: 'none',
                           padding: '10px 20px',
                           borderRadius: '8px',
-                          cursor: processingId === `notification-${notification.confirmationId || 'temp'}` ? 'not-allowed' : 'pointer',
+                          cursor: processingId === `notification-${notification.id || 'temp'}` ? 'not-allowed' : 'pointer',
                           fontSize: '14px',
                           fontWeight: '600',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '8px',
                           transition: 'all 0.3s ease',
-                          opacity: processingId === `notification-${notification.confirmationId || 'temp'}` ? 0.6 : 1
+                          opacity: processingId === `notification-${notification.id || 'temp'}` ? 0.6 : 1
                         }}
                         onMouseEnter={(e) => {
-                          if (processingId !== `notification-${notification.confirmationId || 'temp'}`) {
+                          if (processingId !== `notification-${notification.id || 'temp'}`) {
                             e.target.style.transform = 'translateY(-1px)';
                           }
                         }}
                         onMouseLeave={(e) => {
-                          if (processingId !== `notification-${notification.confirmationId || 'temp'}`) {
+                          if (processingId !== `notification-${notification.id || 'temp'}`) {
                             e.target.style.transform = 'translateY(0)';
                           }
                         }}
                       >
                         <FaCheckCircle />
-                        {processingId === `notification-${notification.confirmationId || 'temp'}` ? 'Đang xác nhận...' : 'Xác nhận'}
+                        {processingId === `notification-${notification.id || 'temp'}` ? 'Đang xác nhận...' : 'Xác nhận'}
                       </button>
 
                       <button
                         onClick={() => handleReject(notification)}
-                        disabled={processingId === `notification-${notification.confirmationId || 'temp'}`}
+                        disabled={processingId === `notification-${notification.id || 'temp'}`}
                         style={{
-                          background: processingId === `notification-${notification.confirmationId || 'temp'}`
+                          background: processingId === `notification-${notification.id || 'temp'}`
                             ? '#ccc' 
                             : 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)',
                           color: '#fff',
                           border: 'none',
                           padding: '10px 20px',
                           borderRadius: '8px',
-                          cursor: processingId === `notification-${notification.confirmationId || 'temp'}` ? 'not-allowed' : 'pointer',
+                          cursor: processingId === `notification-${notification.id || 'temp'}` ? 'not-allowed' : 'pointer',
                           fontSize: '14px',
                           fontWeight: '600',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '8px',
                           transition: 'all 0.3s ease',
-                          opacity: processingId === `notification-${notification.confirmationId || 'temp'}` ? 0.6 : 1
+                          opacity: processingId === `notification-${notification.id || 'temp'}` ? 0.6 : 1
                         }}
                         onMouseEnter={(e) => {
-                          if (processingId !== `notification-${notification.confirmationId || 'temp'}`) {
+                          if (processingId !== `notification-${notification.id || 'temp'}`) {
                             e.target.style.transform = 'translateY(-1px)';
                           }
                         }}
                         onMouseLeave={(e) => {
-                          if (processingId !== `notification-${notification.confirmationId || 'temp'}`) {
+                          if (processingId !== `notification-${notification.id || 'temp'}`) {
                             e.target.style.transform = 'translateY(0)';
                           }
                         }}
                       >
                         <FaTimesCircle />
-                        {processingId === `notification-${notification.confirmationId || 'temp'}` ? 'Đang từ chối...' : 'Từ chối'}
+                        {processingId === `notification-${notification.id || 'temp'}` ? 'Đang từ chối...' : 'Từ chối'}
                       </button>
                     </div>
                   </div>

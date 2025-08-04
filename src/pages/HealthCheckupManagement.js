@@ -644,7 +644,7 @@ const HealthCheckupManagement = () => {
                               }
                               
                               // Lưu thông tin học sinh vào localStorage
-                              const studentCode = student.studentCode || student.student_code || student.studentId || 'HS001';
+                              const studentCode = student.studentCode || student.student_code || student.studentId || student.id;
                               console.log('🔍 StudentCode to save:', studentCode);
                               console.log('🔍 Student object for localStorage:', {
                                 ...student,

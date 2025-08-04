@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaStethoscope, FaCheck, FaTimes, FaCalendar, FaMapMarkerAlt, FaInfoCircle } from 'react-icons/fa';
-import { getHealthCheckupNotifications, confirmHealthCheckup } from '../services/healthCheckupApi';
+import { getHealthCheckupNotifications, confirmHealthCheckup, rejectHealthCheckup } from '../services/healthCheckupApi';
 import './HealthCheckupNotifications.css';
 
 const HealthCheckupNotifications = () => {
@@ -43,29 +43,14 @@ const HealthCheckupNotifications = () => {
       setProcessingId(`notification-${notification.id || 'temp'}`);
       setMessage('');
       
-      // Chuyển đổi confirmationId thành UUID format nếu cần
-      let confirmationId = notification.id || generateUUID();
-      
-      // Đảm bảo confirmationId là UUID format hợp lệ
-      if (typeof confirmationId === 'string' && confirmationId.includes('-')) {
-        // Đã là UUID format
-        confirmationId = confirmationId;
-      } else {
-        // Chuyển đổi thành UUID format
-        confirmationId = generateUUID();
-      }
+      // Sử dụng notification.id thay vì generate UUID
+      const confirmationId = notification.id;
 
-      const confirmationData = {
-        confirmationId: confirmationId, // Sử dụng ID thật từ notification nếu có
-        status: 'ACCEPTED', // Backend yêu cầu ACCEPTED thay vì CONFIRMED
-        parentNote: parentNote
-      };
-
-      console.log('✅ Sending confirmation data:', confirmationData);
+      console.log('✅ Sending confirmation data:', { confirmationId, parentNote });
       console.log('✅ ConfirmationId type:', typeof confirmationId);
       console.log('✅ ConfirmationId value:', confirmationId);
 
-      const response = await confirmHealthCheckup(confirmationData);
+      const response = await confirmHealthCheckup(confirmationId, parentNote);
 
       console.log('✅ Confirmation response:', response);
 
@@ -90,29 +75,14 @@ const HealthCheckupNotifications = () => {
       setProcessingId(`notification-${notification.id || 'temp'}`);
       setMessage('');
       
-      // Chuyển đổi confirmationId thành UUID format nếu cần
-      let confirmationId = notification.id || generateUUID();
-      
-      // Đảm bảo confirmationId là UUID format hợp lệ
-      if (typeof confirmationId === 'string' && confirmationId.includes('-')) {
-        // Đã là UUID format
-        confirmationId = confirmationId;
-      } else {
-        // Chuyển đổi thành UUID format
-        confirmationId = generateUUID();
-      }
+      // Sử dụng notification.id thay vì generate UUID
+      const confirmationId = notification.id;
 
-      const rejectionData = {
-        confirmationId: confirmationId, // Sử dụng ID thật từ notification nếu có
-        status: 'DECLINED', // Backend yêu cầu DECLINED thay vì REJECTED
-        parentNote: parentNote
-      };
-
-      console.log('❌ Sending rejection data:', rejectionData);
+      console.log('❌ Sending rejection data:', { confirmationId, parentNote });
       console.log('❌ ConfirmationId type:', typeof confirmationId);
       console.log('❌ ConfirmationId value:', confirmationId);
 
-      const response = await confirmHealthCheckup(rejectionData);
+      const response = await rejectHealthCheckup(confirmationId, parentNote);
 
       console.log('✅ Rejection response:', response);
 

@@ -145,13 +145,17 @@ export const sendBroadcastCheckup = async (emailData) => {
 };
 
 // Xác nhận kiểm tra y tế (cho phụ huynh)
-export const confirmHealthCheckup = async (confirmationData) => {
+export const confirmHealthCheckup = async (confirmationId, message) => {
   try {
-    console.log('✅ Xác nhận kiểm tra y tế...', confirmationData);
+    console.log('✅ Xác nhận kiểm tra y tế...', { confirmationId, message });
     console.log('✅ Request URL:', '/api/health-checkups/confirm-checkup');
-    console.log('✅ Request Body:', JSON.stringify(confirmationData, null, 2));
+    console.log('✅ Request Body:', JSON.stringify({ confirmationId, status: 'ACCEPTED', parentNote: message }, null, 2));
 
-    const response = await api.put('/api/health-checkups/confirm-checkup', confirmationData);
+    const response = await api.put('/api/health-checkups/confirm-checkup', { 
+      confirmationId, 
+      status: 'ACCEPTED',
+      parentNote: message 
+    });
     console.log('✅ Response:', response.data);
 
     if (response.data && response.data.code === 1000) {
@@ -168,6 +172,40 @@ export const confirmHealthCheckup = async (confirmationData) => {
       throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
     } else if (error.response?.status === 403) {
       throw new Error('Không có quyền xác nhận. Vui lòng liên hệ admin.');
+    } else {
+      throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
+    }
+  }
+};
+
+// Từ chối kiểm tra y tế (cho phụ huynh)
+export const rejectHealthCheckup = async (confirmationId, message) => {
+  try {
+    console.log('❌ Từ chối kiểm tra y tế...', { confirmationId, message });
+    console.log('✅ Request URL:', '/api/health-checkups/confirm-checkup');
+    console.log('✅ Request Body:', JSON.stringify({ confirmationId, status: 'REJECTED', parentNote: message }, null, 2));
+
+    const response = await api.put('/api/health-checkups/confirm-checkup', { 
+      confirmationId, 
+      status: 'REJECTED',
+      parentNote: message 
+    });
+    console.log('✅ Response:', response.data);
+
+    if (response.data && response.data.code === 1000) {
+      return response.data;
+    } else {
+      throw new Error(response.data?.message || 'Không thể từ chối kiểm tra y tế');
+    }
+  } catch (error) {
+    console.error('❌ Lỗi từ chối kiểm tra y tế:', error);
+
+    if (error.response?.status === 400) {
+      throw new Error('Dữ liệu từ chối không hợp lệ. Vui lòng kiểm tra thông tin.');
+    } else if (error.response?.status === 401) {
+      throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    } else if (error.response?.status === 403) {
+      throw new Error('Không có quyền từ chối. Vui lòng liên hệ admin.');
     } else {
       throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
     }
@@ -456,6 +494,11 @@ export const saveCheckupResult = async (resultData) => {
     console.log('💾 Lưu kết quả kiểm tra y tế vào database...', resultData);
     console.log('✅ Request URL:', '/api/nurse/health-checkup');
     console.log('✅ Request Body:', JSON.stringify(resultData, null, 2));
+    console.log('🔍 studentId in request:', resultData.studentId);
+    console.log('🔍 studentId type:', typeof resultData.studentId);
+    console.log('🔍 studentCode in request:', resultData.studentCode);
+    console.log('🔍 studentCode type:', typeof resultData.studentCode);
+    console.log('🔍 Backend data being sent:', resultData);
 
     const response = await api.post('/api/nurse/health-checkup', resultData);
     console.log('✅ Response:', response.data);
@@ -467,6 +510,11 @@ export const saveCheckupResult = async (resultData) => {
     }
   } catch (error) {
     console.error('❌ Lỗi lưu kết quả kiểm tra y tế:', error);
+    console.error('❌ Error response:', error.response?.data);
+    console.error('❌ Error status:', error.response?.status);
+    console.error('❌ Request data sent:', resultData);
+    console.error('❌ studentCode sent:', resultData.studentCode);
+    
     if (error.response?.status === 400) {
       const errorMessage = error.response?.data?.message || 'Dữ liệu kết quả không hợp lệ. Vui lòng kiểm tra thông tin.';
       console.error('❌ Backend error details:', error.response?.data);

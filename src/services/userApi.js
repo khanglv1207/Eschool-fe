@@ -115,10 +115,10 @@ export const updateStudentProfile = async (studentId, studentData, token) => {
 };
 
 // Xác nhận phụ huynh chuẩn bị khám sức khỏe
-export const confirmParentCheckup = async (notificationId) => {
+export const confirmParentCheckup = async (confirmationId) => {
   try {
     const response = await api.get(`/api/students/parent-checkup-confirm`, {
-      params: { notificationId }
+      params: { confirmationId }
     });
     return response.data;
   } catch (error) {
@@ -140,9 +140,9 @@ export const getConfirmedStudents = async (checkupId) => {
 };
 
 // Lưu kết quả khám sức khỏe
-export const updateCheckupResult = async (notificationId, resultData) => {
+export const updateCheckupResult = async (confirmationId, resultData) => {
   try {
-    const response = await api.put(`/api/nurses/checkup-result/${notificationId}`, resultData);
+    const response = await api.put(`/api/nurses/checkup-result/${confirmationId}`, resultData);
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Lưu kết quả khám thất bại');

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaEnvelope, FaTimes, FaCheck, FaSyringe } from 'react-icons/fa';
-import { getVaccineNotifications, confirmVaccine, rejectVaccine } from '../services/vaccinationApi';
+import { getVaccinationNotifications, confirmVaccination, rejectVaccination } from '../services/vaccinationApi';
 import './Mailbox.css';
 
 const Mailbox = () => {
@@ -33,7 +33,7 @@ const Mailbox = () => {
         fullName: user.fullName
       });
       
-      const data = await getVaccineNotifications();
+      const data = await getVaccinationNotifications();
       console.log('📋 Notifications loaded:', data);
       setNotifications(data);
     } catch (error) {
@@ -44,10 +44,10 @@ const Mailbox = () => {
     }
   };
 
-  const handleConfirm = async (notificationId, studentId) => {
+  const handleConfirm = async (confirmationId, studentId) => {
     try {
       setMessage('');
-      await confirmVaccine(notificationId, 'Phụ huynh đã đồng ý tiêm vaccine');
+      await confirmVaccination(confirmationId, 'Phụ huynh đã đồng ý tiêm vaccine');
       setMessage('✅ Đã xác nhận tiêm chủng!');
       loadNotifications();
     } catch (error) {
@@ -55,10 +55,10 @@ const Mailbox = () => {
     }
   };
 
-  const handleReject = async (notificationId, studentId) => {
+  const handleReject = async (confirmationId, studentId) => {
     try {
       setMessage('');
-      await rejectVaccine(notificationId, 'Phụ huynh đã từ chối tiêm vaccine');
+      await rejectVaccination(confirmationId, 'Phụ huynh đã từ chối tiêm vaccine');
       setMessage('❌ Đã từ chối tiêm chủng!');
       loadNotifications();
     } catch (error) {
@@ -133,13 +133,13 @@ const Mailbox = () => {
                       {notification.status === 'PENDING' && (
                         <div className="actions">
                           <button
-                            onClick={() => handleConfirm(notification.id)}
+                            onClick={() => handleConfirm(notification.confirmationId)}
                             className="btn-confirm"
                           >
                             <FaCheck /> Đồng ý
                           </button>
                           <button
-                            onClick={() => handleReject(notification.id)}
+                            onClick={() => handleReject(notification.confirmationId)}
                             className="btn-reject"
                           >
                             <FaTimes /> Từ chối

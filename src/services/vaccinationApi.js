@@ -100,21 +100,19 @@ export const sendVaccinationNotices = async (notificationData) => {
 };
 
 // Xác nhận tiêm chủng (cho phụ huynh)
-export const confirmVaccination = async (data) => {
+export const confirmVaccination = async (confirmationId, message) => {
   try {
-    console.log('✅ Xác nhận tiêm chủng...', data);
+    console.log('✅ Xác nhận tiêm chủng...', { confirmationId, message });
     console.log('✅ Request URL:', '/api/vaccinations/confirm-vaccination');
-    console.log('✅ Request Body:', JSON.stringify(data, null, 2));
+    console.log('✅ Request Body:', JSON.stringify({ confirmationId, status: 'ACCEPTED', parentNote: message }, null, 2));
 
-    // Tạm thời dùng mock response để test UI
-    return {
-      code: 1000,
-      message: 'Xác nhận tiêm chủng thành công.',
-      result: null
-    };
-
-    // const response = await api.post('/api/vaccinations/confirm-vaccination', data);
-    // return response.data;
+    const response = await api.post('/api/vaccinations/confirm-vaccination', { 
+      confirmationId, 
+      status: 'ACCEPTED',
+      parentNote: message 
+    });
+    console.log('✅ Confirmation response:', response.data);
+    return response.data;
   } catch (error) {
     console.error('❌ Lỗi xác nhận tiêm chủng:', error);
     throw new Error('Dữ liệu xác nhận không hợp lệ. Vui lòng kiểm tra thông tin.');
@@ -122,11 +120,15 @@ export const confirmVaccination = async (data) => {
 };
 
 // Từ chối tiêm chủng (cho phụ huynh)
-export const rejectVaccination = async (rejectionData) => {
+export const rejectVaccination = async (confirmationId, message) => {
   try {
-    console.log('❌ Từ chối tiêm chủng...', rejectionData);
+    console.log('❌ Từ chối tiêm chủng...', { confirmationId, message });
 
-    const response = await api.post('/api/vaccinations/reject-vaccination', rejectionData);
+    const response = await api.post('/api/vaccinations/confirm-vaccination', { 
+      confirmationId, 
+      status: 'REJECTED',
+      parentNote: message 
+    });
     console.log('✅ Response:', response.data);
 
     if (response.data && response.data.code === 1000) {
