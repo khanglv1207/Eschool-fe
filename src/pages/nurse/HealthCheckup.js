@@ -2,33 +2,28 @@ import React, { useState, useEffect } from "react";
 import NurseLayout from "./NurseLayout";
 import {
     getStudentsToVaccinate,
-    createVaccinationRecord,
-    getVaccineTypes
+    createVaccinationRecord
 } from "../../services/vaccinationApi";
 
 function HealthCheckup() {
     const [studentsToVaccinate, setStudentsToVaccinate] = useState([]);
-    const [vaccineTypes, setVaccineTypes] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [showVaccinationModal, setShowVaccinationModal] = useState(false);
-    const [selectedVaccineType, setSelectedVaccineType] = useState("");
     const [vaccinationData, setVaccinationData] = useState({
         studentId: "",
-        vaccineType: "",
         vaccinationDate: "",
         batchNumber: "",
         administeredBy: "",
         notes: "",
-        status: "COMPLETED"
+        status: "IN_PROGRESS"
     });
 
     const loadStudentsToVaccinate = async () => {
         setLoading(true);
         setError("");
         try {
-            // Lấy tất cả học sinh cần tiêm vaccine (không filter theo vaccine cụ thể)
             const response = await getStudentsToVaccinate("");
             if (response && Array.isArray(response)) {
                 setStudentsToVaccinate(response);
@@ -42,32 +37,19 @@ function HealthCheckup() {
         }
     };
 
-    const loadVaccineTypes = async () => {
-        try {
-            const response = await getVaccineTypes();
-            if (response && Array.isArray(response)) {
-                setVaccineTypes(response);
-            }
-        } catch (err) {
-            console.error("Lỗi tải danh sách loại vaccine:", err);
-        }
-    };
-
     useEffect(() => {
         loadStudentsToVaccinate();
-        loadVaccineTypes();
     }, []);
 
     const handleOpenVaccinationModal = (student) => {
         setSelectedStudent(student);
         setVaccinationData({
             studentId: student.studentId || student.id,
-            vaccineType: "",
             vaccinationDate: new Date().toISOString().split('T')[0],
             batchNumber: "",
             administeredBy: "",
             notes: "",
-            status: "COMPLETED"
+            status: "IN_PROGRESS"
         });
         setShowVaccinationModal(true);
     };
@@ -77,12 +59,11 @@ function HealthCheckup() {
         setSelectedStudent(null);
         setVaccinationData({
             studentId: "",
-            vaccineType: "",
             vaccinationDate: "",
             batchNumber: "",
             administeredBy: "",
             notes: "",
-            status: "COMPLETED"
+            status: "IN_PROGRESS"
         });
     };
 
@@ -116,6 +97,8 @@ function HealthCheckup() {
     const getVaccinationStatus = (student) => {
         if (student.vaccinationStatus === "COMPLETED") {
             return <span className="badge bg-success">Đã tiêm</span>;
+        } else if (student.vaccinationStatus === "IN_PROGRESS") {
+            return <span className="badge bg-primary">Đang kiểm tra</span>;
         } else if (student.vaccinationStatus === "PENDING") {
             return <span className="badge bg-warning">Chờ tiêm</span>;
         } else {
@@ -135,7 +118,6 @@ function HealthCheckup() {
                 </div>
             </div>
 
-            {/* Error Alert */}
             {error && (
                 <div className="alert alert-danger alert-dismissible fade show" role="alert">
                     {error}
@@ -143,7 +125,6 @@ function HealthCheckup() {
                 </div>
             )}
 
-            {/* Summary Cards */}
             <div className="row mb-4">
                 <div className="col-md-3">
                     <div className="card bg-primary text-white">
@@ -174,6 +155,21 @@ function HealthCheckup() {
                     </div>
                 </div>
                 <div className="col-md-3">
+                    <div className="card bg-primary text-white">
+                        <div className="card-body">
+                            <div className="d-flex justify-content-between">
+                                <div>
+                                    <h4 className="mb-0">
+                                        {studentsToVaccinate.filter(s => s.vaccinationStatus === "IN_PROGRESS").length}
+                                    </h4>
+                                    <small>Đang kiểm tra</small>
+                                </div>
+                                <i className="fas fa-spinner fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-md-3">
                     <div className="card bg-success text-white">
                         <div className="card-body">
                             <div className="d-flex justify-content-between">
@@ -184,19 +180,6 @@ function HealthCheckup() {
                                     <small>Đã tiêm</small>
                                 </div>
                                 <i className="fas fa-check-circle fa-2x opacity-75"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-3">
-                    <div className="card bg-info text-white">
-                        <div className="card-body">
-                            <div className="d-flex justify-content-between">
-                                <div>
-                                    <h4 className="mb-0">{vaccineTypes.length}</h4>
-                                    <small>Loại vaccine</small>
-                                </div>
-                                <i className="fas fa-syringe fa-2x opacity-75"></i>
                             </div>
                         </div>
                     </div>
@@ -224,7 +207,6 @@ function HealthCheckup() {
                                     <tr>
                                         <th>Học sinh</th>
                                         <th>Lớp</th>
-                                        <th>Loại vaccine</th>
                                         <th>Ngày dự kiến</th>
                                         <th>Trạng thái</th>
                                         <th>Thao tác</th>
@@ -233,7 +215,7 @@ function HealthCheckup() {
                                 <tbody>
                                     {studentsToVaccinate.length === 0 ? (
                                         <tr>
-                                            <td colSpan="6" className="text-center text-muted py-4">
+                                            <td colSpan="5" className="text-center text-muted py-4">
                                                 <i className="fas fa-syringe fa-2x mb-2 text-muted"></i>
                                                 <br />
                                                 Không có học sinh nào cần tiêm vaccine.
@@ -267,10 +249,6 @@ function HealthCheckup() {
                                                     <span className="badge bg-info">{student.className}</span>
                                                 </td>
                                                 <td>
-                                                    <div className="fw-bold">{student.vaccineName}</div>
-                                                    <small className="text-muted">{student.vaccineType}</small>
-                                                </td>
-                                                <td>
                                                     <div>
                                                         <small className="text-muted">
                                                             {student.scheduledDate ?
@@ -288,10 +266,10 @@ function HealthCheckup() {
                                                         className="btn btn-sm btn-outline-primary"
                                                         title="Ghi nhận tiêm vaccine"
                                                         onClick={() => handleOpenVaccinationModal(student)}
-                                                        disabled={student.vaccinationStatus === "COMPLETED"}
+                                                        disabled={student.vaccinationStatus === "COMPLETED" || student.vaccinationStatus === "IN_PROGRESS"}
                                                     >
                                                         <i className="fas fa-syringe"></i>
-                                                        {student.vaccinationStatus === "COMPLETED" ? " Đã tiêm" : " Tiêm"}
+                                                        {student.vaccinationStatus === "COMPLETED" ? " Đã tiêm" : student.vaccinationStatus === "IN_PROGRESS" ? " Đang kiểm tra" : " Tiêm"}
                                                     </button>
                                                 </td>
                                             </tr>
@@ -318,25 +296,6 @@ function HealthCheckup() {
                                     <div className="row">
                                         <div className="col-md-6">
                                             <div className="mb-3">
-                                                <label className="form-label">Loại vaccine *</label>
-                                                <select
-                                                    className="form-select"
-                                                    name="vaccineType"
-                                                    value={vaccinationData.vaccineType}
-                                                    onChange={handleVaccinationChange}
-                                                    required
-                                                >
-                                                    <option value="">Chọn loại vaccine</option>
-                                                    {vaccineTypes.map((vaccine) => (
-                                                        <option key={vaccine.id} value={vaccine.name}>
-                                                            {vaccine.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div className="col-md-6">
-                                            <div className="mb-3">
                                                 <label className="form-label">Ngày tiêm *</label>
                                                 <input
                                                     type="date"
@@ -348,8 +307,6 @@ function HealthCheckup() {
                                                 />
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="row">
                                         <div className="col-md-6">
                                             <div className="mb-3">
                                                 <label className="form-label">Số lô vaccine</label>
@@ -363,6 +320,8 @@ function HealthCheckup() {
                                                 />
                                             </div>
                                         </div>
+                                    </div>
+                                    <div className="row">
                                         <div className="col-md-6">
                                             <div className="mb-3">
                                                 <label className="form-label">Người tiêm</label>
