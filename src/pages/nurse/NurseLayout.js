@@ -8,6 +8,9 @@ function NurseLayout({ children }) {
     const menuItems = [
         { icon: "fa-home", label: "Dashboard", link: "/nurse/dashboard" },
         { icon: "fa-pills", label: "Quản lý đơn thuốc", link: "/nurse/medication-management" },
+        // { icon: "fa-clipboard-list", label: "Yêu cầu thuốc", link: "/nurse/medication-requests" },
+        // { icon: "fa-calendar-day", label: "Lịch uống thuốc", link: "/nurse/schedules" },
+        { icon: "fa-stethoscope", label: "Kiểm tra sức khỏe", link: "/nurse/health-checkup" },
     ];
 
     const handleLogout = () => {

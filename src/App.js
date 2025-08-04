@@ -40,17 +40,13 @@ import SchoolNurseManagement from "./pages/admin/SchoolNurseManagement";
 import MedicalManagement from "./pages/admin/MedicalManagement";
 import MedicalEventRecording from "./pages/admin/MedicalEventRecording";
 import HealthProfileForm from "./pages/HealthProfileForm";
-import ManagerLayout from "./pages/manager/ManagerLayout";
-import ManagerDashboard from "./pages/manager/ManagerDashboard";
 import VaccinManage from "./pages/admin/VaccineManage";
-// import BlogManagement from "./pages/manager/BlogManagement";
-// import FeedBackManagement from "./pages/manager/FeedBackManagement";
-// import StudentManagement from "./pages/manager/StudentManagement";
-// import SchoolNurseManagement from "./pages/manager/SchoolNurseManagement";
-// import UserManagement from "./pages/manager/UserManagement";
 import ConsultationManagement from "./pages/admin/ConsultationManagement";
 import MedicineListManagement from "./pages/admin/MedicineListManagement";
 import MedicationManagement from "./pages/nurse/MedicationManagement";
+import Schedules from "./pages/nurse/Schedules";
+import MedicationRequests from "./pages/nurse/MedicationRequests";
+import HealthCheckup from "./pages/nurse/HealthCheckup";
 import NurseLayout from "./pages/nurse/NurseLayout";
 import NurseDashboard from "./pages/nurse/NurseDashboard";
 import DangKyThuocForm from "./pages/DangKyThuocForm";
@@ -59,12 +55,13 @@ import ParentMedicineList from "./pages/ParentMedicineList";
 function App() {
 
   const isAdminRoute = window.location.pathname.startsWith("/admin");
-  const isManagerRoute = window.location.pathname.startsWith("/manager");
+  const isNurseRoute = window.location.pathname.startsWith("/nurse");
+ 
 
   return (
     <Router>
-      {/* Chỉ hiển thị Navbar nếu không phải trang admin & manager  */}
-      {!isAdminRoute && !isManagerRoute && <Navbar />}
+      {/* Chỉ hiển thị Navbar nếu không phải trang admin & nurse  */}
+      {!isAdminRoute && !isNurseRoute && <Navbar />}
 
       {/* Phần nội dung sẽ thay đổi theo Route */}
       <Routes>
@@ -106,15 +103,16 @@ function App() {
         <Route path="/admin/medicaleventrecording" element={<MedicalEventRecording />} />
         <Route path="/admin/VaccineManage" element={<VaccinManage />} />
         <Route path="/health-profile-form" element={<HealthProfileForm />} />
-        <Route path="/manager" element={<ManagerLayout />} />
-        <Route path="/manager/dashboard" element={<ManagerDashboard />} />
         <Route path="/medicine-registration" element={<DangKyThuocForm onBack={() => window.history.back()} />} />
         <Route path="/parent-medicine-list" element={<MedicineListManagement />} />
 
         {/* Nurse Routes */}
-        <Route path="/nurse" element={<NurseLayout><NurseDashboard /></NurseLayout>} />
+        <Route path="/nurse" element={<NurseDashboard />} />
         <Route path="/nurse/dashboard" element={<NurseLayout><NurseDashboard /></NurseLayout>} />
         <Route path="/nurse/medication-management" element={<NurseLayout><MedicationManagement /></NurseLayout>} />
+        <Route path="/nurse/schedules" element={<Schedules />} />
+        <Route path="/nurse/health-checkup" element={<HealthCheckup />} />
+        <Route path="/nurse/medication-requests" element={<MedicationRequests />} />
       </Routes>
     </Router>
   );
