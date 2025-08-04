@@ -107,7 +107,7 @@ function App() {
         <Route path="/parent-medicine-list" element={<MedicineListManagement />} />
 
         {/* Nurse Routes */}
-        <Route path="/nurse" element={<NurseDashboard />} />
+        <Route path="/nurse" element={<NurseLayout><NurseDashboard /></NurseLayout>} />
         <Route path="/nurse/dashboard" element={<NurseLayout><NurseDashboard /></NurseLayout>} />
         <Route path="/nurse/medication-management" element={<NurseLayout><MedicationManagement /></NurseLayout>} />
         <Route path="/nurse/schedules" element={<Schedules />} />
