@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaCheckCircle, FaTimesCircle, FaCalendarAlt, FaUser, FaSyringe, FaInfoCircle, FaExclamationTriangle } from 'react-icons/fa';
-import { confirmVaccination, getVaccinationNotification } from '../services/vaccinationApi';
+import { confirmVaccination, rejectVaccination, getVaccinationNotification } from '../services/vaccinationApi';
 
 function VaccinationConfirmation() {
   const { confirmationId } = useParams();
   const navigate = useNavigate();
-  
+
   const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -21,7 +21,19 @@ function VaccinationConfirmation() {
   const loadNotification = async () => {
     try {
       setLoading(true);
-      const data = await getVaccinationNotification(confirmationId);
+      const response = await getVaccinationNotification(confirmationId);
+      console.log('📋 Raw response:', response);
+
+      // Kiểm tra response format
+      let data;
+      if (response && response.result) {
+        data = response.result;
+      } else if (response && typeof response === 'object') {
+        data = response;
+      } else {
+        throw new Error('Response format không hợp lệ');
+      }
+
       setNotification(data);
       console.log('📋 Vaccination notification loaded:', data);
     } catch (error) {
@@ -41,27 +53,37 @@ function VaccinationConfirmation() {
     try {
       setSubmitting(true);
       setDecision('confirm');
-      
+
       const confirmationData = {
         confirmationId: confirmationId,
-        decision: 'CONFIRMED',
-        reason: reason,
-        confirmedAt: new Date().toISOString()
+        status: 'accepted',
+        parentNote: reason,
+        // Thử thêm timestamp nếu backend cần
+        timestamp: new Date().toISOString()
       };
 
       console.log('✅ Sending confirmation data:', confirmationData);
-      
+      console.log('✅ Data type:', typeof confirmationData);
+      console.log('✅ JSON stringified:', JSON.stringify(confirmationData));
+
       const response = await confirmVaccination(confirmationData);
-      
+
       console.log('✅ Confirmation response:', response);
-      
-      setMessage('✅ Xác nhận tiêm chủng thành công!');
-      
-      // Redirect after 3 seconds
-      setTimeout(() => {
-        navigate('/parent-dashboard');
-      }, 3000);
-      
+      console.log('✅ Response type:', typeof response);
+      console.log('✅ Response keys:', Object.keys(response || {}));
+
+      // Kiểm tra response format
+      if (response && (response.code === 0 || response.code === 1000 || response.success)) {
+        setMessage('✅ Xác nhận tiêm chủng thành công!');
+
+        // Redirect after 3 seconds
+        setTimeout(() => {
+          navigate('/parent-dashboard');
+        }, 3000);
+      } else {
+        throw new Error(response?.message || 'Không nhận được phản hồi hợp lệ từ server');
+      }
+
     } catch (error) {
       console.error('❌ Lỗi xác nhận tiêm chủng:', error);
       setMessage('❌ Lỗi xác nhận: ' + error.message);
@@ -80,27 +102,35 @@ function VaccinationConfirmation() {
     try {
       setSubmitting(true);
       setDecision('reject');
-      
+
       const rejectionData = {
         confirmationId: confirmationId,
-        decision: 'REJECTED',
-        reason: reason,
-        rejectedAt: new Date().toISOString()
+        status: 'declined',
+        parentNote: reason,
+        // Thử thêm timestamp nếu backend cần
+        timestamp: new Date().toISOString()
       };
 
       console.log('❌ Sending rejection data:', rejectionData);
-      
-      const response = await confirmVaccination(rejectionData);
-      
+
+      const response = await rejectVaccination(rejectionData);
+
       console.log('✅ Rejection response:', response);
-      
-      setMessage('✅ Đã từ chối tiêm chủng thành công!');
-      
-      // Redirect after 3 seconds
-      setTimeout(() => {
-        navigate('/parent-dashboard');
-      }, 3000);
-      
+      console.log('✅ Response type:', typeof response);
+      console.log('✅ Response keys:', Object.keys(response || {}));
+
+      // Kiểm tra response format
+      if (response && (response.code === 0 || response.code === 1000 || response.success)) {
+        setMessage('✅ Đã từ chối tiêm chủng thành công!');
+
+        // Redirect after 3 seconds
+        setTimeout(() => {
+          navigate('/parent-dashboard');
+        }, 3000);
+      } else {
+        throw new Error(response?.message || 'Không nhận được phản hồi hợp lệ từ server');
+      }
+
     } catch (error) {
       console.error('❌ Lỗi từ chối tiêm chủng:', error);
       setMessage('❌ Lỗi từ chối: ' + error.message);
@@ -150,6 +180,8 @@ function VaccinationConfirmation() {
       </div>
     );
   }
+
+  console.log('🔍 Current notification state:', notification);
 
   if (!notification) {
     return (
@@ -219,9 +251,9 @@ function VaccinationConfirmation() {
           textAlign: 'center',
           position: 'relative'
         }}>
-          <div style={{ 
-            fontSize: '28px', 
-            fontWeight: 'bold', 
+          <div style={{
+            fontSize: '28px',
+            fontWeight: 'bold',
             marginBottom: '12px',
             display: 'flex',
             alignItems: 'center',
@@ -231,8 +263,8 @@ function VaccinationConfirmation() {
             <FaSyringe style={{ fontSize: '32px' }} />
             Thông báo tiêm chủng
           </div>
-          <div style={{ 
-            fontSize: '16px', 
+          <div style={{
+            fontSize: '16px',
             opacity: 0.9
           }}>
             Vui lòng xác nhận hoặc từ chối thông báo tiêm chủng cho con của bạn
@@ -265,8 +297,8 @@ function VaccinationConfirmation() {
             marginBottom: '30px',
             border: '1px solid rgba(0,0,0,0.1)'
           }}>
-            <h3 style={{ 
-              color: '#495057', 
+            <h3 style={{
+              color: '#495057',
               marginBottom: '25px',
               fontSize: '20px',
               fontWeight: '600',
@@ -290,8 +322,8 @@ function VaccinationConfirmation() {
                 borderRadius: '15px',
                 border: '1px solid rgba(0,0,0,0.1)'
               }}>
-                <h4 style={{ 
-                  color: '#495057', 
+                <h4 style={{
+                  color: '#495057',
                   marginBottom: '15px',
                   fontSize: '16px',
                   fontWeight: '600',
@@ -322,8 +354,8 @@ function VaccinationConfirmation() {
                 borderRadius: '15px',
                 border: '1px solid rgba(0,0,0,0.1)'
               }}>
-                <h4 style={{ 
-                  color: '#495057', 
+                <h4 style={{
+                  color: '#495057',
                   marginBottom: '15px',
                   fontSize: '16px',
                   fontWeight: '600',
@@ -354,8 +386,8 @@ function VaccinationConfirmation() {
                 borderRadius: '15px',
                 border: '1px solid rgba(0,0,0,0.1)'
               }}>
-                <h4 style={{ 
-                  color: '#495057', 
+                <h4 style={{
+                  color: '#495057',
                   marginBottom: '15px',
                   fontSize: '16px',
                   fontWeight: '600',
@@ -385,8 +417,8 @@ function VaccinationConfirmation() {
             padding: '30px',
             border: '1px solid rgba(0,0,0,0.1)'
           }}>
-            <h3 style={{ 
-              color: '#495057', 
+            <h3 style={{
+              color: '#495057',
               marginBottom: '25px',
               fontSize: '20px',
               fontWeight: '600',
@@ -399,12 +431,12 @@ function VaccinationConfirmation() {
             </h3>
 
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ 
-                fontWeight: '600', 
-                fontSize: '14px', 
-                color: '#495057', 
-                marginBottom: '8px', 
-                display: 'block' 
+              <label style={{
+                fontWeight: '600',
+                fontSize: '14px',
+                color: '#495057',
+                marginBottom: '8px',
+                display: 'block'
               }}>
                 Lý do {decision === 'confirm' ? 'xác nhận' : decision === 'reject' ? 'từ chối' : 'quyết định'}:
               </label>
@@ -442,7 +474,7 @@ function VaccinationConfirmation() {
                 onClick={handleConfirm}
                 disabled={submitting || decision === 'reject'}
                 style={{
-                  background: decision === 'confirm' 
+                  background: decision === 'confirm'
                     ? 'linear-gradient(135deg, #28a745 0%, #20c997 100%)'
                     : 'linear-gradient(135deg, #6c757d 0%, #495057 100%)',
                   color: '#fff',
