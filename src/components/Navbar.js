@@ -66,13 +66,15 @@ function Navbar() {
     if (isAdmin || isNurse) {
       profileSubmenu.push(
         { title: "Tiêm chủng", link: "/vaccination" },
-        { title: "Kiểm tra y tế định kỳ", link: "/medical-checkup" }
+        { title: "Kiểm tra y tế định kỳ", link: "/health-checkup" }
       );
     } else if (isParent) {
       // Menu cho phụ huynh
       profileSubmenu.push(
         { title: "Thông báo tiêm chủng", link: "/vaccination-notifications" },
-        { title: "Kết quả tiêm chủng", link: "/vaccination-results" }
+        { title: "Kết quả tiêm chủng", link: "/vaccination-results" },
+        { title: "Thông báo kiểm tra y tế", link: "/health-checkup-notifications" },
+        { title: "Kết quả kiểm tra y tế", link: "/health-checkup-results" }
       );
     } else {
       // Menu cho user thường

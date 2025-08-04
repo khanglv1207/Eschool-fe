@@ -13,15 +13,28 @@ function MedicalCheckup() {
 
   // Mock data - trong thực tế sẽ lấy từ API
   useEffect(() => {
-    const mockStudents = [
-      { id: 1, name: 'Nguyễn Văn A', class: '6A1', parentEmail: 'parent1@email.com', status: 'pending' },
-      { id: 2, name: 'Trần Thị B', class: '6A2', parentEmail: 'parent2@email.com', status: 'pending' },
-      { id: 3, name: 'Lê Văn C', class: '6A3', parentEmail: 'parent3@email.com', status: 'pending' },
-      { id: 4, name: 'Phạm Thị D', class: '6A4', parentEmail: 'parent4@email.com', status: 'pending' },
-      { id: 5, name: 'Hoàng Văn E', class: '6A5', parentEmail: 'parent5@email.com', status: 'pending' },
-    ];
-    setStudents(mockStudents);
+    loadStudents();
   }, []);
+
+  const loadStudents = async () => {
+    try {
+      // Gọi API để lấy danh sách học sinh từ backend
+      // const response = await getStudents();
+      // setStudents(response.data || []);
+      
+      // Tạm thời sử dụng mock data cho đến khi có API thật
+      const mockStudents = [
+        { id: 1, name: 'Nguyễn Văn A', class: '6A1', parentEmail: 'parent1@email.com', status: 'pending' },
+        { id: 2, name: 'Trần Thị B', class: '6A2', parentEmail: 'parent2@email.com', status: 'pending' },
+        { id: 3, name: 'Lê Văn C', class: '6A3', parentEmail: 'parent3@email.com', status: 'pending' },
+        { id: 4, name: 'Phạm Thị D', class: '6A4', parentEmail: 'parent4@email.com', status: 'pending' },
+        { id: 5, name: 'Hoàng Văn E', class: '6A5', parentEmail: 'parent5@email.com', status: 'pending' },
+      ];
+      setStudents(mockStudents);
+    } catch (error) {
+      console.error('Lỗi tải danh sách học sinh:', error);
+    }
+  };
 
   const handleStudentSelection = (studentId) => {
     setSelectedStudents(prev =>
@@ -54,7 +67,13 @@ function MedicalCheckup() {
 
     setLoading(true);
     try {
-      // Mock API call
+      // Gọi API thật để gửi thông báo
+      // const response = await sendHealthCheckupNotification({
+      //   studentIds: selectedStudents,
+      //   content: notificationContent
+      // });
+      
+      // Tạm thời sử dụng mock API call cho đến khi có API thật
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       setMessage('Đã gửi thông báo kiểm tra y tế định kỳ thành công!');

@@ -63,8 +63,10 @@ const VaccinationManagement = () => {
     try {
       setLoading(true);
       const response = await getStudentsNeedVaccination();
+      console.log('📋 Students need vaccination:', response);
       setPendingStudents(response);
     } catch (error) {
+      console.error('❌ Error loading pending vaccinations:', error);
       setMessage('❌ Lỗi tải danh sách học sinh cần tiêm: ' + error.message);
     } finally {
       setLoading(false);
@@ -541,6 +543,19 @@ const VaccinationManagement = () => {
           <div className="pending-vaccinations">
             <h2><FaCheck /> Học Sinh Cần Tiêm Chủng</h2>
 
+            {pendingStudents.length > 0 && (
+              <div className="info-message" style={{
+                background: '#d4edda',
+                color: '#155724',
+                padding: '10px 15px',
+                borderRadius: '5px',
+                marginBottom: '15px',
+                border: '1px solid #c3e6cb'
+              }}>
+                ✅ Tìm thấy {pendingStudents.length} học sinh đã được phụ huynh xác nhận tiêm chủng
+              </div>
+            )}
+
             <div className="actions">
               <button
                 onClick={loadPendingVaccinations}
@@ -567,6 +582,7 @@ const VaccinationManagement = () => {
                       <th>Lớp</th>
                       <th>Vaccine</th>
                       <th>Email PH</th>
+                      <th>Ngày Tiêm</th>
                       <th>Trạng Thái</th>
                       <th>Thao Tác</th>
                     </tr>
@@ -579,6 +595,7 @@ const VaccinationManagement = () => {
                         <td>{student.className}</td>
                         <td>{student.vaccineName}</td>
                         <td>{student.parentEmail}</td>
+                        <td>{student.vaccinationDate ? formatDate(student.vaccinationDate) : 'Chưa lên lịch'}</td>
                         <td>
                           <span className="status confirmed">Đã xác nhận</span>
                         </td>
@@ -588,7 +605,8 @@ const VaccinationManagement = () => {
                               setResultForm(prev => ({
                                 ...prev,
                                 studentId: student.studentId,
-                                vaccineName: student.vaccineName
+                                vaccineName: student.vaccineName,
+                                confirmationId: student.confirmationId
                               }));
                               setShowResultForm(true);
                             }}

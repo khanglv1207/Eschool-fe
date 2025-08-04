@@ -13,12 +13,30 @@ function Schedules() {
     const [studentSchedules, setStudentSchedules] = useState([]);
     const [showScheduleModal, setShowScheduleModal] = useState(false);
 
-    // Mock data cho danh sách học sinh (trong thực tế sẽ lấy từ API)
-    const mockStudents = [
-        { studentId: "student-1", studentName: "Nguyễn Văn A", className: "10A1" },
-        { studentId: "student-2", studentName: "Trần Thị B", className: "10A2" },
-        { studentId: "student-3", studentName: "Lê Văn C", className: "11A1" },
-    ];
+    // Lấy danh sách học sinh từ API
+    const [students, setStudents] = useState([]);
+
+    useEffect(() => {
+        loadStudents();
+    }, []);
+
+    const loadStudents = async () => {
+        try {
+            // Gọi API để lấy danh sách học sinh
+            // const response = await getStudents();
+            // setStudents(response.data || []);
+            
+            // Tạm thời sử dụng mock data cho đến khi có API
+            const mockStudents = [
+                { studentId: "student-1", studentName: "Nguyễn Văn A", className: "10A1" },
+                { studentId: "student-2", studentName: "Trần Thị B", className: "10A2" },
+                { studentId: "student-3", studentName: "Lê Văn C", className: "11A1" },
+            ];
+            setStudents(mockStudents);
+        } catch (error) {
+            console.error('Lỗi tải danh sách học sinh:', error);
+        }
+    };
 
     const loadSchedules = async (studentId) => {
         if (!studentId) return;
@@ -131,7 +149,7 @@ function Schedules() {
                                 onChange={handleStudentChange}
                             >
                                 <option value="">-- Chọn học sinh --</option>
-                                {mockStudents.map((student) => (
+                                {students.map((student) => (
                                     <option key={student.studentId} value={student.studentId}>
                                         {student.studentName} - {student.className}
                                     </option>

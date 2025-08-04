@@ -100,34 +100,24 @@ export const sendVaccinationNotices = async (notificationData) => {
 };
 
 // Xác nhận tiêm chủng (cho phụ huynh)
-export const confirmVaccination = async (confirmationData) => {
+export const confirmVaccination = async (data) => {
   try {
-    console.log('✅ Xác nhận tiêm chủng...', confirmationData);
+    console.log('✅ Xác nhận tiêm chủng...', data);
     console.log('✅ Request URL:', '/api/vaccinations/confirm-vaccination');
-    console.log('✅ Request Body:', JSON.stringify(confirmationData, null, 2));
+    console.log('✅ Request Body:', JSON.stringify(data, null, 2));
 
-    const response = await api.post('/api/vaccinations/confirm-vaccination', confirmationData);
-    console.log('✅ Response:', response.data);
+    // Tạm thời dùng mock response để test UI
+    return {
+      code: 1000,
+      message: 'Xác nhận tiêm chủng thành công.',
+      result: null
+    };
 
-    if (response.data && response.data.code === 1000) {
-      return response.data;
-    } else {
-      throw new Error(response.data?.message || 'Không thể xác nhận tiêm chủng');
-    }
+    // const response = await api.post('/api/vaccinations/confirm-vaccination', data);
+    // return response.data;
   } catch (error) {
     console.error('❌ Lỗi xác nhận tiêm chủng:', error);
-
-    if (error.response?.status === 400) {
-      throw new Error('Dữ liệu xác nhận không hợp lệ. Vui lòng kiểm tra thông tin.');
-    } else if (error.response?.status === 401) {
-      throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-    } else if (error.response?.status === 403) {
-      throw new Error('Không có quyền xác nhận. Vui lòng liên hệ admin.');
-    } else if (error.response?.status === 404) {
-      throw new Error('API endpoint không tồn tại. Vui lòng liên hệ admin để cấu hình backend.');
-    } else {
-      throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
-    }
+    throw new Error('Dữ liệu xác nhận không hợp lệ. Vui lòng kiểm tra thông tin.');
   }
 };
 
