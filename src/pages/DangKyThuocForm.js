@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { createMedicalRequest, getParentStudents, getStudentsByEmailImproved, searchStudentByCode } from "../services/parentApi";
+import { sendMedicalRequest, getParentStudents, getStudentsByEmailImproved, searchStudentByCode } from "../services/parentApi";
 
 function DangKyThuocForm({ onBack }) {
   const [medicines, setMedicines] = useState([
@@ -9,6 +9,7 @@ function DangKyThuocForm({ onBack }) {
   const [loading, setLoading] = useState(false);
   const [students, setStudents] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState(null);
   const [loadingStudents, setLoadingStudents] = useState(true);
   
   // Thêm state cho tìm kiếm theo student code
@@ -24,6 +25,7 @@ function DangKyThuocForm({ onBack }) {
         setLoadingStudents(true);
         const response = await getParentStudents();
         console.log('API Response:', response);
+        console.log('🔍 Full API response structure:', JSON.stringify(response, null, 2));
         
         // Xử lý các format response khác nhau
         let studentsData = [];
@@ -48,14 +50,22 @@ function DangKyThuocForm({ onBack }) {
         console.log('Processed students data:', studentsData);
         
         if (studentsData.length > 0) {
+          // Debug: Log dữ liệu gốc từ API
+          console.log('🔍 Raw student data from API:', studentsData[0]);
+          
           // Map dữ liệu để đảm bảo format đúng
-          const mappedStudents = studentsData.map(student => ({
-            id: student.id || student.student_id || student.studentId,
-            fullName: student.fullName || student.student_name || student.name || student.studentName,
-            studentCode: student.studentCode || student.student_code || student.code,
-            className: student.className || student.class_name || student.class,
-            relationship: student.relationship || student.relation
-          }));
+          const mappedStudents = studentsData.map(student => {
+            const mappedStudent = {
+              id: student.id || student.student_id || student.studentId,
+              fullName: student.fullName || student.student_name || student.name || student.studentName,
+              studentCode: student.studentCode || student.StudentCode || student.student_code || student.code,
+              className: student.className || student.class_name || student.class,
+              relationship: student.relationship || student.relation
+            };
+            
+            console.log('🔍 Mapped student:', mappedStudent);
+            return mappedStudent;
+          });
           
           console.log('Mapped students:', mappedStudents);
           setStudents(mappedStudents);
@@ -63,6 +73,7 @@ function DangKyThuocForm({ onBack }) {
           // Tự động chọn học sinh đầu tiên nếu chỉ có 1 học sinh
           if (mappedStudents.length === 1) {
             setSelectedStudentId(mappedStudents[0].id);
+            setSelectedStudent(mappedStudents[0]);
             console.log('Auto-selected student ID:', mappedStudents[0].id);
           }
         } else {
@@ -111,6 +122,11 @@ function DangKyThuocForm({ onBack }) {
     // Validation
     if (!selectedStudentId) {
       alert("Vui lòng chọn học sinh!");
+      return;
+    }
+    
+    if (!studentCode.trim()) {
+      alert("Vui lòng nhập mã học sinh!");
       return;
     }
     
@@ -255,11 +271,34 @@ function DangKyThuocForm({ onBack }) {
          throw new Error('Không thể xác định studentId để gửi thuốc');
        }
       
+      // Debug: Kiểm tra giá trị studentCode
+      console.log('🔍 Debug studentCode:');
+      console.log('  - selectedStudent?.studentCode:', selectedStudent?.studentCode);
+      console.log('  - studentCode state:', studentCode);
+      console.log('  - Using studentCode from input field');
+      
+      // Chuyển đổi medications theo đúng DTO MedicalRequest.MedicationItemRequest
+      const medicationsForAPI = medications.map(medication => {
+        console.log('🔍 Creating medication for API:', {
+          medicationName: medication.medicationName,
+          dosage: medication.dosage,
+          note: medication.note,
+          schedule: medication.schedule
+        });
+        
+        return {
+          medicationName: medication.medicationName,
+          dosage: medication.dosage,
+          note: medication.note,
+          schedule: medication.schedule
+        };
+      });
+      
       const medicalRequest = {
         studentId: actualStudentId,
-        studentCode: selectedStudent?.studentCode || studentCode,
+        studentCode: studentCode, // Sử dụng studentCode từ input field
         note: note,
-        medications: medications
+        medications: medicationsForAPI
       };
       
              console.log('=== SUBMIT MEDICAL REQUEST ===');
@@ -273,10 +312,11 @@ function DangKyThuocForm({ onBack }) {
        });
        console.log('Medical request data:', JSON.stringify(medicalRequest, null, 2));
        console.log('Note:', note);
-       console.log('Medications:', medications);
+       console.log('Original medications:', medications);
+       console.log('Medications for API:', medicationsForAPI);
       
       // Gửi request đến API
-      const response = await createMedicalRequest(medicalRequest);
+      const response = await sendMedicalRequest(medicalRequest);
       
       console.log('Response:', response);
       
@@ -381,7 +421,13 @@ function DangKyThuocForm({ onBack }) {
             <>
               <select
                 value={selectedStudentId}
-                onChange={(e) => setSelectedStudentId(e.target.value)}
+                onChange={(e) => {
+                  const studentId = e.target.value;
+                  setSelectedStudentId(studentId);
+                  // Tìm student object tương ứng
+                  const selectedStudentObj = students.find(s => s.id === studentId);
+                  setSelectedStudent(selectedStudentObj);
+                }}
                 required
                 style={{
                   width: "100%",
@@ -414,98 +460,39 @@ function DangKyThuocForm({ onBack }) {
                 💡 Chọn học sinh mà bạn muốn gửi thuốc cho
               </small>
               
-              {/* Tìm kiếm theo student code */}
-              <div style={{ marginTop: "12px", padding: "12px", background: "#f8f9fa", borderRadius: "8px", border: "1px solid #e3eafc" }}>
-                <label style={{ fontWeight: 600, fontSize: "13px", color: "#1E90FF", marginBottom: "8px", display: "block" }}>
-                  🔍 Tìm kiếm theo mã học sinh
+              {/* Ô nhập Student Code thủ công */}
+              <div style={{ marginTop: "12px" }}>
+                <label style={{ fontWeight: 600, fontSize: 13, color: "#1E90FF", marginBottom: 8, display: "block" }}>
+                  Mã học sinh <span style={{ color: "#ff6b6b" }}>*</span>
                 </label>
-                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                  <input
-                    type="text"
-                    placeholder="Nhập mã học sinh..."
-                    value={studentCode}
-                    onChange={(e) => setStudentCode(e.target.value)}
-                    style={{
-                      flex: 1,
-                      padding: "8px 12px",
-                      borderRadius: "6px",
-                      border: "1px solid #e3eafc",
-                      fontSize: "14px",
-                      background: "#fff"
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (!studentCode.trim()) {
-                        alert('Vui lòng nhập mã học sinh!');
-                        return;
-                      }
-                      
-                      console.log('=== TÌM KIẾM HỌC SINH THEO MÃ ===');
-                      setSearchingStudent(true);
-                      setSearchedStudent(null);
-                      try {
-                        const response = await searchStudentByCode(studentCode.trim());
-                        console.log('API Response:', response);
-                        
-                        if (response.result && response.result.length > 0) {
-                          const student = response.result[0];
-                          console.log('Searched student data:', student);
-                          
-                          // Tìm student_id thực
-                          const studentId = student.id || student.student_id || student.studentId;
-                          console.log('Real student ID:', studentId);
-                          
-                          // Set dữ liệu thực
-                          setStudents([student]);
-                          setSelectedStudentId(studentId);
-                          setSearchedStudent(student);
-                          
-                          console.log('✅ Đã tìm thấy học sinh theo mã: ' + student.studentCode);
-                          alert('✅ Đã tìm thấy học sinh: ' + student.fullName);
-                        } else {
-                          console.log('❌ Không tìm thấy học sinh theo mã: ' + studentCode);
-                          alert('❌ Không tìm thấy học sinh với mã này.');
-                        }
-                      } catch (error) {
-                        console.error('❌ Lỗi API tìm kiếm học sinh:', error);
-                        alert('❌ Lỗi khi tìm kiếm học sinh: ' + error.message);
-                      } finally {
-                        setSearchingStudent(false);
-                      }
-                    }}
-                    disabled={searchingStudent}
-                    style={{
-                      padding: "8px 16px",
-                      borderRadius: "6px",
-                      border: "none",
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      cursor: searchingStudent ? "not-allowed" : "pointer",
-                      background: searchingStudent ? "#ccc" : "#1E90FF",
-                      color: "white",
-                      minWidth: "120px"
-                    }}
-                  >
-                    {searchingStudent ? "🔍 Đang tìm..." : "🔍 Tìm kiếm"}
-                  </button>
-                </div>
-                {searchedStudent && (
-                  <div style={{ 
-                    marginTop: "8px", 
-                    padding: "8px", 
-                    background: "#e8f5e8", 
-                    borderRadius: "6px", 
-                    border: "1px solid #4caf50",
-                    fontSize: "13px"
-                  }}>
-                    ✅ <strong>{searchedStudent.fullName}</strong> - Mã: {searchedStudent.studentCode}
-                    {searchedStudent.className && ` - Lớp: ${searchedStudent.className}`}
-                  </div>
-                )}
+                <input
+                  type="text"
+                  placeholder="Nhập mã học sinh (VD: HS0001, HS0002...)"
+                  value={studentCode}
+                  onChange={(e) => setStudentCode(e.target.value)}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    border: "1.5px solid #e3eafc",
+                    fontSize: "15px",
+                    background: "#fafdff",
+                    transition: "border 0.2s",
+                    outline: "none"
+                  }}
+                  onFocus={e => e.target.style.border = '1.5px solid #1E90FF'}
+                  onBlur={e => e.target.style.border = '1.5px solid #e3eafc'}
+                />
+                <small style={{ 
+                  color: "#666", 
+                  fontSize: "12px", 
+                  marginTop: "4px", 
+                  display: "block" 
+                }}>
+                  💡 Nhập mã học sinh chính xác để đảm bảo gửi thuốc đúng người
+                </small>
               </div>
-              
               
             </>
           )}
