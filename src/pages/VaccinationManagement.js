@@ -18,6 +18,7 @@ import {
   getVaccinationResult,
   getVaccineTypes
 } from '../services/vaccinationApi';
+import VaccinationResultForm from './VaccinationResultForm';
 import './VaccinationManagement.css';
 
 const VaccinationManagement = () => {
@@ -33,6 +34,7 @@ const VaccinationManagement = () => {
   const [selectedVaccine, setSelectedVaccine] = useState('');
   const [vaccineTypes, setVaccineTypes] = useState([]); // Danh sách vaccine từ database
   const [studentsToVaccinate, setStudentsToVaccinate] = useState([]);
+  const [notificationStatus, setNotificationStatus] = useState({}); // Trạng thái thông báo cho từng học sinh
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -51,6 +53,7 @@ const VaccinationManagement = () => {
   // States for UI
   const [activeTab, setActiveTab] = useState('create');
   const [showResultForm, setShowResultForm] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
     loadVaccinationResults();
@@ -190,6 +193,15 @@ const VaccinationManagement = () => {
       });
 
       setStudentsToVaccinate(response);
+      
+      // Reset trạng thái thông báo cho danh sách học sinh mới
+      const resetStatus = {};
+      response.forEach(student => {
+        const studentId = student.studentId || student.studentCode || student.id;
+        resetStatus[studentId] = 'waiting';
+      });
+      setNotificationStatus(prev => ({ ...prev, ...resetStatus }));
+      
       setMessage(`✅ Tìm thấy ${response.length} học sinh chưa tiêm ${selectedVaccine} (dữ liệu từ khai báo sức khỏe)`);
     } catch (error) {
       console.error('❌ Lỗi lấy danh sách học sinh:', error);
@@ -224,6 +236,14 @@ const VaccinationManagement = () => {
       console.log('🎯 Vaccine:', selectedVaccine);
       console.log('👥 Số học sinh:', studentsToVaccinate.length);
 
+      // Cập nhật trạng thái thành "Chờ gửi thông báo" cho tất cả học sinh
+      const newStatus = {};
+      studentsToVaccinate.forEach(student => {
+        const studentId = student.studentId || student.studentCode || student.id;
+        newStatus[studentId] = 'pending';
+      });
+      setNotificationStatus(prev => ({ ...prev, ...newStatus }));
+
       const request = {
         vaccineName: selectedVaccine,
         scheduledDate: new Date().toISOString().split('T')[0], // Ngày hiện tại
@@ -250,11 +270,28 @@ const VaccinationManagement = () => {
       console.log('✅ Số học sinh sẽ gửi thông báo:', request.studentIds.length);
 
       await sendVaccinationNotices(request);
+      
+      // Cập nhật trạng thái thành "Đã gửi thông báo" cho tất cả học sinh
+      const sentStatus = {};
+      studentsToVaccinate.forEach(student => {
+        const studentId = student.studentId || student.studentCode || student.id;
+        sentStatus[studentId] = 'sent';
+      });
+      setNotificationStatus(prev => ({ ...prev, ...sentStatus }));
+      
       setMessage('✅ Đã gửi thông báo tiêm chủng thành công!');
-      setStudentsToVaccinate([]);
+      // Không xóa danh sách học sinh nữa
     } catch (error) {
       console.error('❌ Lỗi gửi thông báo:', error);
       setMessage('❌ Lỗi gửi thông báo: ' + error.message);
+      
+      // Reset trạng thái về "Chờ xác nhận" nếu gửi thất bại
+      const resetStatus = {};
+      studentsToVaccinate.forEach(student => {
+        const studentId = student.studentId || student.studentCode || student.id;
+        resetStatus[studentId] = 'waiting';
+      });
+      setNotificationStatus(prev => ({ ...prev, ...resetStatus }));
     } finally {
       setLoading(false);
     }
@@ -304,6 +341,24 @@ const VaccinationManagement = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Ghi nhận kết quả tiêm chủng cho từng học sinh
+  const handleRecordVaccinationResult = (student) => {
+    setSelectedStudent(student);
+    setShowResultForm(true);
+  };
+
+  // Xử lý khi form đóng
+  const handleCloseResultForm = () => {
+    setSelectedStudent(null);
+    setShowResultForm(false);
+  };
+
+  // Xử lý khi ghi nhận thành công
+  const handleResultSuccess = async () => {
+    await loadVaccinationResults();
+    setMessage(`✅ Đã ghi nhận kết quả tiêm chủng ${selectedVaccine} cho học sinh ${selectedStudent?.studentName || selectedStudent?.fullName || selectedStudent?.name || selectedStudent?.student_name}!`);
   };
 
 
@@ -483,6 +538,7 @@ const VaccinationManagement = () => {
                         <th>Email PH</th>
                         <th>Lý Do</th>
                         <th>Trạng Thái</th>
+                        <th>Thao Tác</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -498,7 +554,30 @@ const VaccinationManagement = () => {
                             </span>
                           </td>
                           <td>
-                            <span className="status pending">Chờ xác nhận</span>
+                            {(() => {
+                              const studentId = student.studentId || student.studentCode || student.id;
+                              const status = notificationStatus[studentId] || 'waiting';
+                              
+                              switch(status) {
+                                case 'pending':
+                                  return <span className="status pending">Chờ gửi thông báo</span>;
+                                case 'sent':
+                                  return <span className="status sent">Đã gửi thông báo</span>;
+                                case 'waiting':
+                                default:
+                                  return <span className="status waiting">Chờ xác nhận</span>;
+                              }
+                            })()}
+                          </td>
+                          <td>
+                            <button
+                              onClick={() => handleRecordVaccinationResult(student)}
+                              className="btn-record-result"
+                              title="Ghi nhận kết quả tiêm chủng"
+                              disabled={loading}
+                            >
+                              <FaEdit /> Ghi Nhận Kết Quả
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -589,96 +668,13 @@ const VaccinationManagement = () => {
       </div>
 
       {/* Vaccination Result Form Modal */}
-      {showResultForm && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
-              <h3>Ghi Nhận Kết Quả Tiêm Chủng</h3>
-              <button
-                onClick={() => setShowResultForm(false)}
-                className="close-btn"
-              >
-                <FaTimes />
-              </button>
-            </div>
-            <form onSubmit={handleCreateVaccinationResult} className="result-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Mã Học Sinh</label>
-                  <input
-                    type="text"
-                    name="studentId"
-                    value={resultForm.studentId}
-                    onChange={handleResultFormChange}
-                    required
-                    readOnly
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Loại Vaccine</label>
-                  <input
-                    type="text"
-                    name="vaccineName"
-                    value={resultForm.vaccineName}
-                    onChange={handleResultFormChange}
-                    required
-                    readOnly
-                  />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Ngày Tiêm *</label>
-                  <input
-                    type="date"
-                    name="vaccinationDate"
-                    value={resultForm.vaccinationDate}
-                    onChange={handleResultFormChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Trạng Thái</label>
-                  <select
-                    name="status"
-                    value={resultForm.status}
-                    onChange={handleResultFormChange}
-                  >
-                    <option value="COMPLETED">Hoàn thành</option>
-                    <option value="PENDING">Đang xử lý</option>
-                    <option value="CANCELLED">Đã hủy</option>
-                  </select>
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Triệu Chứng (nếu có)</label>
-                <textarea
-                  name="symptoms"
-                  value={resultForm.symptoms}
-                  onChange={handleResultFormChange}
-                  placeholder="Mô tả triệu chứng sau tiêm..."
-                />
-              </div>
-              <div className="form-group">
-                <label>Ghi Chú</label>
-                <textarea
-                  name="notes"
-                  value={resultForm.notes}
-                  onChange={handleResultFormChange}
-                  placeholder="Ghi chú thêm..."
-                />
-              </div>
-              <div className="form-actions">
-                <button type="button" onClick={() => setShowResultForm(false)} className="btn-secondary">
-                  Hủy
-                </button>
-                <button type="submit" className="btn-primary" disabled={loading}>
-                  {loading ? 'Đang lưu...' : 'Lưu Kết Quả'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+      {showResultForm && selectedStudent && (
+        <VaccinationResultForm
+          student={selectedStudent}
+          vaccineName={selectedVaccine}
+          onClose={handleCloseResultForm}
+          onSuccess={handleResultSuccess}
+        />
       )}
     </div>
   );

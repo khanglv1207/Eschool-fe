@@ -164,6 +164,35 @@
     cursor: not-allowed;
 }
 
+.btn-record-result {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 4px rgba(39, 174, 96, 0.3);
+}
+
+.btn-record-result:hover {
+    background: linear-gradient(135deg, #229954 0%, #27ae60 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(39, 174, 96, 0.4);
+}
+
+.btn-record-result:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
 .btn-small {
     background: #e3f2fd;
     color: #1565c0;
@@ -227,9 +256,14 @@ tr:hover {
     text-transform: uppercase;
 }
 
-.status.pending {
+.status.waiting {
     background: #fff3cd;
     color: #856404;
+}
+
+.status.pending {
+    background: #ffeaa7;
+    color: #d63031;
 }
 
 .status.completed {

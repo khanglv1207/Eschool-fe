@@ -102,21 +102,6 @@ export const sendVaccinationNotices = async (notificationData) => {
 // Xác nhận tiêm chủng (cho phụ huynh)
 export const confirmVaccination = async (data) => {
   try {
-<<<<<<< HEAD
-    console.log('✅ Xác nhận tiêm chủng...', { confirmationId, message });
-    console.log('✅ Request URL:', '/api/vaccinations/confirm-vaccination');
-    
-    // Sử dụng đúng format VaccinationConfirmationRequest
-    const requestData = {
-      confirmationId: confirmationId,
-      status: 'ACCEPTED',
-      parentNote: message
-    };
-    
-    console.log('✅ Request Body:', JSON.stringify(requestData, null, 2));
-
-    const response = await api.post('/api/vaccinations/confirm-vaccination', requestData);
-=======
     // Validate data
     if (!data.confirmationId) {
       throw new Error('confirmationId là bắt buộc');
@@ -136,7 +121,6 @@ export const confirmVaccination = async (data) => {
     console.log('✅ Request Body:', JSON.stringify(data, null, 2));
 
     const response = await api.post('/api/vaccinations/confirm-vaccination', data);
->>>>>>> 03a3eee54506e6ef970be57d6f794093402cdca4
     console.log('✅ Confirmation response:', response.data);
     console.log('✅ Response status:', response.status);
     console.log('✅ Response headers:', response.headers);
@@ -157,26 +141,6 @@ export const confirmVaccination = async (data) => {
 // Từ chối tiêm chủng (cho phụ huynh)
 export const rejectVaccination = async (data) => {
   try {
-<<<<<<< HEAD
-    console.log('❌ Từ chối tiêm chủng...', { confirmationId, message });
-    console.log('✅ Request URL:', '/api/vaccinations/confirm-vaccination');
-    
-    // Sử dụng đúng format VaccinationConfirmationRequest
-    const requestData = {
-      confirmationId: confirmationId,
-      status: 'REJECTED',
-      parentNote: message
-    };
-    
-    console.log('✅ Request Body:', JSON.stringify(requestData, null, 2));
-
-    const response = await api.post('/api/vaccinations/confirm-vaccination', requestData);
-    console.log('✅ Rejection response:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('❌ Lỗi từ chối tiêm chủng:', error);
-    throw new Error('Dữ liệu từ chối không hợp lệ. Vui lòng kiểm tra thông tin.');
-=======
     // Validate data
     if (!data.confirmationId) {
       throw new Error('confirmationId là bắt buộc');
@@ -210,7 +174,6 @@ export const rejectVaccination = async (data) => {
     } else {
       throw new Error('Dữ liệu từ chối không hợp lệ. Vui lòng kiểm tra thông tin.');
     }
->>>>>>> 03a3eee54506e6ef970be57d6f794093402cdca4
   }
 };
 
@@ -309,7 +272,19 @@ export const createVaccinationResult = async (resultData) => {
   try {
     console.log('📝 Ghi nhận kết quả tiêm chủng...', resultData);
 
-    const response = await api.post('/api/vaccinations/vaccination/result', resultData);
+    // Chuyển đổi dữ liệu theo VaccinationResultRequest
+    const requestData = {
+      confirmationId: resultData.confirmationId,
+      vaccinationDate: resultData.vaccinationDate,
+      notes: resultData.notes || '',
+      hasReaction: resultData.hasReaction || false,
+      followUpNeeded: resultData.followUpNeeded || false,
+      needsBooster: resultData.needsBooster || false
+    };
+
+    console.log('📋 Request data:', requestData);
+
+    const response = await api.post('/api/vaccinations/vaccination/result', requestData);
     console.log('✅ Response:', response.data);
 
     if (response.data && response.data.code === 1000) {
