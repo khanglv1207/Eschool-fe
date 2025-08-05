@@ -6,7 +6,7 @@ import { handleError } from "./api";
 // Lấy danh sách tất cả blogs
 export const getAllBlogs = async (page = 1, size = 10, search = "") => {
     try {
-        const response = await api.get("/api/blogs", {
+        const response = await api.get("/api/blogs/get_all_blog", {
             params: { page, size, search }
         });
         return response.data;
@@ -19,7 +19,7 @@ export const getAllBlogs = async (page = 1, size = 10, search = "") => {
 // Lấy blog theo ID
 export const getBlogById = async (blogId) => {
     try {
-        const response = await api.get(`/api/blogs/${blogId}`);
+        const response = await api.get(`/api/blogs/get/${blogId}`);
         return response.data;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
@@ -36,7 +36,7 @@ export const createBlog = async (blogData) => {
                 'Content-Type': 'application/json',
             }
         };
-        
+
         const response = await api.post("/api/blogs", blogData, config);
         return response.data;
     } catch (error) {
@@ -53,8 +53,8 @@ export const updateBlog = async (blogId, blogData) => {
                 'Content-Type': 'application/json',
             }
         };
-        
-        const response = await api.put(`/api/blogs/${blogId}`, blogData, config);
+
+        const response = await api.put(`/api/blogs/update_document/${blogId}`, blogData, config);
         return response.data;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
@@ -65,7 +65,7 @@ export const updateBlog = async (blogId, blogData) => {
 // Xóa blog
 export const deleteBlog = async (blogId) => {
     try {
-        const response = await api.delete(`/api/blogs/${blogId}`);
+        const response = await api.delete(`/api/blogs/delete_document/${blogId}`);
         return response.data;
     } catch (error) {
         const errorMsg = error.response?.data?.message;
@@ -232,7 +232,7 @@ export const createAdminBlog = async (blogData) => {
                 'Content-Type': 'application/json',
             }
         };
-        
+
         const response = await api.post("/api/admin/blogs", blogData, config);
         return response.data;
     } catch (error) {
@@ -249,7 +249,7 @@ export const updateAdminBlog = async (blogId, blogData) => {
                 'Content-Type': 'application/json',
             }
         };
-        
+
         const response = await api.put(`/api/admin/blogs/${blogId}`, blogData, config);
         return response.data;
     } catch (error) {

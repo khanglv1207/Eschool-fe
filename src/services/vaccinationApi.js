@@ -100,8 +100,9 @@ export const sendVaccinationNotices = async (notificationData) => {
 };
 
 // Xác nhận tiêm chủng (cho phụ huynh)
-export const confirmVaccination = async (confirmationId, message) => {
+export const confirmVaccination = async (data) => {
   try {
+<<<<<<< HEAD
     console.log('✅ Xác nhận tiêm chủng...', { confirmationId, message });
     console.log('✅ Request URL:', '/api/vaccinations/confirm-vaccination');
     
@@ -115,17 +116,48 @@ export const confirmVaccination = async (confirmationId, message) => {
     console.log('✅ Request Body:', JSON.stringify(requestData, null, 2));
 
     const response = await api.post('/api/vaccinations/confirm-vaccination', requestData);
+=======
+    // Validate data
+    if (!data.confirmationId) {
+      throw new Error('confirmationId là bắt buộc');
+    }
+    if (!data.status) {
+      throw new Error('status là bắt buộc');
+    }
+    if (!['accepted', 'declined'].includes(data.status)) {
+      throw new Error('status phải là accepted hoặc declined');
+    }
+    if (!data.parentNote) {
+      throw new Error('parentNote là bắt buộc');
+    }
+
+    console.log('✅ Xác nhận tiêm chủng...', data);
+    console.log('✅ Request URL:', '/api/vaccinations/confirm-vaccination');
+    console.log('✅ Request Body:', JSON.stringify(data, null, 2));
+
+    const response = await api.post('/api/vaccinations/confirm-vaccination', data);
+>>>>>>> 03a3eee54506e6ef970be57d6f794093402cdca4
     console.log('✅ Confirmation response:', response.data);
+    console.log('✅ Response status:', response.status);
+    console.log('✅ Response headers:', response.headers);
     return response.data;
   } catch (error) {
     console.error('❌ Lỗi xác nhận tiêm chủng:', error);
-    throw new Error('Dữ liệu xác nhận không hợp lệ. Vui lòng kiểm tra thông tin.');
+    console.error('❌ Error response:', error.response?.data);
+    console.error('❌ Error status:', error.response?.status);
+
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    } else {
+      throw new Error('Dữ liệu xác nhận không hợp lệ. Vui lòng kiểm tra thông tin.');
+    }
   }
 };
 
 // Từ chối tiêm chủng (cho phụ huynh)
-export const rejectVaccination = async (confirmationId, message) => {
+export const rejectVaccination = async (data) => {
   try {
+<<<<<<< HEAD
     console.log('❌ Từ chối tiêm chủng...', { confirmationId, message });
     console.log('✅ Request URL:', '/api/vaccinations/confirm-vaccination');
     
@@ -144,6 +176,41 @@ export const rejectVaccination = async (confirmationId, message) => {
   } catch (error) {
     console.error('❌ Lỗi từ chối tiêm chủng:', error);
     throw new Error('Dữ liệu từ chối không hợp lệ. Vui lòng kiểm tra thông tin.');
+=======
+    // Validate data
+    if (!data.confirmationId) {
+      throw new Error('confirmationId là bắt buộc');
+    }
+    if (!data.status) {
+      throw new Error('status là bắt buộc');
+    }
+    if (!['accepted', 'declined'].includes(data.status)) {
+      throw new Error('status phải là accepted hoặc declined');
+    }
+    if (!data.parentNote) {
+      throw new Error('parentNote là bắt buộc');
+    }
+
+    console.log('❌ Từ chối tiêm chủng...', data);
+    console.log('❌ Request URL:', '/api/vaccinations/confirm-vaccination');
+    console.log('❌ Request Body:', JSON.stringify(data, null, 2));
+
+    const response = await api.post('/api/vaccinations/confirm-vaccination', data);
+    console.log('✅ Response:', response.data);
+    console.log('✅ Response status:', response.status);
+    console.log('✅ Response headers:', response.headers);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Lỗi từ chối tiêm chủng:', error);
+    console.error('❌ Error response:', error.response?.data);
+    console.error('❌ Error status:', error.response?.status);
+
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    } else {
+      throw new Error('Dữ liệu từ chối không hợp lệ. Vui lòng kiểm tra thông tin.');
+    }
+>>>>>>> 03a3eee54506e6ef970be57d6f794093402cdca4
   }
 };
 
