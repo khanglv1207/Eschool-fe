@@ -18,6 +18,7 @@ function LatestDeclaration({ declaration, visible, onClose }) {
     }
   };
 
+  
   return (
     <div style={styles.overlay}>
       <div style={styles.modal}>
