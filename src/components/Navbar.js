@@ -53,6 +53,14 @@ function Navbar() {
   const isParent = userRole === 'PARENT' || userRole === 'parent' ||
     (Array.isArray(userRole) && userRole.includes('PARENT'));
 
+  // Debug role
+  console.log('🔍 User Role Debug:', {
+    userRole,
+    isNurse,
+    isAdmin,
+    isParent,
+    fullName
+  });
 
 
   // Tạo menu items dựa trên role
@@ -73,8 +81,7 @@ function Navbar() {
       profileSubmenu.push(
         { title: "Thông báo tiêm chủng", link: "/vaccination-notifications" },
         { title: "Kết quả tiêm chủng", link: "/vaccination-results" },
-        { title: "Thông báo kiểm tra y tế", link: "/health-checkup-notifications" },
-        { title: "Kết quả kiểm tra y tế", link: "/health-checkup-results" }
+        { title: "Thông báo kiểm tra y tế", link: "/health-checkup-notifications" }
       );
     } else {
       // Menu cho user thường
@@ -96,6 +103,7 @@ function Navbar() {
           { title: "Danh sách thuốc đã gửi", link: "/parent-medicine-list" },
         ] : [
           { title: "Quản lý yêu cầu thuốc", link: "/medicine-list-management" },
+          { title: "Lịch uống thuốc hôm nay", link: "/today-medication-schedules" },
         ],
       },
       { title: "Blog", link: "/blogs" },
@@ -116,6 +124,15 @@ function Navbar() {
   };
 
   const MENU_ITEMS = getMenuItems();
+  
+  // Debug menu items
+  console.log('🔍 Menu Items Debug:', {
+    userRole,
+    isAdmin,
+    isNurse,
+    isParent,
+    menuItems: MENU_ITEMS
+  });
 
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");

@@ -48,6 +48,19 @@ const VaccinationNotification = () => {
     }
   };
 
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'PENDING':
+        return 'Chờ xác nhận';
+      case 'CONFIRMED':
+        return 'Đã xác nhận';
+      case 'REJECTED':
+        return 'Đã từ chối';
+      default:
+        return status;
+    }
+  };
+
   if (loading) {
     return (
       <div className="notification-loading">
@@ -101,10 +114,8 @@ const VaccinationNotification = () => {
                   <FaClock /> Ngày tiêm: {new Date(notification.vaccinationDate).toLocaleDateString('vi-VN')}
                 </p>
               </div>
-              <div className={`status-badge ${notification.status.toLowerCase()}`}>
-                {notification.status === 'PENDING' && 'Chờ xác nhận'}
-                {notification.status === 'CONFIRMED' && 'Đã xác nhận'}
-                {notification.status === 'REJECTED' && 'Đã từ chối'}
+              <div className={`status-badge ${notification.status?.toLowerCase() || 'pending'}`}>
+                {getStatusText(notification.status)}
               </div>
             </div>
 

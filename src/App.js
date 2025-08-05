@@ -51,6 +51,7 @@ import NurseLayout from "./pages/nurse/NurseLayout";
 import NurseDashboard from "./pages/nurse/NurseDashboard";
 import DangKyThuocForm from "./pages/DangKyThuocForm";
 import ParentMedicineList from "./pages/ParentMedicineList";
+import TodayMedicationSchedules from "./pages/TodayMedicationSchedules";
 
 function App() {
 
@@ -105,6 +106,7 @@ function App() {
         <Route path="/health-profile-form" element={<HealthProfileForm />} />
         <Route path="/medicine-registration" element={<DangKyThuocForm onBack={() => window.history.back()} />} />
         <Route path="/parent-medicine-list" element={<MedicineListManagement />} />
+        <Route path="/today-medication-schedules" element={<TodayMedicationSchedules />} />
 
         {/* Nurse Routes */}
         <Route path="/nurse" element={<NurseDashboard />} />

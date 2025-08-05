@@ -104,13 +104,17 @@ export const confirmVaccination = async (confirmationId, message) => {
   try {
     console.log('✅ Xác nhận tiêm chủng...', { confirmationId, message });
     console.log('✅ Request URL:', '/api/vaccinations/confirm-vaccination');
-    console.log('✅ Request Body:', JSON.stringify({ confirmationId, status: 'ACCEPTED', parentNote: message }, null, 2));
-
-    const response = await api.post('/api/vaccinations/confirm-vaccination', { 
-      confirmationId, 
+    
+    // Sử dụng đúng format VaccinationConfirmationRequest
+    const requestData = {
+      confirmationId: confirmationId,
       status: 'ACCEPTED',
-      parentNote: message 
-    });
+      parentNote: message
+    };
+    
+    console.log('✅ Request Body:', JSON.stringify(requestData, null, 2));
+
+    const response = await api.post('/api/vaccinations/confirm-vaccination', requestData);
     console.log('✅ Confirmation response:', response.data);
     return response.data;
   } catch (error) {
@@ -123,33 +127,23 @@ export const confirmVaccination = async (confirmationId, message) => {
 export const rejectVaccination = async (confirmationId, message) => {
   try {
     console.log('❌ Từ chối tiêm chủng...', { confirmationId, message });
-
-    const response = await api.post('/api/vaccinations/confirm-vaccination', { 
-      confirmationId, 
+    console.log('✅ Request URL:', '/api/vaccinations/confirm-vaccination');
+    
+    // Sử dụng đúng format VaccinationConfirmationRequest
+    const requestData = {
+      confirmationId: confirmationId,
       status: 'REJECTED',
-      parentNote: message 
-    });
-    console.log('✅ Response:', response.data);
+      parentNote: message
+    };
+    
+    console.log('✅ Request Body:', JSON.stringify(requestData, null, 2));
 
-    if (response.data && response.data.code === 1000) {
-      return response.data.result;
-    } else {
-      throw new Error(response.data?.message || 'Không thể từ chối tiêm chủng');
-    }
+    const response = await api.post('/api/vaccinations/confirm-vaccination', requestData);
+    console.log('✅ Rejection response:', response.data);
+    return response.data;
   } catch (error) {
     console.error('❌ Lỗi từ chối tiêm chủng:', error);
-
-    if (error.response?.status === 400) {
-      throw new Error('Dữ liệu từ chối không hợp lệ. Vui lòng kiểm tra thông tin.');
-    } else if (error.response?.status === 401) {
-      throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-    } else if (error.response?.status === 403) {
-      throw new Error('Không có quyền từ chối. Vui lòng liên hệ admin.');
-    } else if (error.response?.status === 404) {
-      throw new Error('API endpoint không tồn tại. Vui lòng liên hệ admin để cấu hình backend.');
-    } else {
-      throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
-    }
+    throw new Error('Dữ liệu từ chối không hợp lệ. Vui lòng kiểm tra thông tin.');
   }
 };
 
@@ -415,5 +409,35 @@ export const deleteVaccinationRecord = async (recordId) => {
   } catch (error) {
     console.error('❌ Lỗi xóa bản ghi tiêm chủng:', error);
     throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
+  }
+}; 
+
+// Gửi thông báo tiêm chủng trực tiếp cho học sinh cần tiêm
+export const sendDirectVaccinationNotices = async () => {
+  try {
+    console.log('📧 Gửi thông báo tiêm chủng trực tiếp...');
+
+    const response = await api.post('/api/vaccinations/send-direct-vaccination-notices');
+    console.log('✅ Response:', response.data);
+
+    if (response.data && response.data.code === 1000) {
+      return response.data.result;
+    } else {
+      throw new Error(response.data?.message || 'Không thể gửi thông báo tiêm chủng trực tiếp');
+    }
+  } catch (error) {
+    console.error('❌ Lỗi gửi thông báo tiêm chủng trực tiếp:', error);
+
+    if (error.response?.status === 400) {
+      throw new Error('Dữ liệu không hợp lệ. Vui lòng kiểm tra thông tin.');
+    } else if (error.response?.status === 401) {
+      throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    } else if (error.response?.status === 403) {
+      throw new Error('Không có quyền gửi thông báo. Vui lòng liên hệ admin.');
+    } else if (error.response?.status === 404) {
+      throw new Error('API endpoint không tồn tại. Vui lòng liên hệ admin để cấu hình backend.');
+    } else {
+      throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
+    }
   }
 }; 

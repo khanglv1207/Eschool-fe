@@ -13,7 +13,6 @@ import {
   createVaccineType,
   getStudentsToVaccinate,
   sendVaccinationNotices,
-  getStudentsNeedVaccination,
   createVaccinationResult,
   sendVaccinationResults,
   getVaccinationResult,
@@ -34,7 +33,7 @@ const VaccinationManagement = () => {
   const [selectedVaccine, setSelectedVaccine] = useState('');
   const [vaccineTypes, setVaccineTypes] = useState([]); // Danh sách vaccine từ database
   const [studentsToVaccinate, setStudentsToVaccinate] = useState([]);
-  const [pendingStudents, setPendingStudents] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -54,24 +53,11 @@ const VaccinationManagement = () => {
   const [showResultForm, setShowResultForm] = useState(false);
 
   useEffect(() => {
-    loadPendingVaccinations();
     loadVaccinationResults();
     loadVaccineTypes(); // Load danh sách vaccine từ database
   }, []);
 
-  const loadPendingVaccinations = async () => {
-    try {
-      setLoading(true);
-      const response = await getStudentsNeedVaccination();
-      console.log('📋 Students need vaccination:', response);
-      setPendingStudents(response);
-    } catch (error) {
-      console.error('❌ Error loading pending vaccinations:', error);
-      setMessage('❌ Lỗi tải danh sách học sinh cần tiêm: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const loadVaccinationResults = async () => {
     try {
@@ -274,6 +260,8 @@ const VaccinationManagement = () => {
     }
   };
 
+
+
   // Vaccination Results
   const handleResultFormChange = (e) => {
     const { name, value } = e.target;
@@ -298,7 +286,6 @@ const VaccinationManagement = () => {
         status: 'COMPLETED'
       });
       setShowResultForm(false);
-      loadPendingVaccinations();
       loadVaccinationResults();
     } catch (error) {
       setMessage('❌ Lỗi lưu kết quả: ' + error.message);
@@ -318,6 +305,8 @@ const VaccinationManagement = () => {
       setLoading(false);
     }
   };
+
+
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('vi-VN');
@@ -349,12 +338,7 @@ const VaccinationManagement = () => {
         >
           <FaUsers /> Quản Lý Học Sinh
         </button>
-        <button
-          className={`tab ${activeTab === 'pending' ? 'active' : ''}`}
-          onClick={() => setActiveTab('pending')}
-        >
-          <FaCheck /> Học Sinh Cần Tiêm
-        </button>
+
         <button
           className={`tab ${activeTab === 'results' ? 'active' : ''}`}
           onClick={() => setActiveTab('results')}
@@ -538,95 +522,7 @@ const VaccinationManagement = () => {
           </div>
         )}
 
-        {/* Pending Vaccinations Tab */}
-        {activeTab === 'pending' && (
-          <div className="pending-vaccinations">
-            <h2><FaCheck /> Học Sinh Cần Tiêm Chủng</h2>
 
-            {pendingStudents.length > 0 && (
-              <div className="info-message" style={{
-                background: '#d4edda',
-                color: '#155724',
-                padding: '10px 15px',
-                borderRadius: '5px',
-                marginBottom: '15px',
-                border: '1px solid #c3e6cb'
-              }}>
-                ✅ Tìm thấy {pendingStudents.length} học sinh đã được phụ huynh xác nhận tiêm chủng
-              </div>
-            )}
-
-            <div className="actions">
-              <button
-                onClick={loadPendingVaccinations}
-                className="btn-secondary"
-                disabled={loading}
-              >
-                {loading ? 'Đang tải...' : 'Làm Mới Danh Sách'}
-              </button>
-              <button
-                onClick={() => setShowResultForm(true)}
-                className="btn-primary"
-              >
-                <FaPlus /> Ghi Nhận Kết Quả Tiêm
-              </button>
-            </div>
-
-            {pendingStudents.length > 0 ? (
-              <div className="pending-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Mã HS</th>
-                      <th>Họ Tên</th>
-                      <th>Lớp</th>
-                      <th>Vaccine</th>
-                      <th>Email PH</th>
-                      <th>Ngày Tiêm</th>
-                      <th>Trạng Thái</th>
-                      <th>Thao Tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pendingStudents.map((student, index) => (
-                      <tr key={index}>
-                        <td>{student.studentCode}</td>
-                        <td>{student.studentName}</td>
-                        <td>{student.className}</td>
-                        <td>{student.vaccineName}</td>
-                        <td>{student.parentEmail}</td>
-                        <td>{student.vaccinationDate ? formatDate(student.vaccinationDate) : 'Chưa lên lịch'}</td>
-                        <td>
-                          <span className="status confirmed">Đã xác nhận</span>
-                        </td>
-                        <td>
-                          <button
-                            onClick={() => {
-                              setResultForm(prev => ({
-                                ...prev,
-                                studentId: student.studentId,
-                                vaccineName: student.vaccineName,
-                                confirmationId: student.confirmationId
-                              }));
-                              setShowResultForm(true);
-                            }}
-                            className="btn-small"
-                          >
-                            <FaEdit /> Ghi Kết Quả
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="no-data">
-                <p>Không có học sinh nào cần tiêm chủng</p>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Results Tab */}
         {activeTab === 'results' && (
@@ -674,7 +570,7 @@ const VaccinationManagement = () => {
                         <td>{result.symptoms || 'Không có'}</td>
                         <td>{result.notes || 'Không có'}</td>
                         <td>
-                          <span className={`status ${result.status.toLowerCase()}`}>
+                          <span className={`status ${result.status?.toLowerCase() || 'pending'}`}>
                             {result.status === 'COMPLETED' ? 'Hoàn thành' : 'Đang xử lý'}
                           </span>
                         </td>

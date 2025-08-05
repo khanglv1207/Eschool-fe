@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { sendMedicalRequest } from "../services/parentApi";
+import { createMedicalRequest } from "../services/parentApi";
 
 function SimpleMedicalForm() {
   const [studentCode, setStudentCode] = useState("");
@@ -37,7 +37,7 @@ function SimpleMedicalForm() {
         ]
       };
 
-      const response = await sendMedicalRequest(medicalRequest);
+      const response = await createMedicalRequest(medicalRequest);
       
       if (response.success) {
         setMessage("✅ Gửi thuốc thành công!");

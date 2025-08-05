@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { sendMedicalRequest, getParentStudents, getParentStudentsFromDB, searchStudentByCode } from "../services/parentApi";
+import { createMedicalRequest, getParentStudents, getStudentsByEmailImproved, searchStudentByCode } from "../services/parentApi";
 
 function DangKyThuocForm({ onBack }) {
   const [medicines, setMedicines] = useState([
@@ -276,7 +276,7 @@ function DangKyThuocForm({ onBack }) {
        console.log('Medications:', medications);
       
       // Gửi request đến API
-      const response = await sendMedicalRequest(medicalRequest);
+      const response = await createMedicalRequest(medicalRequest);
       
       console.log('Response:', response);
       

@@ -268,28 +268,32 @@ export const createHealthCheckupResult = async (resultData) => {
   }
 };
 
-// Gửi kết quả kiểm tra y tế cho phụ huynh
-export const sendHealthCheckupResults = async () => {
+// Gửi kết quả khám sức khỏe qua email cho phụ huynh
+export const sendHealthCheckupResults = async (checkupId, date) => {
   try {
-    console.log('📧 Gửi kết quả kiểm tra y tế cho phụ huynh...');
-
-    const response = await api.post('/api/health-checkups/send-results');
-    console.log('✅ Response:', response.data);
-
+    console.log('📧 Gửi kết quả khám sức khỏe qua email...', { checkupId, date });
+    const requestData = {
+      checkupId: checkupId,
+      date: date
+    };
+    console.log('📤 Request data:', requestData);
+    
+    const response = await api.post('/api/mail/checkup/send-results', requestData);
+    console.log('✅ Send results response:', response.data);
+    
     if (response.data && response.data.code === 1000) {
-      return response.data.result;
+      return response.data;
     } else {
-      throw new Error(response.data?.message || 'Không thể gửi kết quả kiểm tra y tế');
+      throw new Error(response.data?.message || 'Không thể gửi kết quả khám sức khỏe');
     }
   } catch (error) {
-    console.error('❌ Lỗi gửi kết quả kiểm tra y tế:', error);
-
+    console.error('❌ Lỗi gửi kết quả khám sức khỏe:', error);
     if (error.response?.status === 400) {
       throw new Error('Dữ liệu không hợp lệ. Vui lòng kiểm tra thông tin.');
     } else if (error.response?.status === 401) {
       throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
     } else if (error.response?.status === 403) {
-      throw new Error('Không có quyền gửi kết quả. Vui lòng liên hệ admin.');
+      throw new Error('Không có quyền truy cập. Vui lòng liên hệ admin.');
     } else {
       throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
     }
@@ -543,6 +547,58 @@ export const getCheckupResultsFromDB = async () => {
     }
   } catch (error) {
     console.error('❌ Lỗi lấy danh sách kết quả kiểm tra:', error);
+    if (error.response?.status === 400) {
+      throw new Error('Dữ liệu không hợp lệ. Vui lòng kiểm tra thông tin.');
+    } else if (error.response?.status === 401) {
+      throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    } else if (error.response?.status === 403) {
+      throw new Error('Không có quyền truy cập. Vui lòng liên hệ admin.');
+    } else {
+      throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
+    }
+  }
+}; 
+
+// Lấy danh sách học sinh đã khám sức khỏe
+export const getCheckedStudents = async () => {
+  try {
+    console.log('📋 Lấy danh sách học sinh đã khám sức khỏe...');
+    const response = await api.get('/api/nurse/checked-students');
+    console.log('✅ Response:', response.data);
+    
+    if (response.data && response.data.code === 1000) {
+      return response.data.result || [];
+    } else {
+      throw new Error(response.data?.message || 'Không lấy được danh sách học sinh đã khám');
+    }
+  } catch (error) {
+    console.error('❌ Lỗi lấy danh sách học sinh đã khám:', error);
+    if (error.response?.status === 400) {
+      throw new Error('Dữ liệu không hợp lệ. Vui lòng kiểm tra thông tin.');
+    } else if (error.response?.status === 401) {
+      throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    } else if (error.response?.status === 403) {
+      throw new Error('Không có quyền truy cập. Vui lòng liên hệ admin.');
+    } else {
+      throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
+    }
+  }
+}; 
+
+// Lấy kết quả kiểm tra y tế cho phụ huynh
+export const getCheckupResults = async () => {
+  try {
+    console.log('📋 Lấy kết quả kiểm tra y tế...');
+    const response = await api.get('/api/parents/checkup-result');
+    console.log('✅ Response:', response.data);
+
+    if (response.data && response.data.code === 1000) {
+      return response.data.result || [];
+    } else {
+      throw new Error(response.data?.message || 'Không lấy được kết quả kiểm tra y tế');
+    }
+  } catch (error) {
+    console.error('❌ Lỗi lấy kết quả kiểm tra y tế:', error);
     if (error.response?.status === 400) {
       throw new Error('Dữ liệu không hợp lệ. Vui lòng kiểm tra thông tin.');
     } else if (error.response?.status === 401) {

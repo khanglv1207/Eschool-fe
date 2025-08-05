@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   FaPlus,
   FaUsers,
@@ -17,12 +17,14 @@ import {
   getHealthCheckupResult,
   getMedicalCheckupNotices,
   getMedicalCheckupSchedules,
-  getAllStudents
+  getAllStudents,
+  getCheckedStudents
 } from '../services/healthCheckupApi';
 import './HealthCheckupManagement.css';
 
 const HealthCheckupManagement = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Helper function để tạo UUID
   const generateUUID = () => {
@@ -125,7 +127,14 @@ const HealthCheckupManagement = () => {
     loadCheckupResults();
     loadCheckupTypes(); // Load danh sách loại kiểm tra từ database
     loadStudentsNeedCheckup(); // Load danh sách học sinh cần kiểm tra từ DB
-  }, [loadCheckupTypes]);
+
+    // Xử lý query parameter để chuyển tab
+    const queryParams = new URLSearchParams(location.search);
+    const tab = queryParams.get('tab');
+    if (tab === 'results') {
+      setActiveTab('results');
+    }
+  }, [loadCheckupTypes, location.search]);
 
   const loadPendingCheckups = async () => {
     try {
@@ -159,11 +168,15 @@ const HealthCheckupManagement = () => {
 
   const loadCheckupResults = async () => {
     try {
-      // Tạm thời sử dụng getAllStudents thay vì getHealthCheckupResult
-      const response = await getAllStudents();
+      setLoading(true);
+      const response = await getCheckedStudents();
       setCheckupResults(response);
+      console.log('📋 Checkup results loaded from API:', response);
     } catch (error) {
       console.error('Lỗi tải kết quả kiểm tra y tế:', error);
+      setMessage('❌ Lỗi tải kết quả kiểm tra y tế: ' + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -313,12 +326,17 @@ const HealthCheckupManagement = () => {
   // Checkup Results
 
 
-  const handleSendCheckupResults = async () => {
+  const handleSendCheckupResults = async (checkupId, date) => {
     try {
       setLoading(true);
-      await sendHealthCheckupResults();
-      setMessage('✅ Đã gửi kết quả kiểm tra y tế cho phụ huynh!');
+      setMessage('📧 Đang gửi kết quả khám sức khỏe qua email...');
+      
+      await sendHealthCheckupResults(checkupId, date);
+      setMessage('✅ Đã gửi kết quả khám sức khỏe cho phụ huynh thành công!');
+      
+      setTimeout(() => setMessage(''), 3000);
     } catch (error) {
+      console.error('❌ Lỗi gửi kết quả khám sức khỏe:', error);
       setMessage('❌ Lỗi gửi kết quả: ' + error.message);
     } finally {
       setLoading(false);
@@ -693,7 +711,13 @@ const HealthCheckupManagement = () => {
                 {loading ? 'Đang tải...' : 'Làm Mới'}
               </button>
               <button
-                onClick={handleSendCheckupResults}
+                onClick={() => {
+                  // Lấy ngày hiện tại
+                  const today = new Date().toISOString().split('T')[0];
+                  // Tạo UUID cho checkupId
+                  const checkupId = generateUUID();
+                  handleSendCheckupResults(checkupId, today);
+                }}
                 className="btn-primary"
                 disabled={loading}
               >
@@ -708,34 +732,43 @@ const HealthCheckupManagement = () => {
                     <tr>
                       <th>Mã HS</th>
                       <th>Họ Tên</th>
-                      <th>Loại Kiểm Tra</th>
+                      <th>Lớp</th>
                       <th>Ngày Kiểm Tra</th>
-                      <th>Chiều Cao</th>
-                      <th>Cân Nặng</th>
-                      <th>Huyết Áp</th>
-                      <th>Thị Lực</th>
-                      <th>Thính Lực</th>
-                      <th>Ghi Chú</th>
+                      <th>Chiều Cao (cm)</th>
+                      <th>Cân Nặng (kg)</th>
+                      <th>Y Tá Khám</th>
                       <th>Trạng Thái</th>
+                      <th>Thao Tác</th>
                     </tr>
                   </thead>
                   <tbody>
                     {checkupResults.map((result, index) => (
                       <tr key={index}>
-                        <td>{result.studentCode}</td>
-                        <td>{result.studentName}</td>
-                        <td>{result.checkupType}</td>
-                        <td>{formatDate(result.checkupDate)}</td>
-                        <td>{result.height || 'N/A'}</td>
-                        <td>{result.weight || 'N/A'}</td>
-                        <td>{result.bloodPressure || 'N/A'}</td>
-                        <td>{result.vision || 'N/A'}</td>
-                        <td>{result.hearing || 'N/A'}</td>
-                        <td>{result.notes || 'Không có'}</td>
+                        <td>{result.studentId || 'N/A'}</td>
+                        <td>{result.studentName || 'N/A'}</td>
+                        <td>{result.className || 'N/A'}</td>
+                        <td>{result.checkupDate ? formatDate(result.checkupDate) : 'N/A'}</td>
+                        <td>{result.heightCm || 'N/A'}</td>
+                        <td>{result.weightKg || 'N/A'}</td>
+                        <td>{result.nurseName || 'N/A'}</td>
                         <td>
-                          <span className={`status ${result.status.toLowerCase()}`}>
-                            {result.status === 'COMPLETED' ? 'Hoàn thành' : 'Đang xử lý'}
+                          <span className="status completed">
+                            Đã kiểm tra y tế định kỳ
                           </span>
+                        </td>
+                        <td>
+                          <button
+                            onClick={() => {
+                              const checkupId = generateUUID();
+                              const checkupDate = result.checkupDate || new Date().toISOString().split('T')[0];
+                              handleSendCheckupResults(checkupId, checkupDate);
+                            }}
+                            className="btn-small"
+                            style={{ backgroundColor: '#667eea', color: 'white' }}
+                            title="Gửi kết quả qua email cho phụ huynh"
+                          >
+                            <FaEnvelope /> Gửi Email
+                          </button>
                         </td>
                       </tr>
                     ))}

@@ -129,9 +129,9 @@ const HealthCheckupResultForm = () => {
       // Clear localStorage
       localStorage.removeItem('selectedStudent');
       
-      // Chuyển về trang quản lý sau 2 giây
+      // Chuyển về trang quản lý với tab kết quả kiểm tra
       setTimeout(() => {
-        navigate('/health-checkup');
+        navigate('/health-checkup?tab=results');
       }, 2000);
 
     } catch (error) {
