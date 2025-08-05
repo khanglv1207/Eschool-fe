@@ -226,8 +226,6 @@ export const getParentStudentsFromDB = async () => {
     
     console.log('All DB endpoints failed');
     throw new Error('No valid endpoint found');
-    
-    throw new Error('No valid endpoint found and no mock data available');
   } catch (error) {
     console.error('Error getting students from DB:', error);
     throw error;

@@ -106,7 +106,7 @@ function ManagerManagement() {
                         <div>
                             Showing 1 to {filteredManager.length} of {manager.length} entries
                         </div>
-                        {/* Phân trang demo */}
+              
                         <nav>
                             <ul className="pagination mb-0">
                                 <li className="page-item disabled">

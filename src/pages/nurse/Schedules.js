@@ -4,6 +4,7 @@ import {
     getTodaySchedules,
     markScheduleAsTaken
 } from "../../services/nurseApi";
+import { getAllStudents } from "../../services/healthCheckupApi";
 
 function Schedules() {
     const [schedules, setSchedules] = useState([]);
@@ -22,19 +23,12 @@ function Schedules() {
 
     const loadStudents = async () => {
         try {
-            // Gọi API để lấy danh sách học sinh
-            // const response = await getStudents();
-            // setStudents(response.data || []);
-            
-            // Tạm thời sử dụng mock data cho đến khi có API
-            const mockStudents = [
-                { studentId: "student-1", studentName: "Nguyễn Văn A", className: "10A1" },
-                { studentId: "student-2", studentName: "Trần Thị B", className: "10A2" },
-                { studentId: "student-3", studentName: "Lê Văn C", className: "11A1" },
-            ];
-            setStudents(mockStudents);
+            // Gọi API để lấy danh sách học sinh từ backend
+            const response = await getAllStudents();
+            setStudents(response.data || []);
         } catch (error) {
             console.error('Lỗi tải danh sách học sinh:', error);
+            setError('Không thể tải danh sách học sinh. Vui lòng thử lại sau.');
         }
     };
 
