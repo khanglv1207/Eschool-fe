@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getPendingVaccinations, sendNotification, confirmVaccination } from "../../services/adminApi"; // Adjust the import path as necessary
+import { getPendingVaccinations, sendNotification, confirmVaccination } from "../../services/adminApi";
 import AdminLayout from "./AdminLayout";
 
 function VaccineManage() {
@@ -7,14 +7,25 @@ function VaccineManage() {
     const [selectedUser, setSelectedUser] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const fetchPendingVaccinations = async () => {
         setIsLoading(true);
+        setError(null);
         try {
             const result = await getPendingVaccinations();
-            setPendingVaccinations(result.result || []);
+            console.log('✅ Vaccination data received:', result);
+
+            // Xử lý response data
+            const vaccinations = result.result || result.data || result || [];
+            setPendingVaccinations(Array.isArray(vaccinations) ? vaccinations : []);
+
+            if (vaccinations.length === 0) {
+                console.log('📭 No pending vaccinations found');
+            }
         } catch (error) {
             console.error("Failed to fetch pending vaccinations:", error);
+            setError(error.message || "Không thể tải danh sách tiêm chủng");
         } finally {
             setIsLoading(false);
         }
@@ -38,12 +49,17 @@ function VaccineManage() {
         if (!selectedUser) return;
 
         try {
-            await sendNotification(selectedUser.accountId);
+            setIsLoading(true);
+            await sendNotification(selectedUser.accountId || selectedUser.id);
             alert("Notification sent successfully.");
             handleCloseNotificationModal();
+            // Refresh data after sending notification
+            await fetchPendingVaccinations();
         } catch (error) {
             console.error("Failed to send notification:", error);
-            alert("Failed to send notification.");
+            alert("Failed to send notification: " + error.message);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -51,93 +67,157 @@ function VaccineManage() {
         if (!window.confirm("Bạn có chắc chắn muốn xác nhận đã tiêm?")) return;
 
         try {
+            setIsLoading(true);
             await confirmVaccination(confirmationId);
             alert("Xác nhận tiêm thành công.");
-            fetchPendingVaccinations();
+            // Refresh data after confirmation
+            await fetchPendingVaccinations();
         } catch (error) {
             console.error("Lỗi khi xác nhận tiêm:", error);
-            alert("Xác nhận thất bại.");
+            alert("Xác nhận thất bại: " + error.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN');
+        } catch (e) {
+            return dateString;
         }
     };
 
     return (
         <AdminLayout>
             <div className="container mt-3">
-                <h2 className="mb-4 text-center">Quản lý xác nhận tiêm chủng</h2>
-                {isLoading ? (
-                    <p>Đang tải dữ liệu...</p>
-                ) : (
-                    <table className="table table-bordered text-center align-middle">
-                        <thead className="table-primary">
-                            <tr>
-                                <th>STT</th>
-                                <th>Tên học sinh</th>
-                                <th>Tên vắc xin</th>
-                                <th>Ngày tiêm</th>
-                                <th>Gửi thông báo</th>
-                                <th>Xác nhận tiêm</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {pendingVaccinations.length === 0 ? (
-                                <tr>
-                                    <td colSpan="6">Không có bản ghi nào.</td>
-                                </tr>
-                            ) : (
-                                pendingVaccinations.map((v, idx) => (
-                                    <tr key={v.confirmationId}>
-                                        <td>{idx + 1}</td>
-                                        <td>{v.fullName}</td>
-                                        <td>{v.vaccineName}</td>
-                                        <td>{new Date(v.vaccinationDate).toLocaleDateString()}</td>
-                                        <td>
-                                            <button
-                                                className="btn btn-outline-primary"
-                                                onClick={() => handleOpenNotificationModal(v)}
-                                            >
-                                                Gửi thông báo
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button
-                                                className="btn btn-success"
-                                                onClick={() => handleConfirmVaccination(v.confirmationId)}
-                                            >
-                                                Xác nhận
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h2 className="mb-0">Quản lý xác nhận tiêm chủng</h2>
+                    <button
+                        className="btn btn-primary"
+                        onClick={fetchPendingVaccinations}
+                        disabled={isLoading}
+                    >
+                        <i className="fas fa-sync-alt me-2"></i>
+                        {isLoading ? 'Đang tải...' : 'Làm mới'}
+                    </button>
+                </div>
+
+                {error && (
+                    <div className="alert alert-danger" role="alert">
+                        <i className="fas fa-exclamation-triangle me-2"></i>
+                        {error}
+                    </div>
                 )}
 
+                {isLoading ? (
+                    <div className="text-center py-5">
+                        <div className="spinner-border text-primary" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </div>
+                        <p className="mt-3">Đang tải dữ liệu...</p>
+                    </div>
+                ) : (
+                    <div className="card shadow">
+                        <div className="card-body">
+                            <div className="table-responsive">
+                                <table className="table table-bordered text-center align-middle">
+                                    <thead className="table-primary">
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Tên học sinh</th>
+                                            <th>Tên vắc xin</th>
+                                            <th>Ngày tiêm</th>
+                                            <th>Gửi thông báo</th>
+                                            <th>Xác nhận tiêm</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {pendingVaccinations.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="6" className="text-center text-muted py-4">
+                                                    <i className="fas fa-inbox fa-2x mb-3"></i>
+                                                    <br />
+                                                    Không có bản ghi nào.
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            pendingVaccinations.map((v, idx) => (
+                                                <tr key={v.confirmationId || v.id || idx}>
+                                                    <td>{idx + 1}</td>
+                                                    <td>{v.fullName || v.studentName || v.name || 'N/A'}</td>
+                                                    <td>{v.vaccineName || v.vaccine || 'N/A'}</td>
+                                                    <td>{formatDate(v.vaccinationDate || v.date || v.scheduledDate)}</td>
+                                                    <td>
+                                                        <button
+                                                            className="btn btn-outline-primary btn-sm"
+                                                            onClick={() => handleOpenNotificationModal(v)}
+                                                            disabled={isLoading}
+                                                        >
+                                                            <i className="fas fa-bell me-1"></i>
+                                                            Gửi thông báo
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <button
+                                                            className="btn btn-success btn-sm"
+                                                            onClick={() => handleConfirmVaccination(v.confirmationId || v.id)}
+                                                            disabled={isLoading}
+                                                        >
+                                                            <i className="fas fa-check me-1"></i>
+                                                            Xác nhận
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Notification Modal */}
                 {isModalOpen && selectedUser && (
-                    <div className="modal show d-block" style={{ background: "rgba(0,0,0,0.5)" }} tabIndex="-1">
-                        <div className="modal-dialog modal-dialog-centered">
-                            <div className="modal-content shadow-lg">
+                    <div className="modal fade show" style={{ display: "block", background: "rgba(0,0,0,0.3)" }} tabIndex="-1">
+                        <div className="modal-dialog">
+                            <div className="modal-content">
                                 <div className="modal-header">
-                                    <h5 className="modal-title">Gửi thông báo</h5>
-                                    <button
-                                        type="button"
-                                        className="btn-close"
-                                        aria-label="Close"
-                                        onClick={handleCloseNotificationModal}
-                                    ></button>
+                                    <h5 className="modal-title">Gửi thông báo tiêm chủng</h5>
+                                    <button type="button" className="btn-close" onClick={handleCloseNotificationModal}></button>
                                 </div>
                                 <div className="modal-body">
-                                    <p>
-                                        Bạn có chắc chắn muốn gửi thông báo cho học sinh:{" "}
-                                        <strong>{selectedUser.fullName}</strong>?
-                                    </p>
+                                    <p>Bạn có chắc chắn muốn gửi thông báo tiêm chủng cho:</p>
+                                    <ul>
+                                        <li><strong>Học sinh:</strong> {selectedUser.fullName || selectedUser.studentName}</li>
+                                        <li><strong>Vắc xin:</strong> {selectedUser.vaccineName || selectedUser.vaccine}</li>
+                                        <li><strong>Ngày tiêm:</strong> {formatDate(selectedUser.vaccinationDate || selectedUser.date)}</li>
+                                    </ul>
                                 </div>
                                 <div className="modal-footer">
-                                    <button className="btn btn-secondary" onClick={handleCloseNotificationModal}>
+                                    <button type="button" className="btn btn-secondary" onClick={handleCloseNotificationModal}>
                                         Hủy
                                     </button>
-                                    <button className="btn btn-primary" onClick={handleSendNotification}>
-                                        Gửi
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary"
+                                        onClick={handleSendNotification}
+                                        disabled={isLoading}
+                                    >
+                                        {isLoading ? (
+                                            <>
+                                                <span className="spinner-border spinner-border-sm me-2"></span>
+                                                Đang gửi...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i className="fas fa-paper-plane me-2"></i>
+                                                Gửi thông báo
+                                            </>
+                                        )}
                                     </button>
                                 </div>
                             </div>

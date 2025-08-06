@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AdminLayout from "./AdminLayout";
 import * as XLSX from "xlsx";
-import { importStudent, importParentStudentExcel, getAllParentStudent, createStudentParent, deleteStudentParent, updateStudentParent } from "../../services/adminApi";
+import { importParentStudentExcel, getAllParentStudent, createStudentParent, deleteStudentParent, updateStudentParent } from "../../services/adminApi";
 import { createParent } from "../../services/adminApi";
 // Dữ liệu mẫu (có thể để rỗng hoặc thêm vài học sinh mẫu)
 const sampleStudents = [

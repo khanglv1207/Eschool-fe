@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { sendMedicalRequest, getParentStudents, getStudentsByEmailImproved, searchStudentByCode } from "../services/parentApi";
+import { sendMedicalRequest, getParentStudents, searchStudentByCode } from "../services/parentApi";
 
 function DangKyThuocForm({ onBack }) {
   const [medicines, setMedicines] = useState([
@@ -11,7 +11,7 @@ function DangKyThuocForm({ onBack }) {
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [loadingStudents, setLoadingStudents] = useState(true);
-  
+
   // Thêm state cho tìm kiếm theo student code
   const [searchMode, setSearchMode] = useState(false);
   const [studentCode, setStudentCode] = useState("");
@@ -26,10 +26,10 @@ function DangKyThuocForm({ onBack }) {
         const response = await getParentStudents();
         console.log('API Response:', response);
         console.log('🔍 Full API response structure:', JSON.stringify(response, null, 2));
-        
+
         // Xử lý các format response khác nhau
         let studentsData = [];
-        
+
         if (response.result && Array.isArray(response.result)) {
           studentsData = response.result;
         } else if (response.data && Array.isArray(response.data)) {
@@ -46,13 +46,13 @@ function DangKyThuocForm({ onBack }) {
             }
           }
         }
-        
+
         console.log('Processed students data:', studentsData);
-        
+
         if (studentsData.length > 0) {
           // Debug: Log dữ liệu gốc từ API
           console.log('🔍 Raw student data from API:', studentsData[0]);
-          
+
           // Map dữ liệu để đảm bảo format đúng
           const mappedStudents = studentsData.map(student => {
             const mappedStudent = {
@@ -62,14 +62,14 @@ function DangKyThuocForm({ onBack }) {
               className: student.className || student.class_name || student.class,
               relationship: student.relationship || student.relation
             };
-            
+
             console.log('🔍 Mapped student:', mappedStudent);
             return mappedStudent;
           });
-          
+
           console.log('Mapped students:', mappedStudents);
           setStudents(mappedStudents);
-          
+
           // Tự động chọn học sinh đầu tiên nếu chỉ có 1 học sinh
           if (mappedStudents.length === 1) {
             setSelectedStudentId(mappedStudents[0].id);
@@ -93,7 +93,7 @@ function DangKyThuocForm({ onBack }) {
   }, []);
 
   const handleMedicineChange = (idx, field, value) => {
-    setMedicines((prev) => prev.map((m, i) => 
+    setMedicines((prev) => prev.map((m, i) =>
       i === idx ? { ...m, [field]: value } : m
     ));
   };
@@ -101,7 +101,7 @@ function DangKyThuocForm({ onBack }) {
   const handleScheduleChange = (idx, timeSlot, checked) => {
     setMedicines((prev) => prev.map((m, i) => {
       if (i !== idx) return m;
-      const newSchedule = checked 
+      const newSchedule = checked
         ? [...m.schedule, timeSlot]
         : m.schedule.filter(s => s !== timeSlot);
       return { ...m, schedule: newSchedule };
@@ -118,23 +118,23 @@ function DangKyThuocForm({ onBack }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (!selectedStudentId) {
       alert("Vui lòng chọn học sinh!");
       return;
     }
-    
+
     if (!studentCode.trim()) {
       alert("Vui lòng nhập mã học sinh!");
       return;
     }
-    
+
     if (medicines.length === 0) {
       alert("Vui lòng thêm ít nhất một loại thuốc!");
       return;
     }
-    
+
     if (medicines.some(m => !m.medicationName || !m.dosage)) {
       alert("Vui lòng nhập đầy đủ tên thuốc và liều lượng cho từng dòng!");
       return;
@@ -147,41 +147,41 @@ function DangKyThuocForm({ onBack }) {
       alert("Vui lòng nhập ghi chú!");
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       // Debug: Kiểm tra thông tin đăng nhập
       const accessToken = localStorage.getItem('access_token');
       const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-      
+
       console.log('Access token:', accessToken);
       console.log('Logged in user:', loggedInUser);
-      
+
       if (!accessToken) {
         alert('Bạn chưa đăng nhập! Vui lòng đăng nhập lại.');
         return;
       }
-      
+
       // Kiểm tra JWT token
       try {
         const tokenParts = accessToken.split('.');
         if (tokenParts.length === 3) {
           const payload = JSON.parse(atob(tokenParts[1]));
           console.log('JWT Payload:', payload);
-          
+
           // Kiểm tra token có hết hạn không
           const currentTime = Math.floor(Date.now() / 1000);
           if (payload.exp && payload.exp < currentTime) {
             alert('Token đã hết hạn! Vui lòng đăng nhập lại.');
             return;
           }
-          
+
           // Kiểm tra authorities
           console.log('JWT Authorities:', payload.authorities);
           console.log('JWT Roles:', payload.roles);
           console.log('JWT Scope:', payload.scope);
-          
+
           // Kiểm tra có PARENT authority không
           if (!payload.authorities || payload.authorities.length === 0) {
             // Kiểm tra scope thay thế
@@ -192,15 +192,15 @@ function DangKyThuocForm({ onBack }) {
               return;
             }
           } else {
-            const hasParentAuthority = payload.authorities.some(auth => 
+            const hasParentAuthority = payload.authorities.some(auth =>
               auth === 'PARENT' || auth.authority === 'PARENT'
             );
-            
+
             if (!hasParentAuthority) {
               alert('JWT token không có PARENT authority! Vui lòng đăng nhập lại.');
               return;
             }
-            
+
             console.log('✅ JWT token hợp lệ với PARENT authority');
           }
         }
@@ -209,27 +209,27 @@ function DangKyThuocForm({ onBack }) {
         alert('Lỗi khi kiểm tra JWT token! Vui lòng đăng nhập lại.');
         return;
       }
-      
+
       // Sử dụng selectedStudentId đã chọn từ dropdown
       const studentId = selectedStudentId;
-      
+
       if (!studentId) {
         alert('Vui lòng chọn học sinh!');
         return;
       }
-      
+
       console.log('✅ Using selected student ID:', studentId);
-      
+
       // Tạo body đúng chuẩn MedicalRequest DTO
-      const validMedicines = medicines.filter(m => 
+      const validMedicines = medicines.filter(m =>
         m.medicationName && m.dosage && m.schedule.length > 0
       );
-      
+
       if (validMedicines.length === 0) {
         alert("Không có thuốc hợp lệ để gửi!");
         return;
       }
-      
+
       // Tạo medications theo cấu trúc backend API
       const medications = validMedicines.map(medicine => ({
         medicationName: medicine.medicationName || "",
@@ -237,46 +237,45 @@ function DangKyThuocForm({ onBack }) {
         note: medicine.note || "",
         schedule: medicine.schedule || []
       }));
-      
-             // Lấy thông tin học sinh đã chọn
-       const selectedStudent = students.find(s => s.id === selectedStudentId);
-       
-       console.log('🔍 Debug selectedStudent:', {
-         selectedStudentId,
-         selectedStudent,
-         studentsLength: students.length,
-         studentsIds: students.map(s => ({ id: s.id, name: s.fullName }))
-       });
-       
-       // Sử dụng UUID thực của học sinh làm studentId
-       let actualStudentId = selectedStudent?.id || selectedStudent?.student_id;
-       
-       // Nếu không có UUID từ selectedStudent, thử lấy từ selectedStudentId
-       if (!actualStudentId) {
-         actualStudentId = selectedStudentId;
-       }
-       
-       // Nếu vẫn không có UUID hợp lệ, tạo UUID giả để test
-       const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(actualStudentId);
-       
-       if (!isUUID) {
-         console.warn('⚠️ StudentId không phải UUID, tạo UUID giả để test');
-         // Tạo UUID giả cho test
-         actualStudentId = 'faf188e1-7fa9-4f52-9041-183123c60584';
-         console.log('✅ Sử dụng UUID giả:', actualStudentId);
-       }
-       
-       // Đảm bảo có giá trị
-       if (!actualStudentId) {
-         throw new Error('Không thể xác định studentId để gửi thuốc');
-       }
-      
+
+      // Lấy thông tin học sinh đã chọn
+      const selectedStudent = students.find(s => s.id === selectedStudentId);
+
+      console.log('🔍 Debug selectedStudent:', {
+        selectedStudentId,
+        selectedStudent,
+        studentsLength: students.length,
+        studentsIds: students.map(s => ({ id: s.id, name: s.fullName }))
+      });
+
+      // Sử dụng UUID thực của học sinh làm studentId
+      let actualStudentId = selectedStudent?.id || selectedStudent?.student_id;
+
+      // Nếu không có UUID từ selectedStudent, thử lấy từ selectedStudentId
+      if (!actualStudentId) {
+        actualStudentId = studentId;
+      }
+
+      // Kiểm tra UUID hợp lệ
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(actualStudentId);
+
+      if (!isUUID) {
+        console.error('❌ StudentId không phải UUID hợp lệ:', actualStudentId);
+        alert('Mã học sinh không hợp lệ. Vui lòng chọn lại học sinh hoặc liên hệ admin.');
+        return;
+      }
+
+      // Đảm bảo có giá trị
+      if (!actualStudentId) {
+        throw new Error('Không thể xác định studentId để gửi thuốc');
+      }
+
       // Debug: Kiểm tra giá trị studentCode
       console.log('🔍 Debug studentCode:');
       console.log('  - selectedStudent?.studentCode:', selectedStudent?.studentCode);
       console.log('  - studentCode state:', studentCode);
       console.log('  - Using studentCode from input field');
-      
+
       // Chuyển đổi medications theo đúng DTO MedicalRequest.MedicationItemRequest
       const medicationsForAPI = medications.map(medication => {
         console.log('🔍 Creating medication for API:', {
@@ -285,7 +284,7 @@ function DangKyThuocForm({ onBack }) {
           note: medication.note,
           schedule: medication.schedule
         });
-        
+
         return {
           medicationName: medication.medicationName,
           dosage: medication.dosage,
@@ -293,51 +292,51 @@ function DangKyThuocForm({ onBack }) {
           schedule: medication.schedule
         };
       });
-      
+
       const medicalRequest = {
         studentId: actualStudentId,
         studentCode: studentCode, // Sử dụng studentCode từ input field
         note: note,
         medications: medicationsForAPI
       };
-      
-             console.log('=== SUBMIT MEDICAL REQUEST ===');
-       console.log('Original selectedStudentId:', selectedStudentId);
-       console.log('Selected student object:', selectedStudent);
-       console.log('✅ Final UUID being sent:', actualStudentId);
-       console.log('📋 UUID validation:', {
-         isUUID: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(actualStudentId),
-         studentCode: selectedStudent?.studentCode,
-         studentName: selectedStudent?.fullName
-       });
-       console.log('Medical request data:', JSON.stringify(medicalRequest, null, 2));
-       console.log('Note:', note);
-       console.log('Original medications:', medications);
-       console.log('Medications for API:', medicationsForAPI);
-      
+
+      console.log('=== SUBMIT MEDICAL REQUEST ===');
+      console.log('Original selectedStudentId:', selectedStudentId);
+      console.log('Selected student object:', selectedStudent);
+      console.log('✅ Final UUID being sent:', actualStudentId);
+      console.log('📋 UUID validation:', {
+        isUUID: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(actualStudentId),
+        studentCode: selectedStudent?.studentCode,
+        studentName: selectedStudent?.fullName
+      });
+      console.log('Medical request data:', JSON.stringify(medicalRequest, null, 2));
+      console.log('Note:', note);
+      console.log('Original medications:', medications);
+      console.log('Medications for API:', medicationsForAPI);
+
       // Gửi request đến API
       const response = await sendMedicalRequest(medicalRequest);
-      
+
       console.log('Response:', response);
-      
+
       if (response.success) {
         alert(response.message || 'Gửi thuốc thành công!');
         onBack();
       } else {
         alert(response.message || 'Gửi thuốc thất bại!');
       }
-      
+
     } catch (error) {
       console.error('Error submitting medical request:', error);
-      
+
       // Hiển thị thông tin chi tiết về lỗi
       let errorMessage = 'Lỗi kết nối API!';
-      
+
       if (error.response) {
         console.log('Error response:', error.response);
         console.log('Error status:', error.response.status);
         console.log('Error data:', error.response.data);
-        
+
         if (error.response.status === 404) {
           errorMessage = 'API endpoint không tồn tại! Vui lòng kiểm tra backend.';
         } else if (error.response.status === 401) {
@@ -357,7 +356,7 @@ function DangKyThuocForm({ onBack }) {
       } else {
         errorMessage = `Lỗi: ${error.message}`;
       }
-      
+
       alert(errorMessage);
     } finally {
       setLoading(false);
@@ -390,10 +389,10 @@ function DangKyThuocForm({ onBack }) {
             Chọn học sinh <span style={{ color: "#ff6b6b" }}>*</span>
           </label>
           {loadingStudents ? (
-            <div style={{ 
-              padding: "12px", 
-              textAlign: "center", 
-              color: "#666", 
+            <div style={{
+              padding: "12px",
+              textAlign: "center",
+              color: "#666",
               fontSize: "14px",
               background: "#f8f9fa",
               borderRadius: "8px",
@@ -402,10 +401,10 @@ function DangKyThuocForm({ onBack }) {
               <span>Đang tải danh sách học sinh...</span>
             </div>
           ) : students.length === 0 ? (
-            <div style={{ 
-              padding: "12px", 
-              textAlign: "center", 
-              color: "#ff6b6b", 
+            <div style={{
+              padding: "12px",
+              textAlign: "center",
+              color: "#ff6b6b",
               fontSize: "14px",
               background: "#fff5f5",
               borderRadius: "8px",
@@ -445,21 +444,21 @@ function DangKyThuocForm({ onBack }) {
                 <option value="">-- Chọn học sinh --</option>
                 {students.map((student) => (
                   <option key={student.id} value={student.id}>
-                    {student.fullName} - {student.studentCode || 'Chưa có mã học sinh'} 
+                    {student.fullName} - {student.studentCode || 'Chưa có mã học sinh'}
                     {student.relationship ? ` (${student.relationship})` : ''}
                     {student.className ? ` - ${student.className}` : ''}
                   </option>
                 ))}
               </select>
-              <small style={{ 
-                color: "#666", 
-                fontSize: "12px", 
-                marginTop: "4px", 
-                display: "block" 
+              <small style={{
+                color: "#666",
+                fontSize: "12px",
+                marginTop: "4px",
+                display: "block"
               }}>
                 💡 Chọn học sinh mà bạn muốn gửi thuốc cho
               </small>
-              
+
               {/* Ô nhập Student Code thủ công */}
               <div style={{ marginTop: "12px" }}>
                 <label style={{ fontWeight: 600, fontSize: 13, color: "#1E90FF", marginBottom: 8, display: "block" }}>
@@ -484,16 +483,16 @@ function DangKyThuocForm({ onBack }) {
                   onFocus={e => e.target.style.border = '1.5px solid #1E90FF'}
                   onBlur={e => e.target.style.border = '1.5px solid #e3eafc'}
                 />
-                <small style={{ 
-                  color: "#666", 
-                  fontSize: "12px", 
-                  marginTop: "4px", 
-                  display: "block" 
+                <small style={{
+                  color: "#666",
+                  fontSize: "12px",
+                  marginTop: "4px",
+                  display: "block"
                 }}>
                   💡 Nhập mã học sinh chính xác để đảm bảo gửi thuốc đúng người
                 </small>
               </div>
-              
+
             </>
           )}
         </div>
@@ -648,8 +647,8 @@ function DangKyThuocForm({ onBack }) {
             type="submit"
             disabled={loading || students.length === 0 || !selectedStudentId}
             style={{
-              background: students.length === 0 || !selectedStudentId 
-                ? "#ccc" 
+              background: students.length === 0 || !selectedStudentId
+                ? "#ccc"
                 : "linear-gradient(90deg,#1E90FF 60%,#6ec1e4 100%)",
               color: "white",
               border: "none",
@@ -663,16 +662,16 @@ function DangKyThuocForm({ onBack }) {
               transition: "background 0.2s, box-shadow 0.2s",
               opacity: (loading || students.length === 0 || !selectedStudentId) ? 0.6 : 1
             }}
-            onMouseOver={e => { 
-              if (!loading && students.length > 0 && selectedStudentId) { 
-                e.target.style.background = 'linear-gradient(90deg,#1877d2 60%,#4fa3d1 100%)'; 
-                e.target.style.boxShadow = '0 4px 16px rgba(30,144,255,0.18)'; 
+            onMouseOver={e => {
+              if (!loading && students.length > 0 && selectedStudentId) {
+                e.target.style.background = 'linear-gradient(90deg,#1877d2 60%,#4fa3d1 100%)';
+                e.target.style.boxShadow = '0 4px 16px rgba(30,144,255,0.18)';
               }
             }}
-            onMouseOut={e => { 
-              if (!loading && students.length > 0 && selectedStudentId) { 
-                e.target.style.background = 'linear-gradient(90deg,#1E90FF 60%,#6ec1e4 100%)'; 
-                e.target.style.boxShadow = '0 2px 8px rgba(30,144,255,0.10)'; 
+            onMouseOut={e => {
+              if (!loading && students.length > 0 && selectedStudentId) {
+                e.target.style.background = 'linear-gradient(90deg,#1E90FF 60%,#6ec1e4 100%)';
+                e.target.style.boxShadow = '0 2px 8px rgba(30,144,255,0.10)';
               }
             }}
           >
