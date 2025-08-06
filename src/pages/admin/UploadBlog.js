@@ -52,7 +52,7 @@ function UploadBlog() {
             ...prev,
             images: [...prev.images, ...files]
         }));
-        
+
         const newPreviews = files.map(file => URL.createObjectURL(file));
         setPreview(prev => ({
             ...prev,
@@ -95,7 +95,7 @@ function UploadBlog() {
 
             const response = await createAdminBlog(submitData);
             setMessage({ type: "success", text: "Blog đã được tạo thành công!" });
-            
+
             // Reset form
             setFormData({
                 title: "",
@@ -134,7 +134,7 @@ function UploadBlog() {
                             <h2 className="fw-bold mb-0">
                                 <i className="fas fa-upload me-2"></i> Upload Blog
                             </h2>
-                            <button 
+                            <button
                                 className="btn btn-outline-secondary"
                                 onClick={() => window.history.back()}
                             >
@@ -392,10 +392,10 @@ function UploadBlog() {
                                                     <p className="text-muted mb-3">{formData.description}</p>
                                                 )}
                                                 {formData.content && (
-                                                    <div 
+                                                    <div
                                                         className="content-preview"
-                                                        style={{ 
-                                                            maxHeight: 300, 
+                                                        style={{
+                                                            maxHeight: 300,
                                                             overflow: 'auto',
                                                             fontSize: '14px',
                                                             lineHeight: '1.5'

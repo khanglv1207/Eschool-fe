@@ -98,7 +98,21 @@ function UserManagement() {
     const handleUpdateUser = async (e) => {
         e.preventDefault();
         try {
-            await updateUser(editUser);
+            // Lấy userId từ editUser object
+            const userId = editUser.id || editUser._id;
+            if (!userId) {
+                alert("Không tìm thấy ID người dùng!");
+                return;
+            }
+
+            // Chuẩn bị dữ liệu để gửi lên API
+            const userData = {
+                fullName: editUser.fullName,
+                email: editUser.email,
+                role: editUser.role
+            };
+
+            await updateUser(userId, userData);
             setUsers((prev) =>
                 prev.map((u) => (u.id === editUser.id || u._id === editUser._id ? { ...editUser } : u))
             );

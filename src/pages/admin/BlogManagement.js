@@ -166,9 +166,9 @@ function BlogManagement() {
                     <a href="/admin/uploadBlog" className="btn btn-success">
                         <i className="fas fa-upload me-2"></i> Upload Blog
                     </a>
-                    <button className="btn btn-primary" onClick={handleOpenCreateModal}>
+                    {/* <button className="btn btn-primary" onClick={handleOpenCreateModal}>
                         <i className="fas fa-plus me-2"></i> Tạo Blog mới
-                    </button>
+                    </button> */}
                 </div>
             </div>
 

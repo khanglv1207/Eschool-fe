@@ -14,7 +14,7 @@ export const getParentProfile = async () => {
   try {
     console.log('📋 Lấy thông tin parent profile...');
     console.log('🔗 API endpoint: /api/parents/parent-profile');
-    
+
     const response = await api.get('/api/parents/parent-profile');
     console.log('✅ Response:', response.data);
     console.log('📊 Response structure:', {
@@ -22,7 +22,7 @@ export const getParentProfile = async () => {
       message: response.data?.message,
       result: response.data?.result
     });
-    
+
     if (response.data && response.data.code === 1000) {
       console.log('✅ API call thành công, trả về data:', response.data.result);
       return response.data.result;
@@ -32,7 +32,7 @@ export const getParentProfile = async () => {
     }
   } catch (error) {
     console.error('❌ Lỗi lấy parent profile:', error);
-    
+
     if (error.response?.status === 400) {
       throw new Error('Dữ liệu không hợp lệ. Vui lòng kiểm tra thông tin.');
     } else if (error.response?.status === 401) {
@@ -51,23 +51,23 @@ export const getParentProfile = async () => {
 export const getParentStudents = async () => {
   try {
     console.log('Calling getParentStudents API...');
-    
+
     // Lấy thông tin user hiện tại
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
     const userEmail = loggedInUser.email;
-    
+
     console.log('Current user email:', userEmail);
-    
+
     // Thử các endpoint khác nhau
     const endpoints = [
       '/api/parents/students',
-      '/api/parent/students', 
+      '/api/parent/students',
       '/api/parents/children',
       '/api/parent/children',
       `/api/parents/students?email=${encodeURIComponent(userEmail)}`,
       `/api/parent/students?email=${encodeURIComponent(userEmail)}`
     ];
-    
+
     for (const endpoint of endpoints) {
       try {
         console.log(`Trying endpoint: ${endpoint}`);
@@ -80,10 +80,10 @@ export const getParentStudents = async () => {
         throw err;
       }
     }
-    
+
     console.log('No API endpoint found, returning empty result');
     return { result: [] };
-    
+
     // Nếu tất cả đều fail, trả về empty
     return { result: [] };
   } catch (error) {
@@ -102,7 +102,7 @@ export const searchStudentByCode = async (studentCode) => {
   try {
     console.log('=== TÌM KIẾM HỌC SINH THEO CODE ===');
     console.log('Student Code:', studentCode);
-    
+
     // Thử các endpoint khác nhau để tìm kiếm học sinh
     const endpoints = [
       `/api/parents/students/search?studentCode=${encodeURIComponent(studentCode)}`,
@@ -111,7 +111,7 @@ export const searchStudentByCode = async (studentCode) => {
       `/api/parents/students?studentCode=${encodeURIComponent(studentCode)}`,
       `/api/parent/students?studentCode=${encodeURIComponent(studentCode)}`
     ];
-    
+
     for (const endpoint of endpoints) {
       try {
         console.log(`Trying search endpoint: ${endpoint}`);
@@ -124,7 +124,7 @@ export const searchStudentByCode = async (studentCode) => {
         throw err;
       }
     }
-    
+
     throw new Error('Không tìm thấy học sinh với mã số này');
   } catch (error) {
     console.error('❌ Error searching student by code:', error);
@@ -139,26 +139,26 @@ export const sendMedicalRequest = async (medicalRequestData) => {
     console.log('Data being sent:', JSON.stringify(medicalRequestData, null, 2));
     console.log('Student ID:', medicalRequestData.studentId);
     console.log('Student Code:', medicalRequestData.studentCode);
-    
-         // Sử dụng dữ liệu gốc, không tự động chuyển đổi
-     let requestData = { ...medicalRequestData };
-     
-     // Log để debug
-            console.log('📋 StudentId (using UUID):', {
-         studentId: medicalRequestData.studentId,
-         studentCode: medicalRequestData.studentCode,
-         isUUID: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(medicalRequestData.studentId),
-         type: typeof medicalRequestData.studentId
-       });
-    
+
+    // Sử dụng dữ liệu gốc, không tự động chuyển đổi
+    let requestData = { ...medicalRequestData };
+
+    // Log để debug
+    console.log('📋 StudentId (using UUID):', {
+      studentId: medicalRequestData.studentId,
+      studentCode: medicalRequestData.studentCode,
+      isUUID: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(medicalRequestData.studentId),
+      type: typeof medicalRequestData.studentId
+    });
+
     console.log('Final request data:', JSON.stringify(requestData, null, 2));
-    
+
     // Thử các endpoint khác nhau
     const endpoints = [
       '/api/parents/medical-request',
       '/api/parent/medical-request'
     ];
-    
+
     for (const endpoint of endpoints) {
       try {
         console.log(`Trying endpoint: ${endpoint}`);
@@ -172,7 +172,7 @@ export const sendMedicalRequest = async (medicalRequestData) => {
         throw err;
       }
     }
-    
+
     throw new Error('No valid endpoint found');
   } catch (error) {
     console.error('❌ Error sending medical request:', error);
@@ -196,9 +196,9 @@ export const getParentStudentsFromDB = async () => {
   try {
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
     const userEmail = loggedInUser.email;
-    
+
     console.log('Getting students from DB for email:', userEmail);
-    
+
     // Thử các endpoint khác nhau để lấy dữ liệu từ bảng parents_students
     const endpoints = [
       `/api/parents/students-by-email?email=${encodeURIComponent(userEmail)}`,
@@ -210,7 +210,7 @@ export const getParentStudentsFromDB = async () => {
       `/api/parents/students`,
       `/api/parent/students`
     ];
-    
+
     for (const endpoint of endpoints) {
       try {
         console.log(`Trying DB endpoint: ${endpoint}`);
@@ -223,28 +223,28 @@ export const getParentStudentsFromDB = async () => {
         throw err;
       }
     }
-    
+
     console.log('All DB endpoints failed');
     throw new Error('No valid endpoint found');
-    
+
     throw new Error('No valid endpoint found and no mock data available');
   } catch (error) {
     console.error('Error getting students from DB:', error);
     throw error;
   }
-}; 
+};
 
 // Lấy danh sách thuốc phụ huynh đã gửi
 export const getParentMedicalRequests = async () => {
   try {
     console.log('=== LẤY DANH SÁCH THUỐC PHỤ HUYNH ĐÃ GỬI ===');
-    
+
     // Lấy thông tin user hiện tại
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
     const userEmail = loggedInUser.email;
-    
+
     console.log('Current user email:', userEmail);
-    
+
     // Thử các endpoint khác nhau
     const endpoints = [
       '/api/parents/medical-requests',
@@ -256,7 +256,7 @@ export const getParentMedicalRequests = async () => {
       `/api/parents/medicine-requests?email=${encodeURIComponent(userEmail)}`,
       `/api/parent/medicine-requests?email=${encodeURIComponent(userEmail)}`
     ];
-    
+
     for (const endpoint of endpoints) {
       try {
         console.log(`Trying endpoint: ${endpoint}`);
@@ -269,7 +269,7 @@ export const getParentMedicalRequests = async () => {
         throw err;
       }
     }
-    
+
     console.log('No API endpoint found, returning empty result');
     return { result: [] };
   } catch (error) {

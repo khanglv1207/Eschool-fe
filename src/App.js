@@ -57,7 +57,7 @@ function App() {
 
   const isAdminRoute = window.location.pathname.startsWith("/admin");
   const isNurseRoute = window.location.pathname.startsWith("/nurse");
- 
+
 
   return (
     <Router>
@@ -99,13 +99,13 @@ function App() {
         <Route path="/admin/manageChildren" element={<StudentManagement />} />
         <Route path="/admin/manageSchoolNurse" element={<SchoolNurseManagement />} />
         <Route path="/admin/ConsultationManagement" element={<ConsultationManagement />} />
-        <Route path="/admin/MedicineListManagement" element={<MedicineListManagement />} />
+        <Route path="/admin/MedicineListManagement" element={<AdminLayout><MedicineListManagement /></AdminLayout>} />
         <Route path="/admin/MedicalManagement" element={<MedicalManagement />} />
         <Route path="/admin/medicaleventrecording" element={<MedicalEventRecording />} />
         <Route path="/admin/VaccineManage" element={<VaccinManage />} />
         <Route path="/health-profile-form" element={<HealthProfileForm />} />
         <Route path="/medicine-registration" element={<DangKyThuocForm onBack={() => window.history.back()} />} />
-        <Route path="/parent-medicine-list" element={<MedicineListManagement />} />
+        <Route path="/parent-medicine-list" element={<ParentMedicineList />} />
         <Route path="/today-medication-schedules" element={<TodayMedicationSchedules />} />
 
         {/* Nurse Routes */}
