@@ -318,7 +318,11 @@ export const sendVaccinationResults = async () => {
     console.log('✅ Response:', response.data);
 
     if (response.data && response.data.code === 1000) {
-      return response.data.result;
+      // Trả về cả result và message từ backend
+      return {
+        result: response.data.result,
+        message: response.data.message || 'Đã gửi kết quả tiêm chủng thành công!'
+      };
     } else {
       throw new Error(response.data?.message || 'Không thể gửi kết quả tiêm chủng');
     }
@@ -342,13 +346,37 @@ export const sendVaccinationResults = async () => {
 // Lấy kết quả tiêm chủng (cho phụ huynh)
 export const getVaccinationResult = async () => {
   try {
-    console.log('📋 Lấy kết quả tiêm chủng...');
+    console.log('📋 Lấy kết quả tiêm chủng cho phụ huynh...');
 
-    const response = await api.get('/api/vaccinations/results');
+    const response = await api.get('/api/vaccinations/vaccination-result');
     console.log('✅ Response:', response.data);
 
     if (response.data && response.data.code === 1000) {
-      return response.data.result || [];
+      const results = response.data.result || [];
+      
+      // Map dữ liệu theo DTO VaccinationResultResponse
+      const mappedResults = results.map(result => ({
+        confirmationId: result.confirmationId,
+        studentName: result.studentName,
+        className: result.className,
+        vaccineName: result.vaccineName,
+        vaccinationDate: result.vaccinationDate,
+        hasReaction: result.hasReaction,
+        reactionNote: result.reactionNote,
+        needsBooster: result.needsBooster,
+        finalized: result.finalized,
+        // Thêm các trường cũ để tương thích với UI hiện tại
+        studentCode: result.studentCode || 'N/A',
+        location: result.location || 'Trường học',
+        scheduledDate: result.vaccinationDate,
+        scheduledTime: result.vaccinationDate ? new Date(result.vaccinationDate).toLocaleTimeString('vi-VN') : 'N/A',
+        notes: result.reactionNote,
+        result: result.finalized ? 'Đã hoàn thành' : 'Đang xử lý',
+        status: result.finalized ? 'COMPLETED' : 'PENDING'
+      }));
+      
+      console.log('📋 Mapped results:', mappedResults);
+      return mappedResults;
     } else {
       throw new Error(response.data?.message || 'Không lấy được kết quả tiêm chủng');
     }
@@ -363,6 +391,52 @@ export const getVaccinationResult = async () => {
       throw new Error('Không có quyền truy cập. Vui lòng liên hệ admin.');
     } else if (error.response?.status === 404) {
       return []; // Không có kết quả nào
+    } else {
+      throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
+    }
+  }
+};
+
+// Lấy danh sách kết quả tiêm chủng (cho admin/nurse)
+export const getVaccinationResultsList = async () => {
+  try {
+    console.log('📋 Lấy danh sách kết quả tiêm chủng...');
+
+    // Thử endpoint mới trước
+    const response = await api.get('/api/vaccinations/vaccination-results');
+    console.log('✅ Response:', response.data);
+
+    if (response.data && response.data.code === 1000) {
+      return response.data.result || [];
+    } else {
+      throw new Error(response.data?.message || 'Không lấy được danh sách kết quả tiêm chủng');
+    }
+  } catch (error) {
+    console.error('❌ Lỗi lấy danh sách kết quả tiêm chủng:', error);
+
+    if (error.response?.status === 404) {
+      console.log('⚠️ Endpoint /api/vaccinations/vaccination-results không tồn tại, thử endpoint cũ...');
+      
+      // Thử endpoint cũ nếu endpoint mới không tồn tại
+      try {
+        const fallbackResponse = await api.get('/api/vaccinations/results');
+        console.log('✅ Fallback Response:', fallbackResponse.data);
+        
+        if (fallbackResponse.data && fallbackResponse.data.code === 1000) {
+          return fallbackResponse.data.result || [];
+        } else {
+          throw new Error(fallbackResponse.data?.message || 'Không lấy được danh sách kết quả tiêm chủng');
+        }
+      } catch (fallbackError) {
+        console.error('❌ Fallback endpoint cũng lỗi:', fallbackError);
+        return []; // Trả về mảng rỗng nếu cả 2 endpoint đều lỗi
+      }
+    } else if (error.response?.status === 400) {
+      throw new Error('Dữ liệu không hợp lệ. Vui lòng kiểm tra thông tin.');
+    } else if (error.response?.status === 401) {
+      throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    } else if (error.response?.status === 403) {
+      throw new Error('Không có quyền truy cập. Vui lòng liên hệ admin.');
     } else {
       throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
     }

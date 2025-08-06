@@ -18,6 +18,11 @@ const services = [
 ];
 
 function Home({ onKhaiBaoClick, onIncidentClick, onDangKyThuocClick }) {
+  // Lấy thông tin user từ localStorage
+  const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+  const userRole = loggedInUser.role || "";
+  const isParent = userRole === 'PARENT' || userRole === 'parent';
+  
   return (
     <div style={{ background: "#f4f8fc" }}>
       {/* Banner Section */}
@@ -120,7 +125,8 @@ function Home({ onKhaiBaoClick, onIncidentClick, onDangKyThuocClick }) {
           {[
             { icon: "💉", title: "Quản lý tiêm chủng", desc: "Theo dõi, nhắc lịch, quản lý hồ sơ tiêm chủng học sinh.", link: "/vaccination" },
             { icon: "🩺", title: "Khám sức khỏe định kỳ", desc: "Quản lý, nhắc lịch, lưu trữ kết quả khám sức khỏe.", link: "/medical-checkup" },
-            { icon: "📋", title: "Khai báo y tế", desc: "Khai báo sức khỏe, sự kiện y tế, phối hợp xử lý nhanh chóng." },
+            // Chỉ hiển thị "Khai báo y tế" cho role parent
+            ...(isParent ? [{ icon: "📋", title: "Khai báo y tế", desc: "Khai báo sức khỏe, sự kiện y tế, phối hợp xử lý nhanh chóng." }] : []),
           ].map((s, idx) => (
             s.link ? (
               <div key={idx} className="service-card-home" onClick={() => window.location.href = s.link} style={{ background: '#fff', borderRadius: 24, boxShadow: '0 6px 24px rgba(67,149,247,0.10)', padding: 40, minWidth: 320, textAlign: 'center', flex: 1, margin: '0 12px', transition: 'box-shadow 0.2s, transform 0.2s', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>

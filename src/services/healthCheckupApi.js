@@ -389,11 +389,32 @@ export const getMedicalCheckupNotices = async () => {
   try {
     console.log('📋 Lấy danh sách thông báo kiểm tra y tế cho admin/nurse...');
 
-    const response = await api.get('/api/nurse/medical-checkup-notices');
+    const response = await api.get('/api/medical-checkup-notices');
     console.log('✅ Response:', response.data);
 
     if (response.data && response.data.code === 1000) {
-      return response.data.result || [];
+      const notices = response.data.result || [];
+      
+      // Map dữ liệu theo DTO MedicalCheckupNoticeResponse
+      const mappedNotices = notices.map(notice => ({
+        id: notice.id,
+        checkupTitle: notice.checkupTitle,
+        checkupDate: notice.checkupDate,
+        studentName: notice.studentName,
+        className: notice.className,
+        isConfirmed: notice.isConfirmed,
+        sentAt: notice.sentAt,
+        confirmedAt: notice.confirmedAt,
+        // Thêm các trường cũ để tương thích với UI hiện tại
+        title: notice.checkupTitle,
+        scheduledDate: notice.checkupDate,
+        status: notice.isConfirmed ? 'CONFIRMED' : 'PENDING',
+        location: 'Trường học',
+        note: notice.checkupTitle
+      }));
+      
+      console.log('📋 Mapped notices:', mappedNotices);
+      return mappedNotices;
     } else {
       throw new Error(response.data?.message || 'Không lấy được danh sách thông báo kiểm tra y tế');
     }
@@ -599,6 +620,51 @@ export const getCheckupResults = async () => {
     }
   } catch (error) {
     console.error('❌ Lỗi lấy kết quả kiểm tra y tế:', error);
+    if (error.response?.status === 400) {
+      throw new Error('Dữ liệu không hợp lệ. Vui lòng kiểm tra thông tin.');
+    } else if (error.response?.status === 401) {
+      throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    } else if (error.response?.status === 403) {
+      throw new Error('Không có quyền truy cập. Vui lòng liên hệ admin.');
+    } else {
+      throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
+    }
+  }
+};
+
+// Lấy kết quả kiểm tra y tế theo DTO mới
+export const getCheckupResultsNew = async () => {
+  try {
+    console.log('📋 Lấy kết quả kiểm tra y tế (API mới)...');
+    const response = await api.get('/api/medical-checkup-notices');
+    console.log('✅ Response:', response.data);
+
+    if (response.data && response.data.code === 1000) {
+      const results = response.data.result || [];
+      
+      // Map dữ liệu theo DTO CheckupResultResponse
+      const mappedResults = results.map(result => ({
+        studentId: result.studentId,
+        studentName: result.studentName,
+        className: result.className,
+        hasChecked: result.hasChecked,
+        heightCm: result.heightCm,
+        weightKg: result.weightKg,
+        visionLeft: result.visionLeft,
+        visionRight: result.visionRight,
+        notes: result.notes,
+        // Thêm các trường cũ để tương thích
+        checkupDate: result.checkupDate || new Date().toISOString(),
+        status: result.hasChecked ? 'COMPLETED' : 'PENDING'
+      }));
+      
+      console.log('📋 Mapped results:', mappedResults);
+      return mappedResults;
+    } else {
+      throw new Error(response.data?.message || 'Không lấy được kết quả kiểm tra y tế');
+    }
+  } catch (error) {
+    console.error('❌ Lỗi lấy kết quả kiểm tra y tế (API mới):', error);
     if (error.response?.status === 400) {
       throw new Error('Dữ liệu không hợp lệ. Vui lòng kiểm tra thông tin.');
     } else if (error.response?.status === 401) {

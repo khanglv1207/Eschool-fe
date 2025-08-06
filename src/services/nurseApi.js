@@ -138,6 +138,26 @@ export const getCurrentNurse = async () => {
   }
 };
 
+// Lấy tất cả danh sách y tá
+export const getAllNursesList = async () => {
+  try {
+    console.log('🔍 Đang gọi API /api/nurse/get-all-nurse...');
+    const response = await api.get('/api/nurse/get-all-nurse');
+    console.log('👩‍⚕️ All nurses from API:', response.data);
+
+    const nurses = response.data.result || [];
+    console.log('📋 Số lượng nurses:', nurses.length);
+    console.log('📋 Nurses data:', nurses);
+
+    return nurses;
+  } catch (error) {
+    console.error('❌ Error fetching all nurses:', error);
+    console.error('❌ Error response:', error.response?.data);
+    console.error('❌ Error status:', error.response?.status);
+    throw new Error('Không thể lấy danh sách y tá');
+  }
+};
+
 // Lấy nurse theo ID
 export const getNurseById = async (nurseId) => {
   try {
@@ -160,6 +180,7 @@ export const getNurseById = async (nurseId) => {
 export const nurseApi = {
   getCurrentNurse,
   getAllNurses,
+  getAllNursesList,
   getNurseById,
   getTodaySchedules,
   getPendingMedicationRequests,

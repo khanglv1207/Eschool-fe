@@ -21,7 +21,7 @@ import VaccinationTest from "./pages/VaccinationTest";
 import VaccinationCreateTest from "./pages/VaccinationCreateTest";
 import MedicalCheckup from "./pages/MedicalCheckup";
 import HealthCheckupManagement from "./pages/HealthCheckupManagement";
-import HealthCheckupNotifications from "./pages/HealthCheckupNotifications";
+
 import HealthCheckupResults from "./pages/HealthCheckupResults";
 import HealthCheckupTest from "./pages/HealthCheckupTest";
 import HealthCheckupResultForm from "./pages/HealthCheckupResultForm";
@@ -82,7 +82,7 @@ function App() {
         <Route path="/vaccination-create-test" element={<VaccinationCreateTest />} />
         <Route path="/medical-checkup" element={<MedicalCheckup />} />
         <Route path="/health-checkup" element={<HealthCheckupManagement />} />
-        <Route path="/health-checkup-notifications" element={<HealthCheckupNotifications />} />
+
         <Route path="/health-checkup-results" element={<HealthCheckupResults />} />
         <Route path="/health-checkup-test" element={<HealthCheckupTest />} />
         <Route path="/health-checkup-result-form/:studentId?" element={<HealthCheckupResultForm />} />

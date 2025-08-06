@@ -66,9 +66,12 @@ function Navbar() {
   // Tạo menu items dựa trên role
   const getMenuItems = () => {
     // Tạo submenu cho "Hồ sơ & Tiêm chủng" dựa trên role
-    const profileSubmenu = [
-      { title: "Khai báo sức khỏe", link: "/health-declaration" },
-    ];
+    const profileSubmenu = [];
+    
+    // Chỉ hiển thị "Khai báo sức khỏe" cho role parent
+    if (isParent) {
+      profileSubmenu.push({ title: "Khai báo sức khỏe", link: "/health-declaration" });
+    }
 
     // Thêm menu tiêm chủng cho tất cả roles
     if (isAdmin || isNurse) {
@@ -76,19 +79,18 @@ function Navbar() {
         { title: "Tiêm chủng", link: "/vaccination" },
         { title: "Kiểm tra y tế định kỳ", link: "/health-checkup" }
       );
-    } else if (isParent) {
-      // Menu cho phụ huynh
-      profileSubmenu.push(
-        { title: "Thông báo tiêm chủng", link: "/vaccination-notifications" },
-        { title: "Kết quả tiêm chủng", link: "/vaccination-results" },
-        { title: "Thông báo kiểm tra y tế", link: "/health-checkup-notifications" }
-      );
-    } else {
-      // Menu cho user thường
-      profileSubmenu.push(
-        { title: "Thông báo tiêm chủng", link: "/vaccination-notifications" }
-      );
-    }
+         } else if (isParent) {
+       // Menu cho phụ huynh
+       profileSubmenu.push(
+         { title: "Thông báo tiêm chủng", link: "/vaccination-notifications" },
+         { title: "Kết quả tiêm chủng", link: "/vaccination-results" }
+       );
+     } else {
+       // Menu cho user thường
+       profileSubmenu.push(
+         { title: "Thông báo tiêm chủng", link: "/vaccination-notifications" }
+       );
+     }
 
     const baseMenuItems = [
       { title: "Trang chủ", link: "/" },
@@ -102,7 +104,6 @@ function Navbar() {
           { title: "Gửi thuốc cho con", link: "/medicine-registration" },
           { title: "Danh sách thuốc đã gửi", link: "/parent-medicine-list" },
         ] : [
-          { title: "Quản lý yêu cầu thuốc", link: "/medicine-list-management" },
           { title: "Lịch uống thuốc hôm nay", link: "/today-medication-schedules" },
         ],
       },

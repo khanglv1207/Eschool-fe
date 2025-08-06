@@ -300,7 +300,7 @@ function VaccinationResults() {
                             {result.studentName || 'N/A'}
                           </div>
                           <div style={{ fontSize: '12px', color: '#6c757d' }}>
-                            {result.studentCode || 'N/A'} - {result.className || 'N/A'}
+                            {result.className || 'N/A'}
                           </div>
                         </div>
                       </div>
@@ -331,16 +331,107 @@ function VaccinationResults() {
                         <FaCalendarAlt style={{ color: '#667eea', fontSize: '16px' }} />
                         <div>
                           <div style={{ fontWeight: '600', color: '#495057' }}>
-                            {result.scheduledDate ? new Date(result.scheduledDate).toLocaleDateString('vi-VN') : 'N/A'}
+                            {result.vaccinationDate ? new Date(result.vaccinationDate).toLocaleDateString('vi-VN') : 'N/A'}
                           </div>
                           <div style={{ fontSize: '12px', color: '#6c757d' }}>
-                            {result.scheduledTime || 'N/A'}
+                            {result.vaccinationDate ? new Date(result.vaccinationDate).toLocaleTimeString('vi-VN') : 'N/A'}
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {result.notes && (
+                    {/* Additional Info Grid */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                      gap: '15px',
+                      marginBottom: '20px'
+                    }}>
+                      {/* Reaction Info */}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px'
+                      }}>
+                        <FaExclamationTriangle style={{ 
+                          color: result.hasReaction ? '#dc3545' : '#28a745', 
+                          fontSize: '16px' 
+                        }} />
+                        <div>
+                          <div style={{ 
+                            fontWeight: '600', 
+                            color: result.hasReaction ? '#dc3545' : '#28a745' 
+                          }}>
+                            {result.hasReaction ? 'Có phản ứng' : 'Không có phản ứng'}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#6c757d' }}>
+                            Tình trạng phản ứng
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Booster Info */}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px'
+                      }}>
+                        <FaCheckCircle style={{ 
+                          color: result.needsBooster ? '#ffc107' : '#28a745', 
+                          fontSize: '16px' 
+                        }} />
+                        <div>
+                          <div style={{ 
+                            fontWeight: '600', 
+                            color: result.needsBooster ? '#ffc107' : '#28a745' 
+                          }}>
+                            {result.needsBooster ? 'Cần tiêm nhắc' : 'Không cần tiêm nhắc'}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#6c757d' }}>
+                            Khuyến nghị tiêm nhắc
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Finalized Status */}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px'
+                      }}>
+                        <FaCheckCircle style={{ 
+                          color: result.finalized ? '#28a745' : '#ffc107', 
+                          fontSize: '16px' 
+                        }} />
+                        <div>
+                          <div style={{ 
+                            fontWeight: '600', 
+                            color: result.finalized ? '#28a745' : '#ffc107' 
+                          }}>
+                            {result.finalized ? 'Đã hoàn thành' : 'Đang xử lý'}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#6c757d' }}>
+                            Trạng thái kết quả
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {result.reactionNote && (
+                      <div style={{
+                        background: result.hasReaction ? '#fff3cd' : '#f8f9fa',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        color: result.hasReaction ? '#856404' : '#495057',
+                        marginBottom: '15px',
+                        border: result.hasReaction ? '1px solid #ffeaa7' : 'none'
+                      }}>
+                        <strong>Ghi chú phản ứng:</strong> {result.reactionNote}
+                      </div>
+                    )}
+
+                    {result.notes && !result.reactionNote && (
                       <div style={{
                         background: '#f8f9fa',
                         padding: '12px',
