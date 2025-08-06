@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getAllParentStudent, createHealthIncident } from "../services/adminApi";
 import api from "../services/api";
+import { getCurrentNurse, getAllNursesList } from "../services/nurseApi";
 
 // Thêm import Roboto font cho toàn trang nếu chưa có
 const robotoFont = document.getElementById('roboto-font');
@@ -125,7 +126,7 @@ export default function HealthIncidentForm() {
     const fetchNurseInfo = async () => {
       try {
         // Lấy thông tin nurse hiện tại từ API
-        const nurseData = await api.getCurrentNurse();
+        const nurseData = await getCurrentNurse();
         console.log('👩‍⚕️ Nurse info from API:', nurseData);
 
         // Kiểm tra cấu trúc response từ backend theo GetAllNurseResponse
@@ -142,8 +143,27 @@ export default function HealthIncidentForm() {
         }
       } catch (error) {
         console.error("Lỗi khi lấy thông tin nurse:", error);
-        // Không set nurse info nếu không lấy được từ database
-        setError("Không thể lấy thông tin nurse từ database. Vui lòng thử lại.");
+        // Thử lấy danh sách tất cả nurse nếu getCurrentNurse thất bại
+                 try {
+           console.log('🔄 Thử lấy danh sách tất cả nurse...');
+           const allNurses = await getAllNursesList();
+           if (allNurses && allNurses.length > 0) {
+            const firstNurse = allNurses[0];
+            setNurseInfo({
+              id: firstNurse.nurseId,
+              name: firstNurse.fullName,
+              code: firstNurse.specialization || 'N/A',
+              email: firstNurse.email,
+              phone: firstNurse.phone
+            });
+            console.log('✅ Nurse info loaded from all nurses list:', firstNurse);
+          } else {
+            setError("Không có y tá nào trong hệ thống. Vui lòng liên hệ admin.");
+          }
+        } catch (fallbackError) {
+          console.error("Lỗi khi lấy danh sách nurse:", fallbackError);
+          setError("Không thể lấy thông tin nurse từ database. Vui lòng thử lại.");
+        }
       }
     };
 
@@ -170,7 +190,7 @@ export default function HealthIncidentForm() {
       // Lấy thông tin nurse từ API (nếu chưa có)
       if (!nurseInfo?.id) {
         try {
-          const nurseData = await api.getCurrentNurse();
+                     const nurseData = await getCurrentNurse();
           if (nurseData && nurseData.nurseId) {
             setNurseInfo({
               id: nurseData.nurseId,
@@ -184,7 +204,25 @@ export default function HealthIncidentForm() {
           }
         } catch (error) {
           console.error("Lỗi khi lấy thông tin nurse:", error);
-          setError("Không thể lấy thông tin nurse từ database.");
+          // Thử lấy danh sách tất cả nurse nếu getCurrentNurse thất bại
+          try {
+                         const allNurses = await getAllNursesList();
+            if (allNurses && allNurses.length > 0) {
+              const firstNurse = allNurses[0];
+              setNurseInfo({
+                id: firstNurse.nurseId,
+                name: firstNurse.fullName,
+                code: firstNurse.specialization || 'N/A',
+                email: firstNurse.email,
+                phone: firstNurse.phone
+              });
+            } else {
+              setError("Không có y tá nào trong hệ thống. Vui lòng liên hệ admin.");
+            }
+          } catch (fallbackError) {
+            console.error("Lỗi khi lấy danh sách nurse:", fallbackError);
+            setError("Không thể lấy thông tin nurse từ database.");
+          }
         }
       }
     }

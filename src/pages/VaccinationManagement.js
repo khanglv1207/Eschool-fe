@@ -7,7 +7,8 @@ import {
   FaTimes,
   FaSyringe,
   FaFileAlt,
-  FaEdit
+  FaEdit,
+  FaList
 } from 'react-icons/fa';
 import {
   createVaccineType,
@@ -16,12 +17,32 @@ import {
   createVaccinationResult,
   sendVaccinationResults,
   getVaccinationResult,
-  getVaccineTypes
+  getVaccineTypes,
+  getVaccinationConfirmations
 } from '../services/vaccinationApi';
 import VaccinationResultForm from './VaccinationResultForm';
 import './VaccinationManagement.css';
 
 const VaccinationManagement = () => {
+  // Check user role and authentication
+  const [userRole, setUserRole] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Check authentication and role
+    const accessToken = localStorage.getItem('access_token');
+    const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+    
+    setIsAuthenticated(!!accessToken);
+    setUserRole(loggedInUser.role || loggedInUser.authorities?.[0] || null);
+    
+    console.log('🔐 VaccinationManagement - User Info:', {
+      isAuthenticated: !!accessToken,
+      userRole: loggedInUser.role || loggedInUser.authorities?.[0],
+      userInfo: loggedInUser
+    });
+  }, []);
+
   // States for vaccine creation
   const [vaccineForm, setVaccineForm] = useState({
     vaccineName: '',
@@ -54,10 +75,12 @@ const VaccinationManagement = () => {
   const [activeTab, setActiveTab] = useState('create');
   const [showResultForm, setShowResultForm] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [confirmedStudents, setConfirmedStudents] = useState([]); // Danh sách học sinh phụ huynh đã xác nhận đồng ý tiêm
 
   useEffect(() => {
     loadVaccinationResults();
     loadVaccineTypes(); // Load danh sách vaccine từ database
+    loadConfirmedStudents(); // Load danh sách học sinh phụ huynh đã xác nhận
   }, []);
 
 
@@ -86,6 +109,46 @@ const VaccinationManagement = () => {
     } catch (error) {
       console.error('Lỗi tải vaccine types:', error);
       setMessage('❌ Lỗi tải danh sách vaccine: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load danh sách học sinh phụ huynh đã xác nhận đồng ý tiêm
+  const loadConfirmedStudents = async () => {
+    try {
+      setLoading(true);
+      console.log('🔍 Đang lấy danh sách học sinh đã được phụ huynh xác nhận...');
+      
+      const response = await getVaccinationConfirmations();
+      console.log('✅ Danh sách học sinh phụ huynh đã xác nhận:', response);
+      
+      // Chuyển đổi dữ liệu từ API response sang format phù hợp với UI
+      // Dựa trên DTO VaccinationConfirmationResponse:
+      // - studentId: UUID
+      // - studentName: String
+      // - vaccineName: String
+      // - scheduledDate: LocalDate
+      // - status: String
+      // - confirmedAt: LocalDateTime
+      const formattedStudents = response.map(confirmation => ({
+        studentId: confirmation.studentId,
+        studentCode: confirmation.studentId, // Sử dụng studentId làm studentCode
+        studentName: confirmation.studentName,
+        vaccineName: confirmation.vaccineName,
+        vaccinationDate: confirmation.confirmedAt || confirmation.scheduledDate,
+        parentEmail: 'N/A', // DTO không có trường này
+        className: 'N/A', // DTO không có trường này
+        status: confirmation.status,
+        confirmedAt: confirmation.confirmedAt,
+        scheduledDate: confirmation.scheduledDate
+      }));
+      
+      setConfirmedStudents(formattedStudents);
+      console.log('✅ Đã format dữ liệu cho UI:', formattedStudents);
+    } catch (error) {
+      console.error('Lỗi tải danh sách học sinh đã xác nhận:', error);
+      setMessage('❌ Lỗi tải danh sách học sinh đã xác nhận: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -244,9 +307,15 @@ const VaccinationManagement = () => {
       });
       setNotificationStatus(prev => ({ ...prev, ...newStatus }));
 
+      // Tìm vaccine type ID từ selected vaccine name
+      const selectedVaccineType = vaccineTypes.find(vaccine => vaccine.name === selectedVaccine);
+      if (!selectedVaccineType) {
+        throw new Error('Không tìm thấy thông tin vaccine type');
+      }
+
       const request = {
-        vaccineName: selectedVaccine,
-        scheduledDate: new Date().toISOString().split('T')[0], // Ngày hiện tại
+        vaccineTypeId: selectedVaccineType.id || selectedVaccineType.vaccine_type_id,
+        scheduledDate: new Date().toISOString(), // Format ISO datetime
         location: 'Phòng y tế trường học',
         note: `Thông báo tiêm chủng ${selectedVaccine} cho học sinh`,
         studentIds: studentsToVaccinate
@@ -255,7 +324,7 @@ const VaccinationManagement = () => {
       };
 
       console.log('📋 Request body:', request);
-      console.log('🎯 Vaccine:', request.vaccineName);
+      console.log('🎯 Vaccine Type ID:', request.vaccineTypeId);
       console.log('📅 Scheduled date:', request.scheduledDate);
       console.log('📍 Location:', request.location);
       console.log('📝 Note:', request.note);
@@ -393,7 +462,22 @@ const VaccinationManagement = () => {
         >
           <FaUsers /> Quản Lý Học Sinh
         </button>
-
+        {userRole === 'ADMIN' || userRole === 'NURSE' || userRole === 'admin' || userRole === 'nurse' ? (
+          <button
+            className={`tab ${activeTab === 'vaccinated' ? 'active' : ''}`}
+            onClick={() => setActiveTab('vaccinated')}
+          >
+            <FaList /> Danh Sách Học Sinh Đã Xác Nhận
+          </button>
+        ) : (
+          <button
+            className="tab disabled"
+            title="Chỉ Admin và Nurse mới có quyền xem danh sách này"
+            disabled
+          >
+            <FaList /> Danh Sách Học Sinh Đã Xác Nhận
+          </button>
+        )}
         <button
           className={`tab ${activeTab === 'results' ? 'active' : ''}`}
           onClick={() => setActiveTab('results')}
@@ -601,7 +685,172 @@ const VaccinationManagement = () => {
           </div>
         )}
 
+        {/* Confirmed Students List Tab */}
+        {activeTab === 'vaccinated' && (
+          <div className="confirmed-students">
+            <h2><FaList /> Danh Sách Học Sinh Đã Xác Nhận Tiêm Chủng</h2>
+            
+                             {/* Permission Check */}
+                 {userRole !== 'ADMIN' && userRole !== 'NURSE' && userRole !== 'admin' && userRole !== 'nurse' && (
+                   <div style={{
+                     background: '#fff3cd',
+                     border: '1px solid #ffeaa7',
+                     color: '#856404',
+                     padding: '15px',
+                     borderRadius: '8px',
+                     marginBottom: '20px',
+                     textAlign: 'center'
+                   }}>
+                     <strong>⚠️ Quyền Truy Cập Hạn Chế</strong><br />
+                     Chỉ Admin và Nurse mới có quyền xem danh sách học sinh đã xác nhận tiêm chủng.<br />
+                     Vui lòng liên hệ admin để được cấp quyền hoặc đăng nhập với tài khoản có quyền phù hợp.
+                   </div>
+                 )}
+                 
+                 {/* 403 Error Notification */}
+                 {confirmedStudents.length === 0 && (userRole === 'ADMIN' || userRole === 'NURSE' || userRole === 'admin' || userRole === 'nurse') && (
+                   <div style={{
+                     background: '#f8d7da',
+                     border: '1px solid #f5c6cb',
+                     color: '#721c24',
+                     padding: '15px',
+                     borderRadius: '8px',
+                     marginBottom: '20px',
+                     textAlign: 'center'
+                   }}>
+                     <strong>🚫 Lỗi Truy Cập API</strong><br />
+                     Không thể lấy dữ liệu từ server (Lỗi 403 Forbidden).<br />
+                     <strong>Nguyên nhân có thể:</strong><br />
+                     • Backend chưa cấu hình đúng quyền cho endpoint này<br />
+                     • Token xác thực không hợp lệ hoặc đã hết hạn<br />
+                     • Cần kiểm tra cấu hình Spring Security ở backend<br />
+                     <br />
+                     <em>Vui lòng kiểm tra console để xem chi tiết lỗi và liên hệ admin để khắc phục.</em>
+                     <br /><br />
+                     <button 
+                       onClick={loadConfirmedStudents}
+                       style={{
+                         background: '#007bff',
+                         color: 'white',
+                         border: 'none',
+                         padding: '8px 16px',
+                         borderRadius: '4px',
+                         cursor: 'pointer',
+                         fontSize: '14px'
+                       }}
+                     >
+                       🔄 Thử Lại
+                     </button>
+                   </div>
+                 )}
 
+            <div className="actions">
+              <button
+                onClick={loadConfirmedStudents}
+                className="btn-secondary"
+                disabled={loading}
+              >
+                {loading ? 'Đang tải...' : 'Làm Mới'}
+              </button>
+              <div style={{ marginLeft: '10px' }}>
+                <small style={{ color: '#666' }}>
+                  📊 Hiển thị danh sách học sinh mà phụ huynh đã xác nhận đồng ý tiêm chủng
+                </small>
+              </div>
+            </div>
+
+            {confirmedStudents.length > 0 ? (
+              <div className="confirmed-students-table">
+                <div style={{
+                  background: '#e8f5e8',
+                  padding: '10px',
+                  borderRadius: '5px',
+                  marginBottom: '15px',
+                  border: '1px solid #27ae60'
+                }}>
+                  <small style={{ color: '#27ae60' }}>
+                    ✅ Hiển thị {confirmedStudents.length} học sinh đã được phụ huynh xác nhận đồng ý tiêm chủng
+                  </small>
+                </div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Mã HS</th>
+                      <th>Họ Tên</th>
+                      <th>Lớp</th>
+                      <th>Vaccine</th>
+                      <th>Ngày Xác Nhận</th>
+                      <th>Email PH</th>
+                      <th>Trạng Thái</th>
+                      <th>Thao Tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {confirmedStudents.map((student, index) => (
+                      <tr key={index}>
+                        <td>{student.studentCode || student.studentId || 'N/A'}</td>
+                        <td>{student.studentName || 'N/A'}</td>
+                        <td>{student.className || 'N/A'}</td>
+                        <td>
+                          <span style={{ 
+                            color: '#27ae60', 
+                            fontWeight: 'bold',
+                            fontSize: '12px'
+                          }}>
+                            {student.vaccineName || 'N/A'}
+                          </span>
+                        </td>
+                        <td>
+                          {student.confirmedAt ? 
+                            formatDate(student.confirmedAt) : 
+                            (student.scheduledDate ? formatDate(student.scheduledDate) : 'N/A')
+                          }
+                        </td>
+                        <td>{student.parentEmail || 'N/A'}</td>
+                        <td>
+                          <span className={`status ${student.status?.toLowerCase() || 'confirmed'}`}>
+                            {student.status === 'CONFIRMED' ? '✅ Đã xác nhận' : 
+                             student.status === 'PENDING' ? '⏳ Chờ xác nhận' :
+                             student.status === 'REJECTED' ? '❌ Từ chối' :
+                             '✅ Đã xác nhận'}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            onClick={() => handleRecordVaccinationResult(student)}
+                            className="btn-record-result"
+                            title="Ghi nhận kết quả tiêm chủng"
+                            disabled={loading}
+                          >
+                            <FaEdit /> Ghi Nhận Kết Quả
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="no-data">
+                <div style={{
+                  textAlign: 'center',
+                  padding: '40px',
+                  background: '#f8f9fa',
+                  borderRadius: '8px',
+                  border: '2px dashed #dee2e6'
+                }}>
+                  <FaList style={{ fontSize: '48px', color: '#6c757d', marginBottom: '20px' }} />
+                  <h3 style={{ color: '#6c757d', marginBottom: '10px' }}>
+                    Chưa có học sinh nào được phụ huynh xác nhận
+                  </h3>
+                  <p style={{ color: '#6c757d', fontSize: '14px' }}>
+                    Danh sách sẽ hiển thị khi phụ huynh xác nhận đồng ý tiêm chủng cho học sinh
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Results Tab */}
         {activeTab === 'results' && (

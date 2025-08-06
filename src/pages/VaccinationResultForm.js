@@ -52,7 +52,7 @@ const VaccinationResultForm = ({ student, vaccineName, onClose, onSuccess }) => 
 
       await createVaccinationResult(resultData);
       
-      setMessage('✅ Ghi nhận kết quả tiêm chủng thành công!');
+      setMessage('✅ Ghi nhận kết quả tiêm chủng thành công! Kết quả sẽ được gửi cho phụ huynh.');
       
       // Call success callback
       if (onSuccess) {
@@ -90,6 +90,18 @@ const VaccinationResultForm = ({ student, vaccineName, onClose, onSuccess }) => 
           <button onClick={handleCancel} className="close-btn">
             <FaTimes />
           </button>
+        </div>
+        
+        <div style={{
+          background: '#e8f5e8',
+          padding: '10px',
+          borderRadius: '5px',
+          marginBottom: '15px',
+          border: '1px solid #27ae60'
+        }}>
+          <small style={{ color: '#27ae60' }}>
+            📧 Sau khi ghi nhận kết quả, hệ thống sẽ tự động gửi email thông báo cho phụ huynh
+          </small>
         </div>
 
         {message && (

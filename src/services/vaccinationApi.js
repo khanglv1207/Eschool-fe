@@ -84,6 +84,7 @@ export const sendVaccinationNotices = async (notificationData) => {
   try {
     console.log('📧 Gửi thông báo tiêm chủng...', notificationData);
 
+
     const response = await api.post('/api/vaccinations/send-notices', notificationData);
     console.log('✅ Response:', response.data);
 
@@ -312,7 +313,11 @@ export const sendVaccinationResults = async (resultsData) => {
     console.log('✅ Response:', response.data);
 
     if (response.data && response.data.code === 1000) {
-      return response.data.result;
+      // Trả về cả result và message từ backend
+      return {
+        result: response.data.result,
+        message: response.data.message || 'Đã gửi kết quả tiêm chủng thành công!'
+      };
     } else {
       throw new Error(response.data?.message || 'Không thể gửi kết quả tiêm chủng');
     }
@@ -334,13 +339,37 @@ export const sendVaccinationResults = async (resultsData) => {
 // Lấy kết quả tiêm chủng
 export const getVaccinationResult = async () => {
   try {
-    console.log('📋 Lấy kết quả tiêm chủng...');
+    console.log('📋 Lấy kết quả tiêm chủng cho phụ huynh...');
 
     const response = await api.get('/api/vaccinations/vaccination-result');
     console.log('✅ Response:', response.data);
 
     if (response.data && response.data.code === 1000) {
-      return response.data.result || [];
+      const results = response.data.result || [];
+      
+      // Map dữ liệu theo DTO VaccinationResultResponse
+      const mappedResults = results.map(result => ({
+        confirmationId: result.confirmationId,
+        studentName: result.studentName,
+        className: result.className,
+        vaccineName: result.vaccineName,
+        vaccinationDate: result.vaccinationDate,
+        hasReaction: result.hasReaction,
+        reactionNote: result.reactionNote,
+        needsBooster: result.needsBooster,
+        finalized: result.finalized,
+        // Thêm các trường cũ để tương thích với UI hiện tại
+        studentCode: result.studentCode || 'N/A',
+        location: result.location || 'Trường học',
+        scheduledDate: result.vaccinationDate,
+        scheduledTime: result.vaccinationDate ? new Date(result.vaccinationDate).toLocaleTimeString('vi-VN') : 'N/A',
+        notes: result.reactionNote,
+        result: result.finalized ? 'Đã hoàn thành' : 'Đang xử lý',
+        status: result.finalized ? 'COMPLETED' : 'PENDING'
+      }));
+      
+      console.log('📋 Mapped results:', mappedResults);
+      return mappedResults;
     } else {
       throw new Error(response.data?.message || 'Không lấy được kết quả tiêm chủng');
     }
@@ -355,6 +384,52 @@ export const getVaccinationResult = async () => {
       throw new Error('Không có quyền truy cập. Vui lòng liên hệ admin.');
     } else if (error.response?.status === 404) {
       return []; // Không có kết quả nào
+    } else {
+      throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
+    }
+  }
+};
+
+// Lấy danh sách kết quả tiêm chủng (cho admin/nurse)
+export const getVaccinationResultsList = async () => {
+  try {
+    console.log('📋 Lấy danh sách kết quả tiêm chủng...');
+
+    // Thử endpoint mới trước
+    const response = await api.get('/api/vaccinations/vaccination-results');
+    console.log('✅ Response:', response.data);
+
+    if (response.data && response.data.code === 1000) {
+      return response.data.result || [];
+    } else {
+      throw new Error(response.data?.message || 'Không lấy được danh sách kết quả tiêm chủng');
+    }
+  } catch (error) {
+    console.error('❌ Lỗi lấy danh sách kết quả tiêm chủng:', error);
+
+    if (error.response?.status === 404) {
+      console.log('⚠️ Endpoint /api/vaccinations/vaccination-results không tồn tại, thử endpoint cũ...');
+      
+      // Thử endpoint cũ nếu endpoint mới không tồn tại
+      try {
+        const fallbackResponse = await api.get('/api/vaccinations/results');
+        console.log('✅ Fallback Response:', fallbackResponse.data);
+        
+        if (fallbackResponse.data && fallbackResponse.data.code === 1000) {
+          return fallbackResponse.data.result || [];
+        } else {
+          throw new Error(fallbackResponse.data?.message || 'Không lấy được danh sách kết quả tiêm chủng');
+        }
+      } catch (fallbackError) {
+        console.error('❌ Fallback endpoint cũng lỗi:', fallbackError);
+        return []; // Trả về mảng rỗng nếu cả 2 endpoint đều lỗi
+      }
+    } else if (error.response?.status === 400) {
+      throw new Error('Dữ liệu không hợp lệ. Vui lòng kiểm tra thông tin.');
+    } else if (error.response?.status === 401) {
+      throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    } else if (error.response?.status === 403) {
+      throw new Error('Không có quyền truy cập. Vui lòng liên hệ admin.');
     } else {
       throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
     }
@@ -500,6 +575,92 @@ export const sendDirectVaccinationNotices = async () => {
       throw new Error('API endpoint không tồn tại. Vui lòng liên hệ admin để cấu hình backend.');
     } else {
       throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
+    }
+  }
+}; 
+
+// Lấy danh sách xác nhận tiêm chủng từ phụ huynh
+export const getVaccinationConfirmations = async () => {
+  try {
+    // Debug: Kiểm tra thông tin đăng nhập chi tiết hơn
+    const accessToken = localStorage.getItem('access_token');
+    const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+    
+    console.log('🔐 Debug Authentication Chi Tiết:');
+    console.log('  - Access Token:', accessToken ? `✅ Có token (${accessToken.substring(0, 20)}...)` : '❌ Không có token');
+    console.log('  - User Role:', loggedInUser.role || loggedInUser.authorities?.[0] || 'N/A');
+    console.log('  - User ID:', loggedInUser.id || loggedInUser.userId || 'N/A');
+    console.log('  - User Email:', loggedInUser.email || 'N/A');
+    console.log('  - Full User Info:', loggedInUser);
+    
+    // Kiểm tra xem token có hợp lệ không
+    if (!accessToken) {
+      console.error('❌ Không có access token!');
+      throw new Error('Chưa đăng nhập. Vui lòng đăng nhập lại.');
+    }
+    
+    // Kiểm tra thêm về vai trò người dùng
+    const userRole = loggedInUser.role || loggedInUser.authorities?.[0];
+    console.log('🔍 Phân tích vai trò người dùng:');
+    console.log('  - Role từ localStorage:', userRole);
+    console.log('  - Role có phải ADMIN?:', userRole === 'ADMIN' || userRole === 'admin');
+    console.log('  - Role có phải NURSE?:', userRole === 'NURSE' || userRole === 'nurse');
+    
+    console.log('🔍 Đang gọi API lấy danh sách xác nhận tiêm chủng...');
+    console.log('  - URL:', '/api/vaccinations/confirmation-status');
+    console.log('  - Method: GET');
+    console.log('  - Expected Role: ADMIN hoặc NURSE');
+    
+    const response = await api.get('/api/vaccinations/confirmation-status');
+    console.log('✅ Response thành công:', response.data);
+    
+    // Kiểm tra cấu trúc response theo DTO VaccinationConfirmationResponse
+    if (response.data && response.data.result) {
+      console.log('📋 Dữ liệu từ DTO VaccinationConfirmationResponse:');
+      response.data.result.forEach((item, index) => {
+        console.log(`  Học sinh ${index + 1}:`, {
+          studentId: item.studentId,
+          studentName: item.studentName,
+          vaccineName: item.vaccineName,
+          scheduledDate: item.scheduledDate,
+          status: item.status,
+          confirmedAt: item.confirmedAt
+        });
+      });
+      return response.data.result;
+    } else {
+      console.warn('⚠️ Response không có cấu trúc mong đợi:', response.data);
+      return [];
+    }
+  } catch (error) {
+    console.error('❌ Lỗi lấy danh sách xác nhận tiêm chủng:', error);
+    console.error('  - Status:', error.response?.status);
+    console.error('  - Status Text:', error.response?.statusText);
+    console.error('  - Response Data:', error.response?.data);
+    console.error('  - Request Config:', error.config);
+    
+    if (error.response?.status === 403) {
+      console.error('🚫 403 Forbidden - Phân tích lỗi:');
+      console.error('  - Có thể do thiếu quyền truy cập endpoint');
+      console.error('  - Có thể do token không hợp lệ');
+      console.error('  - Có thể do backend chưa cấu hình đúng quyền');
+      console.error('  - User Role hiện tại:', JSON.parse(localStorage.getItem('loggedInUser') || '{}').role);
+      
+      // Tạm thời trả về mảng rỗng để UI không bị lỗi
+      console.log('⚠️ Tạm thời trả về mảng rỗng do 403 Forbidden');
+      return [];
+    } else if (error.response?.status === 401) {
+      console.error('🔐 401 Unauthorized - Token có thể đã hết hạn');
+      throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    } else if (error.response?.status === 404) {
+      console.error('🔍 404 Not Found - Endpoint không tồn tại');
+      throw new Error('API endpoint không tồn tại. Vui lòng liên hệ admin để cấu hình backend.');
+    } else if (error.response?.status === 500) {
+      console.error('💥 500 Internal Server Error - Lỗi server');
+      throw new Error('Lỗi server. Vui lòng thử lại sau.');
+    } else {
+      console.error('❓ Lỗi không xác định:', error.message);
+      throw new Error(error.response?.data?.message || 'Lỗi lấy danh sách xác nhận tiêm chủng');
     }
   }
 }; 

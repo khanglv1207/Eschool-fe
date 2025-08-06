@@ -19,16 +19,25 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const accessToken = isClient ? localStorage.getItem(ACCESS_TOKEN) : null;
+    
+    // Debug: Log thông tin request
+    console.log('🔧 API Request Debug:');
+    console.log('  - URL:', config.url);
+    console.log('  - Method:', config.method?.toUpperCase());
+    console.log('  - Has Token:', !!accessToken);
+    console.log('  - Token Preview:', accessToken ? `${accessToken.substring(0, 20)}...` : 'None');
+    
     if (accessToken && accessToken !== "undefined") {
       config.headers.Authorization = `Bearer ${accessToken}`;
+      console.log('  - Authorization Header:', `Bearer ${accessToken.substring(0, 20)}...`);
+    } else {
+      console.log('  - ⚠️ Không có Authorization header!');
     }
 
     // Nếu là FormData, để trình duyệt tự thêm Content-Type
     if (config.data instanceof FormData) {
       delete config.headers["Content-Type"];
     }
-
-
 
     return config;
   },

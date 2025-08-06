@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUserMd, FaClipboardList, FaStethoscope, FaFileMedical, FaBell, FaCheckCircle, FaTimesCircle, FaSync } from 'react-icons/fa';
+import { getAllStudents, sendHealthCheckupNotices } from '../services/healthCheckupApi';
 
 function MedicalCheckup() {
   const [students, setStudents] = useState([]);
@@ -11,7 +12,7 @@ function MedicalCheckup() {
   const [messageType, setMessageType] = useState('');
   const navigate = useNavigate();
 
-  // Mock data - trong thực tế sẽ lấy từ API
+  // Lấy danh sách học sinh từ API thật
   useEffect(() => {
     loadStudents();
   }, []);
@@ -19,20 +20,12 @@ function MedicalCheckup() {
   const loadStudents = async () => {
     try {
       // Gọi API để lấy danh sách học sinh từ backend
-      // const response = await getStudents();
-      // setStudents(response.data || []);
-      
-      // Tạm thời sử dụng mock data cho đến khi có API thật
-      const mockStudents = [
-        { id: 1, name: 'Nguyễn Văn A', class: '6A1', parentEmail: 'parent1@email.com', status: 'pending' },
-        { id: 2, name: 'Trần Thị B', class: '6A2', parentEmail: 'parent2@email.com', status: 'pending' },
-        { id: 3, name: 'Lê Văn C', class: '6A3', parentEmail: 'parent3@email.com', status: 'pending' },
-        { id: 4, name: 'Phạm Thị D', class: '6A4', parentEmail: 'parent4@email.com', status: 'pending' },
-        { id: 5, name: 'Hoàng Văn E', class: '6A5', parentEmail: 'parent5@email.com', status: 'pending' },
-      ];
-      setStudents(mockStudents);
+      const response = await getAllStudents();
+      setStudents(response.data || []);
     } catch (error) {
       console.error('Lỗi tải danh sách học sinh:', error);
+      setMessage('Không thể tải danh sách học sinh. Vui lòng thử lại sau.');
+      setMessageType('error');
     }
   };
 
@@ -68,13 +61,10 @@ function MedicalCheckup() {
     setLoading(true);
     try {
       // Gọi API thật để gửi thông báo
-      // const response = await sendHealthCheckupNotification({
-      //   studentIds: selectedStudents,
-      //   content: notificationContent
-      // });
-      
-      // Tạm thời sử dụng mock API call cho đến khi có API thật
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const response = await sendHealthCheckupNotices({
+        studentIds: selectedStudents,
+        content: notificationContent
+      });
 
       setMessage('Đã gửi thông báo kiểm tra y tế định kỳ thành công!');
       setMessageType('success');
